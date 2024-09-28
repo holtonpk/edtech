@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     success: true,
     response:
       // DummyResponse
-      JSON.parse(completion.choices[0].message.content),
+      JSON.parse(completion.choices[0].message.content || "[]"),
   });
 }
 
@@ -45,7 +45,7 @@ export async function GET() {
     success: true,
     response:
       // JSON.parse(completion.choices[0].message.content),
-      JSON.parse(completion.choices[0].message.content),
+      JSON.parse(completion.choices[0].message.content || "[]"),
   });
 }
 

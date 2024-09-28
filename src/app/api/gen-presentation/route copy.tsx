@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import OpenAI from "openai";
-import {Size} from "@/config/data";
+
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
@@ -29,6 +29,11 @@ const calculateSize = (text: string, index: number) => {
   const height = numLines * lineHeight;
 
   return {width: 960, height};
+};
+
+type Size = {
+  width: number;
+  height: number;
 };
 
 const calculatePosition = (previousTextBoxSize?: Size) => {
@@ -100,7 +105,9 @@ export async function POST(req: Request) {
     success: true,
     response: formatResponse(
       // DummyResponse
-      JSON.parse(completion.choices[0].message.content) as UnformattedResponse
+      JSON.parse(
+        completion.choices[0].message.content || "[]"
+      ) as UnformattedResponse
     ),
   });
 }
@@ -126,7 +133,9 @@ export async function GET() {
     response:
       // JSON.parse(completion.choices[0].message.content),
       formatResponse(
-        JSON.parse(completion.choices[0].message.content) as UnformattedResponse
+        JSON.parse(
+          completion.choices[0].message.content || "[]"
+        ) as UnformattedResponse
       ),
   });
 }
