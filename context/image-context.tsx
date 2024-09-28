@@ -1,13 +1,7 @@
 "use client";
 
 import React, {useContext, createContext, useEffect, useState} from "react";
-import {
-  CursorModes,
-  TextBoxType,
-  Size,
-  Position,
-  SlideImage,
-} from "@/config/data";
+import {TextBoxType, Size, Position, SlideImage} from "@/config/data";
 import {usePresentation} from "@/context/presentation-context";
 import {set} from "zod";
 
