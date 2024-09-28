@@ -16,6 +16,7 @@ import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 import {motion} from "framer-motion";
 import StepContainer from "./step-container";
+import {UploadType} from "@/config/data";
 const Uploads = () => {
   return (
     <StepContainer
@@ -50,7 +51,7 @@ const StudyMaterial = () => {
   const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setIsLoadingUpload(true);
-      setUploads(event.target.files[0]);
+      // setUploads(event.target.files[0]);
       try {
         const upload = await uploadFile(event.target.files[0]);
         setFile(upload);
