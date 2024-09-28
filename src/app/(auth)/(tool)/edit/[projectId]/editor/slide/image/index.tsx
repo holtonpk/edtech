@@ -146,7 +146,7 @@ const Image = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isSelected, deleteImage]);
+  }, [isSelected, deleteImage, copyTextBox, cutTextBox, pasteTextBox]);
 
   const [isCenteredX, setIsCenteredX] = React.useState<boolean>(false);
   const [isCenteredY, setIsCenteredY] = React.useState<boolean>(false);

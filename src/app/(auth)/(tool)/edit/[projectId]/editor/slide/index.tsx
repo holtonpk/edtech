@@ -108,7 +108,12 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
       textBox.removeEventListener("mousedown", handleMouseDown);
       textBox.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [textBoxArea, setActiveEdit, setGroupSelectedTextBoxes]);
+  }, [
+    textBoxArea,
+    setActiveEdit,
+    setGroupSelectedTextBoxes,
+    setActiveGroupSelectedTextBoxes,
+  ]);
 
   useEffect(() => {
     // listen for delete key
@@ -144,7 +149,7 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeEdit]);
+  }, [activeEdit, copyTextBox, cutTextBox, pasteTextBox]);
 
   const [selectCoordinates, setSelectCoordinates] = React.useState({
     x: 0,
@@ -154,52 +159,51 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
   });
 
   const [isSelecting, setIsSelecting] = React.useState(false);
-  let timeoutId: NodeJS.Timeout | null = null;
-
-  const onMouseDown = (e: MouseEvent) => {
-    const textBox = textBoxArea.current;
-    if (!textBox) return;
-
-    const rect = textBox.getBoundingClientRect();
-    const startX = e.clientX - rect.left;
-    const startY = e.clientY - rect.top;
-
-    timeoutId = setTimeout(() => {
-      setIsSelecting(true);
-      setActiveEdit(undefined);
-      const handleMouseMove = (e: MouseEvent) => {
-        const currentX = e.clientX - rect.left;
-        const currentY = e.clientY - rect.top;
-
-        const x = Math.min(startX, currentX);
-        const y = Math.min(startY, currentY);
-        const width = Math.abs(startX - currentX);
-        const height = Math.abs(startY - currentY);
-
-        setSelectCoordinates({x, y, width, height});
-      };
-
-      const handleMouseUp = () => {
-        setIsSelecting(false);
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-    }, 200);
-  };
-
-  const handleMouseUp = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId); // Clear the timeout if mouse is released before 200ms
-      timeoutId = null;
-    }
-  };
 
   React.useEffect(() => {
     const textBox = textBoxArea.current;
     if (!textBox) return;
+
+    let timeoutId: NodeJS.Timeout | null = null;
+    const handleMouseUp = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId); // Clear the timeout if mouse is released before 200ms
+        timeoutId = null;
+      }
+    };
+    const onMouseDown = (e: MouseEvent) => {
+      const textBox = textBoxArea.current;
+      if (!textBox) return;
+
+      const rect = textBox.getBoundingClientRect();
+      const startX = e.clientX - rect.left;
+      const startY = e.clientY - rect.top;
+
+      timeoutId = setTimeout(() => {
+        setIsSelecting(true);
+        setActiveEdit(undefined);
+        const handleMouseMove = (e: MouseEvent) => {
+          const currentX = e.clientX - rect.left;
+          const currentY = e.clientY - rect.top;
+
+          const x = Math.min(startX, currentX);
+          const y = Math.min(startY, currentY);
+          const width = Math.abs(startX - currentX);
+          const height = Math.abs(startY - currentY);
+
+          setSelectCoordinates({x, y, width, height});
+        };
+
+        const handleMouseUp = () => {
+          setIsSelecting(false);
+          window.removeEventListener("mousemove", handleMouseMove);
+          window.removeEventListener("mouseup", handleMouseUp);
+        };
+
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+      }, 200);
+    };
 
     textBox.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mouseup", handleMouseUp); // Listen globally for mouseup to clear timeout
@@ -208,7 +212,7 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
       textBox.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
+  }, [setActiveEdit]);
 
   useEffect(() => {
     if (!isSelecting) {
@@ -216,7 +220,7 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
       setActiveGroupSelectedTextBoxes(groupSelectedTextBoxes);
       // setGroupSelectedTextBoxes(undefined);
     }
-  }, [isSelecting]);
+  }, [isSelecting, groupSelectedTextBoxes, setActiveGroupSelectedTextBoxes]);
 
   useEffect(() => {
     if (!isSelecting) return;
@@ -257,7 +261,12 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     });
 
     setGroupSelectedTextBoxes(selectedTextBoxes);
-  }, [selectCoordinates, selectedSlide, isSelecting]);
+  }, [
+    selectCoordinates,
+    selectedSlide,
+    isSelecting,
+    setGroupSelectedTextBoxes,
+  ]);
 
   return (
     <div

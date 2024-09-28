@@ -8,7 +8,7 @@ import {usePresentation} from "@/context/presentation-context";
 import {Button} from "@/components/ui/button";
 import {set} from "zod";
 import {Description} from "@radix-ui/react-dialog";
-import {Modes, Position} from "@/config/data";
+import {Modes, Position, Image as ImageType} from "@/config/data";
 import {getDoc, doc} from "firebase/firestore";
 import {db} from "@/config/firebase";
 import {useAuth} from "@/context/user-auth";
@@ -151,25 +151,25 @@ const Images = () => {
 
   const {currentUser} = useAuth()!;
 
-  const fetchUserImages = async () => {
-    if (currentUser) {
-      const docRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setUserImages(docSnap.data().userImagesLocal);
-      }
-    }
-  };
-
   useEffect(() => {
+    const fetchUserImages = async () => {
+      if (currentUser) {
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserImages(docSnap.data().userImagesLocal);
+        }
+      }
+    };
     fetchUserImages();
-  }, []);
+  }, [currentUser, setUserImages]);
 
   const [open, setOpen] = React.useState(false);
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     uploadImage(e.target.files![0]);
   };
+
   return (
     <TabContent title="Images" description="Add images to your slides">
       <div className="flex flex-col gap-4 w-full mt-4s">
@@ -202,6 +202,7 @@ const Images = () => {
               <div className="grid grid-cols-3 gap-2">
                 {userImages.map((image: ImageType) => (
                   <button
+                    key={image.title}
                     onClick={() => {
                       addImageToSlide(image, {x: 400, y: 200});
                     }}
@@ -387,7 +388,7 @@ const AiRewrite = () => {
   const {setMode, selectedTextBox, updateData} = usePresentation()!;
 
   const [originalText, setOriginalText] = React.useState<string>(
-    selectedTextBox?.text
+    selectedTextBox?.text || ""
   );
 
   function extractTextFromHTML(htmlString: string): string {

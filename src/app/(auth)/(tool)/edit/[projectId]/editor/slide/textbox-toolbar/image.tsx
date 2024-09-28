@@ -93,6 +93,7 @@ export const Image = () => {
                 <div className="grid grid-cols-3 gap-2">
                   {userImages.map((image: ImageType) => (
                     <button
+                      key={image.path}
                       onClick={() => {
                         addImageToSlide(image, {x: 400, y: 200});
                         setOpen(false);

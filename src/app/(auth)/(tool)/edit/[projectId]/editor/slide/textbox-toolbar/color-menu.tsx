@@ -115,7 +115,7 @@ export const ColorMenu = ({
                   className="grid grid-cols-8 w-full  h-fit overflow-hidden gap-0"
                 >
                   {color.swatches.reverse().map((swatch) => (
-                    <TooltipProvider>
+                    <TooltipProvider key={swatch.color}>
                       <Tooltip delayDuration={500}>
                         <TooltipTrigger>
                           <button
