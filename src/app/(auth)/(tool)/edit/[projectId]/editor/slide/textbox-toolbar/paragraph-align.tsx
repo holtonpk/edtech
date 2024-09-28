@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
 
-import {applyCommand} from "./index";
+import {applyCommand} from "@/lib/utils";
 
 export const ParagraphAlign = () => {
   const {selectedTextBox} = usePresentation()!;
