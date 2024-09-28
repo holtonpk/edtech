@@ -1,6 +1,6 @@
 "use client";
 import React, {useEffect, useRef, useState} from "react";
-import {CursorModes, size, TextBoxType} from "@/config/data";
+import {size, TextBoxType} from "@/config/data";
 import {Slide, SlideData} from "@/config/data";
 import TextBox from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox";
 import {TextBoxProvider} from "@/context/textbox-context";

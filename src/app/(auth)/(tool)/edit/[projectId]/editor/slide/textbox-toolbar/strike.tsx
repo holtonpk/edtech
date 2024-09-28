@@ -3,7 +3,6 @@ import React, {useEffect} from "react";
 import {Button} from "@/components/ui/button";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
-import {CursorModes} from "@/config/data";
 import {Input} from "@/components/ui/input";
 import {
   Select,
