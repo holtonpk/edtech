@@ -12,8 +12,6 @@ const NavigationButtons = ({
   changeStep: (step: number) => void;
   isDisabled?: boolean;
 }) => {
-  const {isGenerating, Generate} = usePresentation()!;
-
   return (
     <div className="w-full justify-between flex flex-col mt-6">
       {step !== 4 && (
