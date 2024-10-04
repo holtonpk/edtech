@@ -67,7 +67,7 @@ const Rotate = () => {
     <ActionButton
       onMouseDown={handleMouseDownRotate}
       ref={rotateControlRef}
-      className="bg-theme-blue/30 nodrag p-2"
+      className="hover:bg-theme-blue/30 nodrag p-2"
     >
       <Icons.rotate className="h-4 w-4 text-theme-blue" />
     </ActionButton>

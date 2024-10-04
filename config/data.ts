@@ -36,6 +36,11 @@ export interface UnformattedResponse {
   }[];
 }
 
+export interface TextBoxesToUpdate {
+  textBoxId: string;
+  value: Partial<TextBoxType>;
+}
+
 export interface FullSlideData {
   slideData: {slides: Slide[]};
   recentColors: string[];

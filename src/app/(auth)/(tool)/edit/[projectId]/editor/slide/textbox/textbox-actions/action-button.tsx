@@ -21,7 +21,7 @@ const ActionButton = ({
       onClick={onClick}
       className={cn(
         className,
-        "rounded-full   shadow-md  transition-colors duration-200  h-fit flex items-center gap-2"
+        "rounded-full  transition-colors duration-200  h-fit flex items-center gap-2"
       )}
     >
       {children}

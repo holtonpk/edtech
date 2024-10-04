@@ -35,116 +35,118 @@ const ToolBar = () => {
   const [isPublic, setIsPublic] = React.useState(false);
 
   return (
-    <div className="h-[60px] w-full py-2  flex items-center justify-between px-4 border rounded-md bg-background/30 relative z-[50]">
-      <div className="flex gap-1 items-center ">
-        <Icons.lightbulb className="w-6 h-6 " />
-        <h1 className="font-bold ">EDTech tool</h1>
-      </div>
-      <div className="flex items-center  gap-4">
-        <Undo />
-        {/* <div className="h-[30px] w-[1px] bg-black/60"></div> */}
+    <div className="w-full px-2 pt-2 h-[68px] relative ">
+      <div className="h-[60px] w-full py-2 flex items-center justify-between px-4 border rounded-md bg-background relative z-[40]">
+        <div className="flex gap-1 items-center ">
+          <Icons.lightbulb className="w-6 h-6 " />
+          <h1 className="font-bold ">EDTech tool</h1>
+        </div>
+        <div className="flex items-center  gap-4">
+          <Undo />
+          {/* <div className="h-[30px] w-[1px] bg-black/60"></div> */}
 
-        <TooltipProvider>
-          <Tooltip delayDuration={500}>
-            <TooltipTrigger className="disableTextboxListeners">
-              <Input
-                placeholder="give your project a title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-96 overflow-hidden text-ellipsis disableSelector"
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Project title</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger className="disableTextboxListeners">
+                <Input
+                  placeholder="give your project a title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-96 overflow-hidden text-ellipsis disableSelector"
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Project title</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-        {/* <div className="h-[30px] w-[1px] bg-black/60"></div>s */}
-        <SaveStatus />
-      </div>
-      <div className="flex items-center  gap-4  p-3 ">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"outline"}>
-              <Icons.upload className="w-4 h-4 mr-3" />
-              Share
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="p-4 flex flex-col gap-2">
-            <div className="grid gap-2">
-              <Label>Collaboration Link</Label>
-              <Select
-                value={isPublic ? "public" : "private"}
-                onValueChange={(value) => setIsPublic(value == "public")}
-              >
-                <SelectTrigger className="w-[300px] ">
-                  <SelectValue className="flex items-center leading-[5px]">
-                    {isPublic ? (
-                      <div className="flex items-center">
-                        <Icons.public className="w-2 h-2 mr-2" />
-                        Anyone with the link
-                      </div>
-                    ) : (
+          {/* <div className="h-[30px] w-[1px] bg-black/60"></div>s */}
+          <SaveStatus />
+        </div>
+        <div className="flex items-center  gap-4  p-3 ">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"outline"}>
+                <Icons.upload className="w-4 h-4 mr-3" />
+                Share
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="p-4 flex flex-col gap-2">
+              <div className="grid gap-2">
+                <Label>Collaboration Link</Label>
+                <Select
+                  value={isPublic ? "public" : "private"}
+                  onValueChange={(value) => setIsPublic(value == "public")}
+                >
+                  <SelectTrigger className="w-[300px] ">
+                    <SelectValue className="flex items-center leading-[5px]">
+                      {isPublic ? (
+                        <div className="flex items-center">
+                          <Icons.public className="w-2 h-2 mr-2" />
+                          Anyone with the link
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <Icons.lock className="w-4 h-4 mr-2" />
+                          Only you can Access
+                        </div>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      value="private"
+                      className="items-center flex hover:bg-muted cursor-pointer"
+                    >
                       <div className="flex items-center">
                         <Icons.lock className="w-4 h-4 mr-2" />
-                        Only you can Access
+                        <div className="flex flex-col">
+                          <h1 className="font-bold">Only you can Access</h1>
+                          <p className="text-muted-foreground text-sm">
+                            Only you can access the presentation with this link
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="private"
-                    className="items-center flex hover:bg-muted cursor-pointer"
-                  >
-                    <div className="flex items-center">
-                      <Icons.lock className="w-4 h-4 mr-2" />
-                      <div className="flex flex-col">
-                        <h1 className="font-bold">Only you can Access</h1>
-                        <p className="text-muted-foreground text-sm">
-                          Only you can access the presentation with this link
-                        </p>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="public"
-                    className="items-center flex hover:bg-muted cursor-pointer"
-                  >
-                    <div className="flex items-center">
-                      <Icons.public className="w-4 h-4 mr-2" />
-                      <div className="flex flex-col">
-                        <h1 className="font-bold">Anyone with the link</h1>
+                    </SelectItem>
+                    <SelectItem
+                      value="public"
+                      className="items-center flex hover:bg-muted cursor-pointer"
+                    >
+                      <div className="flex items-center">
+                        <Icons.public className="w-4 h-4 mr-2" />
+                        <div className="flex flex-col">
+                          <h1 className="font-bold">Anyone with the link</h1>
 
-                        <p className="text-muted-foreground text-sm">
-                          Anyone with the link can access and edit the
-                          presentation
-                        </p>
+                          <p className="text-muted-foreground text-sm">
+                            Anyone with the link can access and edit the
+                            presentation
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <Button>
-                <Icons.copy className="w-4 h-4 mr-2" />
-                Copy Link
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button>
+                  <Icons.copy className="w-4 h-4 mr-2" />
+                  Copy Link
+                </Button>
+              </div>
+              <Button variant={"ghost"} className="justify-start">
+                <Icons.download className="w-4 h-4 mr-2" />
+                Download
               </Button>
-            </div>
-            <Button variant={"ghost"} className="justify-start">
-              <Icons.download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
-            <Button variant={"ghost"} className="justify-start">
-              <Icons.googleDrive className="w-4 h-4 mr-2" />
-              Save to Google Drive
-            </Button>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <Button variant={"ghost"} className="justify-start">
+                <Icons.googleDrive className="w-4 h-4 mr-2" />
+                Save to Google Drive
+              </Button>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <Present />
+          <Present />
 
-        {/* <ProfileNav /> */}
+          {/* <ProfileNav /> */}
+        </div>
       </div>
     </div>
   );

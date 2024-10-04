@@ -5,7 +5,7 @@ import {Icons} from "@/components/icons";
 
 import {Label} from "@/components/ui/label";
 
-import {TextAlign, TextAlign2} from "./text-align";
+import {TextAlign2} from "./text-align";
 import {FontSelector} from "./font-selector";
 import {List, List2} from "./list";
 import {Strikethrough} from "./strike";
@@ -30,9 +30,9 @@ export const TextBoxToolBar = () => {
   };
 
   return (
-    <div className="h-full relative z-[50]">
+    <div className="h-full  relative z-[50]">
       <div
-        className={`flex-grow h-full  gap-4 flex flex-col items-center p-4  bg-background/50 blurBack  border rounded-md relative  z-[40]
+        className={`flex-grow h-full  gap-4 flex flex-col items-center p-4  bg-background blurBack  border rounded-md relative  z-[40]
           ${mode === "default" ? "opacity-1" : "fade-out-500"}
           `}
       >

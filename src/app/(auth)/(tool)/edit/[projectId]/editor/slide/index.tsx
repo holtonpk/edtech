@@ -22,7 +22,7 @@ const Slide = () => {
 
   return (
     <div
-      className={`w-full h-full relative justify-center  items-start  gap-2 grid -translate-x-2
+      className={`w-full h-full relative justify-center  items-start  gap-2 grid 
       ${mode === "default" ? "default-slide-grid" : "open-menu-slide-grid"}
     `}
     >
@@ -35,6 +35,8 @@ const Slide = () => {
                   <TextBoxProvider
                     key={selectedSlide.id + textBox.textBoxId}
                     textBox={textBox}
+                    // textBoxId={textBox.textBoxId}
+                    // slideId={selectedSlide.id}
                   >
                     <TextBox />
                   </TextBoxProvider>
@@ -74,6 +76,7 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     groupSelectedTextBoxes,
     setGroupSelectedTextBoxes,
     setActiveGroupSelectedTextBoxes,
+    selectedTextBox,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -114,42 +117,6 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     setGroupSelectedTextBoxes,
     setActiveGroupSelectedTextBoxes,
   ]);
-
-  useEffect(() => {
-    // listen for delete key
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // if textBoxRef is being edited, don't delete the text box. determine this by checking if the carrot is visible
-      const selection = window.getSelection();
-
-      const disableTextboxListeners =
-        e.target instanceof Element
-          ? e.target.classList.contains("disableTextboxListeners")
-          : false;
-
-      if (disableTextboxListeners) return;
-      if (
-        !disableTextboxListeners &&
-        activeEdit &&
-        selection?.focusNode?.nodeName !== "#text"
-      ) {
-        if (e.metaKey && e.key === "c") {
-          copyTextBox();
-        }
-        if (e.metaKey && e.key === "x") {
-          cutTextBox();
-        }
-        if (e.metaKey && e.key === "v") {
-          pasteTextBox();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [activeEdit, copyTextBox, cutTextBox, pasteTextBox]);
 
   const [selectCoordinates, setSelectCoordinates] = React.useState({
     x: 0,
@@ -192,6 +159,7 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
           const height = Math.abs(startY - currentY);
 
           setSelectCoordinates({x, y, width, height});
+          // disable document selection
         };
 
         const handleMouseUp = () => {
@@ -218,7 +186,12 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     if (!isSelecting) {
       setSelectCoordinates({x: 0, y: 0, width: 0, height: 0});
       setActiveGroupSelectedTextBoxes(groupSelectedTextBoxes);
+      document.body.style.userSelect = "auto";
+
       // setGroupSelectedTextBoxes(undefined);
+    }
+    if (isSelecting) {
+      document.body.style.userSelect = "none";
     }
   }, [isSelecting, groupSelectedTextBoxes, setActiveGroupSelectedTextBoxes]);
 
@@ -267,6 +240,33 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     isSelecting,
     setGroupSelectedTextBoxes,
   ]);
+
+  useEffect(() => {
+    // listen for delete key
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // if textBoxRef is being edited, don't delete the text box. determine this by checking if the carrot is visible
+      const selection = window.getSelection();
+
+      const disableTextboxListeners =
+        e.target instanceof Element
+          ? e.target.classList.contains("disableTextboxListeners")
+          : false;
+
+      if (disableTextboxListeners) return;
+
+      if (selection?.focusNode?.nodeName !== "#text") {
+        if (e.metaKey && e.key === "v") {
+          pasteTextBox();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [copyTextBox, cutTextBox, pasteTextBox, groupSelectedTextBoxes]);
 
   return (
     <div

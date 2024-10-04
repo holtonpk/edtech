@@ -2,8 +2,15 @@ import ResizableHandle from "./resizable-handle";
 import ScaleHandle from "./scale-handle";
 import React, {useState, useLayoutEffect, useRef, useEffect} from "react";
 import {useTextBox} from "@/context/textbox-context";
+import {usePresentation} from "@/context/presentation-context";
 
-export const ResizableBox = ({children}: {children: React.ReactNode}) => {
+export const ResizableBox = ({
+  children,
+  disabled,
+}: {
+  children: React.ReactNode;
+  disabled: boolean;
+}) => {
   const {
     size,
     setSize,
@@ -15,83 +22,86 @@ export const ResizableBox = ({children}: {children: React.ReactNode}) => {
     activeDrag,
     activeTransform,
     isRotating,
+    textBoxId,
+    textBoxText,
+    textBoxRef,
   } = useTextBox()!;
+
+  const {updateData} = usePresentation()!;
 
   const resizeHandles = ["e", "w"];
   const scaleHandles = ["se"];
 
   const handleRef = React.useRef<HTMLDivElement>(null);
 
-  const handleResize = React.useCallback(
-    (handleAxis: string, deltaX: number) => {
-      switch (handleAxis) {
-        case "e":
-          setSize((prevSize) => ({
-            width: prevSize.width + deltaX,
-          }));
-          break;
-        case "w":
-          setPosition((prevPosition) => ({
-            y: prevPosition.y,
-            x: prevPosition.x + deltaX,
-          }));
-          setSize((prevSize) => ({
-            width: prevSize.width - deltaX,
-          }));
-          break;
+  // const handleResize = React.useCallback(
+  //   (handleAxis: string, deltaX: number) => {
+  //     switch (handleAxis) {
+  //       case "e":
+  //         // console.log("handle", size.width + deltaX);
+  //         setSize({
+  //           width: size.width + deltaX,
+  //         });
+  //         break;
+  //       case "w":
+  //         setPosition({
+  //           y: position.y,
+  //           x: position.x + deltaX,
+  //         });
+  //         setSize({
+  //           width: size.width - deltaX,
+  //         });
+  //         break;
 
-        default:
-          break;
-      }
-    },
-    [setPosition, setSize]
-  );
+  //       default:
+  //         break;
+  //     }
+  //   },
+  //   [size, position]
+  // );
+
+  const handleResize = (handleAxis: string, deltaX: number) => {
+    if (textBoxRef.current) {
+      textBoxRef.current.blur();
+    }
+
+    switch (handleAxis) {
+      case "e":
+        setSize({
+          width: size.width + deltaX,
+        });
+        break;
+      case "w":
+        setPosition({
+          y: position.y,
+          x: position.x + deltaX,
+        });
+        setSize({
+          width: size.width - deltaX,
+        });
+        break;
+
+      default:
+        break;
+    }
+  };
 
   const isScaling = React.useRef<boolean>(false);
 
   const controlScale = React.useCallback(
     (handleAxis: string, deltaX: number, deltaY: number) => {
+      if (textBoxRef.current) {
+        textBoxRef.current.blur();
+      }
       switch (handleAxis) {
         case "se":
           const scale = (size.width + deltaX) / size.width;
 
+          setSize({
+            width: size.width + deltaX,
+          });
           setFontSize(fontSize * scale);
-          setSize({
-            width: size.width + Math.round(deltaX),
-          });
-          break;
-        case "nw":
-          const scale1 = (size.width - deltaX) / size.width;
-          setFontSize(fontSize * scale1);
-          setSize({
-            width: size.width - Math.round(deltaX),
-          });
-          setPosition({
-            x: position.y + deltaY,
-            y: position.x + deltaX,
-          });
-          break;
-        case "ne":
-          const scale2 = (size.width + deltaX) / size.width;
-          setFontSize(fontSize * scale2);
-          setPosition({
-            x: position.y + deltaY,
-            y: position.x,
-          });
-          setSize({
-            width: size.width + Math.round(deltaX),
-          });
-          break;
-        case "sw":
-          const scale3 = (size.width - deltaX) / size.width;
-          setFontSize(fontSize * scale3);
-          setSize({
-            width: size.width - Math.round(deltaX),
-          });
-          setPosition({
-            x: position.y,
-            y: position.x + deltaX,
-          });
+
           break;
 
         default:
@@ -128,34 +138,39 @@ export const ResizableBox = ({children}: {children: React.ReactNode}) => {
         className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px]`}
       />
 
-      {resizeHandles.map((handleAxis) => (
-        <ResizableHandle
-          key={handleAxis}
-          handleAxis={handleAxis}
-          innerRef={handleRef}
-          hidden={
-            activeDrag ||
-            isRotating ||
-            (activeTransform && activeResizeHandle !== handleAxis)
-          }
-          onResize={handleResize}
-          activeHandle={activeResizeHandle}
-          setActiveHandle={setActiveResizeHandle}
-        />
-      ))}
+      {!disabled && (
+        <>
+          {resizeHandles.map((handleAxis) => (
+            <ResizableHandle
+              key={handleAxis}
+              handleAxis={handleAxis}
+              innerRef={handleRef}
+              hidden={
+                activeDrag ||
+                isRotating ||
+                (activeTransform && activeResizeHandle !== handleAxis)
+              }
+              onResize={handleResize}
+              activeHandle={activeResizeHandle}
+              setActiveHandle={setActiveResizeHandle}
+            />
+          ))}
 
-      {scaleHandles.map((handleAxis) => (
-        <ScaleHandle
-          key={handleAxis}
-          handleAxis={handleAxis}
-          hidden={
-            activeDrag || (activeTransform && activeScaleHandle !== handleAxis)
-          }
-          controlScale={controlScale}
-          activeHandle={activeScaleHandle}
-          setActiveHandle={setActiveScaleHandle}
-        />
-      ))}
+          {scaleHandles.map((handleAxis) => (
+            <ScaleHandle
+              key={handleAxis}
+              handleAxis={handleAxis}
+              hidden={
+                activeDrag ||
+                (activeTransform && activeScaleHandle !== handleAxis)
+              }
+              controlScale={controlScale}
+              activeHandle={activeScaleHandle}
+              setActiveHandle={setActiveScaleHandle}
+            />
+          ))}
+        </>
+      )}
       <div className="z-10 relative">{children}</div>
     </div>
   );

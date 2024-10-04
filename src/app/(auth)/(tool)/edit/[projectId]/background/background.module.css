@@ -50,7 +50,7 @@
   transform-origin: center;
   position: absolute;
   /* max-width: 800px; */
-  background-image: radial-gradient(
+  /* background-image: radial-gradient(
       at 97% 21%,
       hsl(var(--orange)) 0px,
       hsla(125, 98%, 72%, 0) 50%
@@ -73,18 +73,23 @@
     ),
     radial-gradient(
       at 19% 93%,
-      hsl(var(--orange)) 0px,
+      hsl(var(--blue)) 0px,
       hsla(343, 68%, 79%, 0) 50%
-    );
+    ); */
 
-  /* background: hsl(var(--primary)); */
+  background: #f3f6f8;
+  /* background: linear-gradient(
+    0deg,
+    rgba(222, 231, 236, 1) 0%,
+    rgba(242, 243, 243, 1) 100%
+  ); */
   position: absolute;
   content: "";
   transform: rotate(0deg);
-  filter: blur(0px);
-  -webkit-filter: blur(0px);
+  /* filter: blur(10px);
+  -webkit-filter: blur(10px); */
   /* top: 80px; */
-  opacity: 0.2;
+  opacity: 1;
   /* animation: rotate 120s linear infinite; */
   /* top: -20%; */
 }

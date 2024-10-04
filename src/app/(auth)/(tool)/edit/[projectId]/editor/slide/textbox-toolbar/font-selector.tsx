@@ -30,77 +30,90 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {TextBoxesToUpdate} from "@/config/data";
 
 export const FontSelector = () => {
-  const {selectedTextBox, updateData} = usePresentation()!;
+  const {
+    activeEdit,
+    updateData,
+    groupSelectedTextBoxes,
+    updateMultipleTextBoxes,
+  } = usePresentation()!;
 
   const [fonts, setFonts] = React.useState<string[]>(googleFonts.fonts);
   const [selectedFont, setSelectedFont] = React.useState<string>(fonts[0]);
 
   const onSelectChange = (commandValue: string) => {
-    if (!selectedTextBox) return;
-    applyCommand(selectedTextBox?.textBoxId, "fontName", commandValue);
-    setSelectedFont(commandValue);
-    const newText = document.getElementById(
-      `text-box-${selectedTextBox.textBoxId}`
-    )?.innerHTML;
-    updateData({text: newText}, selectedTextBox.textBoxId);
+    if (activeEdit) {
+      applyCommand(activeEdit, "fontName", commandValue);
+      setSelectedFont(commandValue);
+      const newText = document.getElementById(
+        `text-box-${activeEdit}`
+      )?.innerHTML;
+      updateData({text: newText}, activeEdit);
+    } else if (groupSelectedTextBoxes) {
+      let textBoxesToUpdate: TextBoxesToUpdate[] = [];
+      groupSelectedTextBoxes.forEach((textBoxId) => {
+        applyCommand(textBoxId, "fontName", commandValue);
+        const newText = document.getElementById(
+          `text-box-${textBoxId}`
+        )?.innerHTML;
+        textBoxesToUpdate.push({value: {text: newText}, textBoxId});
+      });
+      updateMultipleTextBoxes(textBoxesToUpdate);
+    }
   };
 
   const [open, setOpen] = React.useState(false);
 
-  const frameworks = [
-    {
-      value: "next.js",
-      label: "Next.js",
-    },
-    {
-      value: "sveltekit",
-      label: "SvelteKit",
-    },
-    {
-      value: "nuxt.js",
-      label: "Nuxt.js",
-    },
-    {
-      value: "remix",
-      label: "Remix",
-    },
-    {
-      value: "astro",
-      label: "Astro",
-    },
-  ];
+  useEffect(() => {
+    if (activeEdit) {
+      // find the face value of selectedTextBox.text
+      const textBoxElement = document.getElementById(
+        `ui-focus-text-box-${activeEdit}`
+      );
+      // get first font child of textBoxElement
+      const fontNode = textBoxElement?.childNodes[0]
+        .childNodes[0] as HTMLElement;
+      console.log("fontNode:", fontNode);
+
+      const nodeFont = fontNode?.getAttribute("face");
+
+      setSelectedFont(nodeFont ? nodeFont : fonts[0]);
+    } else if (groupSelectedTextBoxes) {
+      const selectedFonts = new Set<string>();
+
+      groupSelectedTextBoxes.forEach((textBoxId) => {
+        const textBoxElement = document.getElementById(
+          `ui-focus-text-box-${textBoxId}`
+        );
+        if (textBoxElement) {
+          // Get the first font child of textBoxElement
+          const fontNode = textBoxElement.childNodes[0]
+            .childNodes[0] as HTMLElement;
+          const nodeFont = fontNode.getAttribute("face");
+
+          if (nodeFont) {
+            selectedFonts.add(nodeFont); // Add the font to the Set
+          } else {
+            selectedFonts.add("Default");
+          }
+        }
+      });
+
+      if (selectedFonts.size > 1) {
+        setSelectedFont("Multiple fonts");
+      } else if (selectedFonts.size === 1) {
+        setSelectedFont(Array.from(selectedFonts)[0]); // Extract the single font
+      } else {
+        setSelectedFont(fonts[0]); // Optional: Handle case where no fonts are found
+      }
+    }
+  }, [activeEdit, groupSelectedTextBoxes]);
 
   const [value, setValue] = React.useState("");
 
   return (
-    // <Select value={selectedFont} onValueChange={onSelectChange}>
-    //   <TooltipProvider>
-    //     <Tooltip delayDuration={500}>
-    //       <TooltipTrigger asChild>
-    //         <SelectTrigger className="w-[150px] dark:bg-[#34323D]">
-    //           <SelectValue defaultValue={selectedFont}>
-    //             <div className="text-ellipsis whitespace-nowrap max-w-full overflow-hidden text-left p-0">
-    //               {selectedFont}
-    //             </div>
-    //           </SelectValue>
-    //         </SelectTrigger>
-    //       </TooltipTrigger>
-    //       <TooltipContent>
-    //         <p>Font</p>
-    //       </TooltipContent>
-    //     </Tooltip>
-    //   </TooltipProvider>
-    //   <SelectContent>
-    //     {fonts.map((font) => (
-    //       <SelectItem key={font} value={font} style={{fontFamily: font}}>
-    //         {font}
-    //       </SelectItem>
-    //     ))}
-    //   </SelectContent>
-    // </Select>
-
     <Popover open={open} onOpenChange={setOpen}>
       <TooltipProvider>
         <Tooltip delayDuration={500}>
@@ -112,9 +125,6 @@ export const FontSelector = () => {
                 aria-expanded={open}
                 className="flex-grow justify-between"
               >
-                {/* {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select framework..."} */}
                 {selectedFont}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -126,8 +136,11 @@ export const FontSelector = () => {
         </Tooltip>
       </TooltipProvider>
       <PopoverContent className="w-[200px] p-0">
-        <Command>
-          <CommandInput placeholder="Search for a font" />
+        <Command value={selectedFont} onValueChange={setSelectedFont}>
+          <CommandInput
+            placeholder="Search for a font"
+            className="disableTextboxListeners disableSelector"
+          />
           <CommandList>
             {/* <CommandEmpty>Change font</CommandEmpty> */}
             <CommandGroup>

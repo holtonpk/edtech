@@ -15,33 +15,35 @@ const SlideSelector = () => {
     createNewSlide,
     activeEdit,
     copySlide,
-    cutSlide,
-    pasteSlide,
     selectedSlideRef,
+    groupSelectedTextBoxes,
   } = usePresentation()!;
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (!selectedSlide || !slideData) return;
 
     // see if element with class disableSelector is present
-    const disableSelector = document
-      .querySelector(".disableSelector")
-      ?.contains(e.target as Node);
+
+    const disableSelector =
+      e.target instanceof Element
+        ? e.target.classList.contains("disableSelector")
+        : false;
+
     if (disableSelector) return;
-    if (e.key === "Backspace" && !activeEdit && selectedSlideRef.current) {
+    if (
+      e.key === "Backspace" &&
+      !activeEdit &&
+      selectedSlideRef.current &&
+      !groupSelectedTextBoxes
+    ) {
+      console.log("deleting", selectedSlideRef.current.id);
       deleteSlide(selectedSlideRef.current.id);
     }
     if (e.metaKey && e.key === "c" && selectedSlideRef.current) {
       console.log("copy", selectedSlideRef.current.id);
       copySlide(selectedSlideRef.current.id);
     }
-    if (e.metaKey && e.key === "x" && selectedSlideRef.current) {
-      cutSlide(selectedSlideRef.current.id);
-    }
-    if (e.metaKey && e.key === "v" && selectedSlideRef.current) {
-      console.log("paste", selectedSlideRef.current.id);
-      pasteSlide();
-    }
+
     if (
       e.key === "ArrowUp" ||
       (e.key === "ArrowLeft" && selectedSlideRef.current)
@@ -95,7 +97,7 @@ const SlideSelector = () => {
   }, []);
 
   return (
-    <div className="w-[1000px]  flex-grow items-center justify-start  overflow-hidden flex flex-row relative bg-background/30 blurBack p-2 border shadow-md rounded-md">
+    <div className="w-[1000px]  flex-grow items-center justify-start  overflow-hidden flex flex-row relative bg-background  p-2 border shadow-md rounded-md">
       <div
         id="slide-container"
         ref={slideContainer}

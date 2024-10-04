@@ -22,13 +22,15 @@ export const V2 = () => {
   const {setMode} = usePresentation()!;
   return (
     <ActionButton
-      className="p-2 nodrag  bg-theme-purple/30 text-theme-purple"
+      className="nodrag hover:bg-theme-purple/30  p-2 text-theme-purple "
       onClick={() => setMode("aiRewrite")}
     >
-      <Icons.magicWand className="h-3 w-3" />
-      <p className="text-[12px] font-bold leading-[12px] whitespace-nowrap ">
-        Ai Rewrite
-      </p>
+      <Icons.magicWand style={{height: 16, width: 16}} />
+      {/* <div className="flex w-full h-full bg-white group-hover:bg-white/90 blurBack rounded-full items-center p-2">
+        <p className="text-[10px] font-semibold leading-[10px] whitespace-nowrap ">
+          Ai Rewrite
+        </p>
+      </div> */}
     </ActionButton>
   );
 };

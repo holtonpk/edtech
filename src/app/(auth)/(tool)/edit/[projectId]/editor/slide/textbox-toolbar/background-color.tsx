@@ -65,7 +65,7 @@ export const BackgroundColor = () => {
   const [openMenu, setOpenMenu] = React.useState(false);
 
   return (
-    <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background rounded-md  items-center relative gap-2 overflow-hidden">
+    <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background border rounded-md  items-center relative gap-2 overflow-hidden">
       <Popover open={openMenu} onOpenChange={setOpenMenu}>
         <PopoverTrigger>
           <TooltipProvider>
@@ -100,7 +100,7 @@ export const BackgroundColor = () => {
           </button>
         </PopoverContent>
       </Popover>
-      <div className="h-6 w-[2px] bg-muted absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="h-8 w-[2px] bg-muted absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
       <TooltipProvider>
         <Tooltip delayDuration={500}>
           <TooltipTrigger asChild>

@@ -1,29 +1,26 @@
 "use client";
 import React, {useEffect} from "react";
-import {Button} from "@/components/ui/button";
-import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
 import {Slider} from "@/components/ui/slider";
-import {Input} from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import googleFonts from "@/public/fonts/fonts.json";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {TextBoxesToUpdate} from "@/config/data";
 
 export const FontSize = () => {
-  const {selectedTextBox, selectedSlide, slideData, setSlideData, updateData} =
-    usePresentation()!;
+  const {
+    selectedTextBox,
+    selectedSlide,
+    slideData,
+    setSlideData,
+    updateData,
+    groupSelectedTextBoxes,
+    updateMultipleTextBoxes,
+  } = usePresentation()!;
 
   const selectButton = React.useRef<HTMLButtonElement>(null);
 
@@ -41,31 +38,45 @@ export const FontSize = () => {
 
   const presetFontSizes = [6, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36];
 
-  const [fontSize, setFontSize] = React.useState<number>(
-    selectedTextBox?.fontSize || 16
+  const [fontSize, setFontSize] = React.useState<number | undefined>(
+    selectedTextBox
+      ? selectedTextBox?.fontSize
+      : groupSelectedTextBoxes
+      ? undefined
+      : 16
   );
 
   useEffect(() => {
     if (selectedTextBox) {
       setFontSize(selectedTextBox.fontSize);
+    } else if (groupSelectedTextBoxes) {
+      setFontSize(undefined);
     }
-  }, [selectedTextBox]);
+  }, [selectedTextBox, groupSelectedTextBoxes]);
 
   const [openMenu, setOpenMenu] = React.useState(false);
 
   // round to tenths
-  const displayValue = Math.round(fontSize * 10) / 10;
+  const displayValue = fontSize ? Math.round(fontSize * 10) / 10 : undefined;
 
   const updateFontSize = (value: number) => {
-    if (!selectedTextBox) return;
-    setFontSize(value);
-    updateData({fontSize: value}, selectedTextBox.textBoxId);
+    if (selectedTextBox) {
+      setFontSize(value);
+      updateData({fontSize: value}, selectedTextBox.textBoxId);
+    } else if (groupSelectedTextBoxes) {
+      let textBoxesToUpdate: TextBoxesToUpdate[] = [];
+
+      groupSelectedTextBoxes.forEach((textBoxId) => {
+        textBoxesToUpdate.push({textBoxId, value: {fontSize: value}});
+      });
+      setFontSize(value);
+      updateMultipleTextBoxes(textBoxesToUpdate);
+    }
   };
 
   const sliderChange = (value: number[]) => {
-    if (!selectedTextBox) return;
-    setFontSize(value[0]);
-    updateData({fontSize: value[0]}, selectedTextBox.textBoxId);
+    if (!selectedTextBox && !groupSelectedTextBoxes) return;
+    updateFontSize(value[0]);
   };
 
   const fontSizeInput = React.useRef<HTMLInputElement>(null);
@@ -84,7 +95,7 @@ export const FontSize = () => {
         .getElementById("font-size-input")
         ?.removeEventListener("keydown", (e) => {
           if (e.key === "Enter") {
-            updateFontSize(fontSize);
+            updateFontSize(fontSize || 16);
           }
         });
     };
@@ -101,7 +112,7 @@ export const FontSize = () => {
                   <input
                     ref={fontSizeInput}
                     id="font-size-input"
-                    onBlur={() => updateFontSize(fontSize)}
+                    onBlur={() => updateFontSize(fontSize || 16)}
                     value={displayValue}
                     onChange={(e) => setFontSize(parseInt(e.target.value))}
                     className="p-2 font-bold dark:bg-[#34323D] hover:bg-muted w-[60px] rounded-md text-center z-20 relative disableSelector disableTextboxListeners"

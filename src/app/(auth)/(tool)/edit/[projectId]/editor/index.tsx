@@ -2,10 +2,9 @@
 import React from "react";
 import {usePresentation} from "@/context/presentation-context";
 import SlideSelector from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide-selector";
-import RightPanel from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/right-panel";
+import {ActionTabs} from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/action-tabs";
 import Slide from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide";
 import {Button} from "@/components/ui/button";
-import Background from "./slide/background";
 
 const Editor = () => {
   const {slideData, createNewSlide, mode} = usePresentation()!;
@@ -13,16 +12,15 @@ const Editor = () => {
   if (!slideData) return null;
 
   return (
-    <div className=" h-full  w-screen  z-10   dot-backgrounds bgs-[#F0F6F6]  flex flex-col relative ">
-      <Background />
+    <div className=" h-[calc(100vh-84px)]  w-[calc(100vw-16px)]  z-[50]  flex flex-col relative mx-auto">
       <div
-        className={`  w-full h-full   overflow-hidden  items-center grid gap-4  pb-4
+        className={`  w-full h-full  items-center grid gap-2 relative 
         ${mode === "default" ? "default-grid" : "open-menu-grid"}
         `}
       >
         {slideData.slides.length ? (
           <>
-            <RightPanel />
+            <ActionTabs />
             <Slide />
           </>
         ) : (

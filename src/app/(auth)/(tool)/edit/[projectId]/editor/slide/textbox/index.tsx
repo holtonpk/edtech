@@ -6,10 +6,9 @@ import {usePresentation} from "@/context/presentation-context";
 import {useTextBox} from "@/context/textbox-context";
 import TextboxActions from "./textbox-actions";
 import {Icons} from "@/components/icons";
-import {AiRewrite} from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-actions/ai-rewrite";
+import {TextBoxType} from "@/config/data";
 const TextBox = () => {
   const {
-    textBoxState,
     text,
     size,
     position,
@@ -37,10 +36,14 @@ const TextBox = () => {
     updateData,
     copyTextBox,
     cutTextBox,
-    pasteTextBox,
+
     mode,
     groupSelectedTextBoxes,
     setActiveGroupSelectedTextBoxes,
+    selectedTextBox,
+    setGroupSelectedTextBoxes,
+    selectedForAiWrite,
+    setSelectedForAiWrite,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -61,7 +64,7 @@ const TextBox = () => {
   const handleDrag = (e: any, ui: any) => {
     setActiveDrag(true);
     setActiveTransform(true);
-    if (activeEdit !== textBoxState.textBoxId) {
+    if (activeEdit !== textBox.textBoxId) {
       setActiveEdit(undefined);
     }
 
@@ -140,17 +143,17 @@ const TextBox = () => {
       if (disableTextboxListeners) return;
 
       if (selection?.focusNode?.nodeName !== "#text") {
-        if (e.key === "Backspace" && isSelected) {
-          deleteTextBox();
-        }
-        if (e.metaKey && e.key === "c") {
-          copyTextBox();
-        }
-        if (e.metaKey && e.key === "x") {
-          cutTextBox();
-        }
-        if (e.metaKey && e.key === "v") {
-          pasteTextBox();
+        if (selectedTextBox) {
+          if (e.key === "Backspace" && isSelected) {
+            deleteTextBox();
+          }
+          if (e.metaKey && e.key === "c") {
+            console.log("copyTextBox ==========");
+            copyTextBox();
+          }
+          if (e.metaKey && e.key === "x") {
+            cutTextBox();
+          }
         }
       }
     };
@@ -160,7 +163,7 @@ const TextBox = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isSelected, deleteTextBox, copyTextBox, cutTextBox, pasteTextBox]);
+  }, [isSelected, deleteTextBox, copyTextBox, cutTextBox]);
 
   const [isCenteredX, setIsCenteredX] = React.useState<boolean>(false);
   const [isCenteredY, setIsCenteredY] = React.useState<boolean>(false);
@@ -169,13 +172,22 @@ const TextBox = () => {
 
   const updateTextBoxText = () => {
     if (textBoxRef.current?.innerHTML)
-      textBoxText.current = textBoxRef.current?.innerHTML;
+      if (textBoxRef.current?.innerHTML.includes("<font")) {
+        textBoxText.current = textBoxRef.current?.innerHTML;
+        textBoxPlaceholderRef.current!.innerHTML =
+          textBoxRef.current?.innerHTML || "";
+      } else {
+        // insert font tag inside the <p> tag
+        const newText = `<p><font>${textBoxRef.current?.innerText}</font></p>`;
+        textBoxText.current = newText;
+        textBoxPlaceholderRef.current!.innerHTML = newText;
+      }
+
     // set inner html of textBoxPlaceholderRef to textBoxRef innerHTML
-    textBoxPlaceholderRef.current!.innerHTML =
-      textBoxRef.current?.innerHTML || "";
   };
 
   useEffect(() => {
+    if (isFirstRender.current) return;
     if (!activeTransform) {
       updateData(
         {
@@ -190,121 +202,160 @@ const TextBox = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTransform]);
 
-  const [openAiMenu, setOpenAiMenu] = React.useState(true);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+  }, []);
+
+  const isGroupSelected = groupSelectedTextBoxes
+    ? groupSelectedTextBoxes?.includes(textBox.textBoxId)
+    : false;
+
+  const onBlur = () => {
+    updateData({text: textBoxText.current}, textBox.textBoxId);
+  };
 
   return (
     <>
-      <div className={` ${isSelected ? "z-20" : ""}`}>
-        <Draggable
-          cancel=".nodrag"
-          disabled={mode === "aiRewrite"}
-          onDrag={handleDrag}
-          position={position}
-          onStop={() => {
-            setActiveEdit(textBoxState.textBoxId);
-            setActiveTransform(false);
-            setActiveGroupSelectedTextBoxes(undefined);
-          }}
-        >
-          <div
-            id={`ui-text-box-${textBoxState.textBoxId}`}
-            className=" absolute z-10 origin-center pointer-events-none group select-none "
-            style={{
-              width: size.width,
-              height: "fit-content",
-              cursor: activeDrag ? "move" : "pointer",
-            }}
-          >
-            <div
-              ref={textBoxPlaceholderRef}
-              className="h-fit w-full relative  whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
-              dangerouslySetInnerHTML={{__html: text}}
-              style={{
-                fontSize,
-                visibility: isSelected ? "hidden" : "visible",
-              }}
-              onClick={() => {
-                setActiveEdit(textBoxState.textBoxId);
-                setIsSelected(true);
+      {mode !== "aiRewrite" ? (
+        <>
+          <div className={`${isSelected ? "z-20" : ""}`}>
+            <Draggable
+              cancel=".nodrag"
+              // disabled={mode === "aiRewrite"}
+              onDrag={handleDrag}
+              position={position}
+              onStop={() => {
+                setActiveEdit(textBox.textBoxId);
+                setActiveTransform(false);
                 setActiveGroupSelectedTextBoxes(undefined);
+                setGroupSelectedTextBoxes(undefined);
               }}
-            />
-            {!isSelected && !activeDragGlobal && (
+            >
               <div
-                className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] 
-                  ${
-                    groupSelectedTextBoxes?.includes(textBoxState.textBoxId)
-                      ? "block"
-                      : "hidden group-hover:block"
-                  }
-                  `}
-              />
-            )}
-            {mode !== "aiRewrite" && <TextboxActions />}
-
-            {isRotating && (
-              <div className="bg-black rounded-md border shadow-sm absolute p-2 text-white  left-1/2 -translate-x-1/2 -bottom-20 translate-y-full w-[50px] flex items-center justify-center">
-                {rotation}°
-              </div>
-            )}
-          </div>
-        </Draggable>
-        {isSelected && (
-          <>
-            {mode !== "aiRewrite" && (
-              <ResizableBox>
-                <div
-                  onInput={updateTextBoxText}
-                  ref={textBoxRef}
-                  className="h-fit w-full z-[50] relative nodrag whitespace-pre-wrap break-words overflow-hidden"
-                  id={`text-box-${textBoxState.textBoxId}`}
-                  dangerouslySetInnerHTML={{__html: text}}
-                  style={{fontSize}}
-                  contentEditable={true}
-                />
-              </ResizableBox>
-            )}
-            {mode === "aiRewrite" && (
-              <div
-                className="absolute"
+                id={`ui-text-box-${textBox.textBoxId}`}
+                className=" absolute z-10 origin-center pointer-events-none group select-none"
                 style={{
-                  top: position.y,
-                  left: position.x,
-                  height: "fit-content",
                   width: size.width,
-                  transform: `rotate(${rotation}deg)`,
-                  fontSize: `${fontSize}px`,
+                  height: "fit-content",
+                  cursor: activeDrag ? "move" : "pointer",
                 }}
               >
                 <div
-                  onInput={updateTextBoxText}
-                  ref={textBoxRef}
-                  className="h-fit w-full z-[50]  relative nodrag  whitespace-pre-wrap break-words overflow-hidden"
-                  id={`text-box-${textBoxState.textBoxId}`}
+                  ref={textBoxPlaceholderRef}
+                  className="h-fit w-full relative whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
                   dangerouslySetInnerHTML={{__html: text}}
-                  contentEditable={true}
+                  id={`ui-focus-text-box-${textBox.textBoxId}`}
+                  style={{
+                    fontSize,
+                    visibility: isSelected ? "hidden" : "visible",
+                    transform: `rotate(${rotation}deg) `,
+                  }}
+                  onClick={() => {
+                    setActiveEdit(textBox.textBoxId);
+                    setIsSelected(true);
+                    setActiveGroupSelectedTextBoxes(undefined);
+                  }}
                 />
-                <div
-                  className={`absolute bg-primary/10  border-2 border-primary top-0 left-0 h-full w-full z-[60] pointer-events-none rounded-[3px]  flex items-center justify-center `}
-                >
-                  {/* <div className="absolute bottom-0 right-0 bg-primary/70 blurBack text-base flex items-center font-bold text-background px-3 py-1 rounded-tl-md">
-                    <Icons.check className="h-5 w-5 mr-2" />
-                    Selected
-                  </div> */}
-                </div>
+                {!isSelected && !activeDragGlobal && (
+                  <div
+                    className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block 
+
+                  `}
+                    style={{
+                      transform: `rotate(${rotation}deg) `,
+                    }}
+                  />
+                )}
+                <TextboxActions />
+
+                {isRotating && (
+                  <div className="bg-black rounded-md border shadow-sm absolute p-2 text-white  left-1/2 -translate-x-1/2 -bottom-20 translate-y-full w-[50px] flex items-center justify-center">
+                    {rotation}°
+                  </div>
+                )}
               </div>
+            </Draggable>
+
+            {(isSelected || isGroupSelected) && (
+              <>
+                <ResizableBox disabled={isGroupSelected}>
+                  <div
+                    onBlur={onBlur}
+                    onInput={updateTextBoxText}
+                    ref={textBoxRef}
+                    className="h-fit w-full z-[50] relative nodrag whitespace-pre-wrap break-words overflow-hidden "
+                    id={`text-box-${textBox.textBoxId}`}
+                    dangerouslySetInnerHTML={{__html: text}}
+                    style={{fontSize}}
+                    contentEditable={true}
+                  />
+                </ResizableBox>
+              </>
             )}
-          </>
-        )}
 
-        {}
-      </div>
+            {}
+          </div>
 
-      {activeDrag && isCenteredX && (
-        <div className="h-full border-dashed border border-primary absolute pointer-events-none left-1/2 -translate-x-1/2"></div>
-      )}
-      {activeDrag && isCenteredY && (
-        <div className="w-full border-dashed border border-primary absolute pointer-events-none top-1/2 -translate-y-1/2"></div>
+          {activeDrag && isCenteredX && (
+            <div className="h-full border-dashed border border-primary absolute pointer-events-none left-1/2 -translate-x-1/2"></div>
+          )}
+          {activeDrag && isCenteredY && (
+            <div className="w-full border-dashed border border-primary absolute pointer-events-none top-1/2 -translate-y-1/2"></div>
+          )}
+        </>
+      ) : (
+        <div
+          onClick={() => {
+            if (!selectedForAiWrite) return;
+            if (selectedForAiWrite.includes(textBox.textBoxId)) {
+              setSelectedForAiWrite(
+                (prev) => prev && prev.filter((id) => id !== textBox.textBoxId)
+              );
+            } else {
+              setSelectedForAiWrite((prev) =>
+                prev ? [...prev, textBox.textBoxId] : [textBox.textBoxId]
+              );
+            }
+          }}
+          className="absolute group cursor-pointer"
+          style={{
+            top: position.y,
+            left: position.x,
+            height: "fit-content",
+            width: size.width,
+            transform: `rotate(${rotation}deg)`,
+            fontSize: `${fontSize}px`,
+          }}
+        >
+          <div
+            className="h-fit w-full z-[50]  relative nodrag  whitespace-pre-wrap break-words overflow-hidden pointer-events-none"
+            dangerouslySetInnerHTML={{__html: text}}
+          />
+
+          <div
+            className={`absolute    top-0 left-0 h-full w-full z-[60] pointer-events-none rounded-[3px]  flex items-center justify-center 
+                ${
+                  selectedForAiWrite &&
+                  selectedForAiWrite.includes(textBox.textBoxId)
+                    ? "bg-primary/10 border-2 border-primary"
+                    : " group-hover:border-2 group-hover:border-primary"
+                }
+                `}
+          >
+            {selectedForAiWrite &&
+              selectedForAiWrite.includes(textBox.textBoxId) && (
+                <div className="absolute bottom-0 translate-y-full left-1/2 -translate-x-1/2 bg-primary blurBack text-[12px] whitespace-nowrap flex items-center font-bold text-background px-3 py-1  rounded-b-sm ">
+                  <Icons.check className="h-4 w-4 mr-2" />
+                  Selected for AI Write
+                </div>
+              )}
+          </div>
+        </div>
       )}
     </>
   );

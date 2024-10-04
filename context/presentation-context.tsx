@@ -19,11 +19,12 @@ import {
   Image,
   Position,
   Size,
+  TextBoxesToUpdate,
 } from "@/config/data";
 import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
 import {db} from "@/config/firebase";
 import {useRouter} from "next/navigation";
-
+import {isTextBoxType, isTextBoxTypeArray, isSlide} from "@/lib/utils";
 import {
   getStorage,
   ref,
@@ -80,7 +81,11 @@ interface PresentationContextType {
   setActiveGroupSelectedTextBoxes: React.Dispatch<
     React.SetStateAction<string[] | undefined>
   >;
+  selectedForAiWrite: string[] | undefined;
 
+  setSelectedForAiWrite: React.Dispatch<
+    React.SetStateAction<string[] | undefined>
+  >;
   // functions -----------------------------
   uploadImage: (file: File) => void;
   Generate: () => void;
@@ -90,12 +95,12 @@ interface PresentationContextType {
   deleteSlide: (slideId: string) => void;
   createNewSlide: () => void;
   copySlide: (slideId: string) => void;
-  cutSlide: (slideId: string) => void;
-  pasteSlide: () => void;
+  deleteMultiTextBoxes: () => void;
   copyTextBox: () => void;
   cutTextBox: () => void;
   pasteTextBox: () => void;
   addImageToSlide: (image: Image, position?: Position, size?: Size) => void;
+  updateMultipleTextBoxes: (textBoxesToUpdate: TextBoxesToUpdate[]) => void;
 }
 
 const PresentationContext = createContext<PresentationContextType | null>(null);
@@ -156,6 +161,16 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   const [historyIndex, setHistoryIndex] = useState<number>(0);
 
   const historyRef = useRef<SlideData[] | undefined>();
+
+  const [selectedForAiWrite, setSelectedForAiWrite] = useState<
+    string[] | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (mode !== "aiRewrite") {
+      setSelectedForAiWrite(undefined);
+    }
+  }, [mode]);
 
   useEffect(() => {
     historyRef.current = history;
@@ -265,10 +280,10 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   }, []);
 
   const updateData = (value: Partial<TextBoxType>, textBoxId: string) => {
-    if (!slideData || !selectedSlide) return;
+    if (!slideDataRef.current || !selectedSlide) return;
     const updatedSlideData = {
-      ...slideData,
-      slides: slideData.slides.map((slide) => {
+      ...slideDataRef.current,
+      slides: slideDataRef.current.slides.map((slide) => {
         if (slide.id === selectedSlide.id) {
           return {
             ...slide,
@@ -289,7 +304,6 @@ export const PresentationProvider = ({children, projectId}: Props) => {
 
     if (JSON.stringify(updatedSlideData) !== JSON.stringify(slideData)) {
       setSlideData(updatedSlideData);
-
       setHistory([updatedSlideData, ...history]);
     }
   };
@@ -324,6 +338,36 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     }
   };
 
+  const updateMultipleTextBoxes = (textBoxesToUpdate: TextBoxesToUpdate[]) => {
+    if (!slideData) return;
+
+    const updatedSlideData = {
+      ...slideData,
+      slides: slideData.slides.map((slide) => ({
+        ...slide,
+        textBoxes: slide.textBoxes.map((textBoxData) => {
+          const updateTextBox = textBoxesToUpdate.find(
+            (tb) => tb.textBoxId === textBoxData.textBoxId
+          );
+
+          if (updateTextBox) {
+            return {
+              ...textBoxData,
+              ...updateTextBox.value,
+            };
+          }
+
+          return textBoxData;
+        }),
+      })),
+    };
+
+    if (JSON.stringify(updatedSlideData) !== JSON.stringify(slideData)) {
+      setSlideData(updatedSlideData);
+      setHistory([updatedSlideData, ...history]);
+    }
+  };
+
   const [slideDataDatabase, setSlideDataDatabase] = useDebouncedSave(
     projectId,
     slideData
@@ -333,19 +377,6 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     if (!slideData) return;
     setSlideDataDatabase(slideData);
   }, [slideData]);
-
-  // useEffect(() => {
-  //   if (slideData) {
-  //     console.log("saving changes to firebase....", slideData);
-  //     setDoc(
-  //       doc(db, "presentations", projectId),
-  //       {
-  //         slideData: slideData,
-  //       },
-  //       {merge: true}
-  //     );
-  //   }
-  // }, [slideData]);
 
   useEffect(() => {
     if (title) {
@@ -408,12 +439,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         (slide) => slide.id !== slideId
       ),
     };
-
     setSlideData(updatedSlideData);
-    console.log("updatedSlideData", [
-      updatedSlideData,
-      ...(historyRef.current || []),
-    ]);
     setHistory([updatedSlideData, ...(historyRef.current || [])]);
 
     // find index of selected slide
@@ -426,128 +452,182 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     setSelectedSlide(updatedSlideData.slides[newIndex]);
   };
 
-  const slideClipboard = useRef<Slide | undefined>(undefined);
+  // const slideClipboard = useRef<Slide | undefined>(undefined);
 
-  const copySlide = (slideId: string) => {
+  async function copySlide(slideId: string) {
     if (!slideData || !slideDataRef.current) return;
 
     // copy slide and create a new id
-    const copiedSlide = slideDataRef.current.slides
-      .filter((slide) => slide.id === slideId)
-      .map((slide) => slide)[0];
-
-    if (!copiedSlide) return;
-    slideClipboard.current = copiedSlide;
-  };
-
-  const cutSlide = (slideId: string) => {
-    if (!slideData || !slideDataRef.current) return;
-
-    const copiedSlide = slideDataRef.current.slides.find(
+    let copiedSlide = slideDataRef.current.slides.filter(
       (slide) => slide.id === slideId
-    );
-
+    )[0];
+    copiedSlide = {
+      ...copiedSlide,
+      id: Math.random().toString(),
+    };
     if (!copiedSlide) return;
+    await navigator.clipboard.writeText(JSON.stringify(copiedSlide));
+  }
 
-    slideClipboard.current = copiedSlide;
+  // };
 
-    const updatedSlideData = {
-      ...slideDataRef.current,
-      slides: slideDataRef.current.slides.filter(
-        (slide) => slide.id !== slideId
-      ),
-    };
+  async function copyTextBox() {
+    if (selectedTextBox) {
+      const copiedTextBox = {
+        ...selectedTextBox,
+        textBoxId: Math.random().toString(),
+        position: {
+          x: selectedTextBox.position.x + 10,
+          y: selectedTextBox.position.y + 10,
+        },
+      };
+      await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
+    } else if (activeGroupSelectedTextBoxes) {
+      const copiedTextBoxes = activeGroupSelectedTextBoxes.flatMap(
+        (textBoxId) => {
+          return slideData?.slides.flatMap((slide) => {
+            if (slide.id === selectedSlide?.id) {
+              return slide.textBoxes
+                .filter((textBox) => textBox.textBoxId === textBoxId) // Filter out non-matching textBoxes
+                .map((textBox) => {
+                  return {
+                    ...textBox,
+                    textBoxId: Math.random().toString(),
+                    position: {
+                      x: textBox.position.x + 10,
+                      y: textBox.position.y + 10,
+                    },
+                  };
+                });
+            }
+            return [];
+          });
+        }
+      );
+      await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
+    }
+  }
 
-    setSlideData(updatedSlideData);
-    setHistory([updatedSlideData, ...history]);
-    setSelectedSlide(
-      updatedSlideData.slides[updatedSlideData.slides.length - 1]
-    );
-  };
+  async function cutTextBox() {
+    if (!selectedSlideRef.current || !slideDataRef.current) return;
 
-  const pasteSlide = () => {
-    if (!slideData || !slideClipboard.current || !slideDataRef.current) return;
-    console.log("slideClipboard", slideClipboard.current.id);
+    let newSlideData;
+    if (selectedTextBox) {
+      const copiedTextBox = {
+        ...selectedTextBox,
+        textBoxId: Math.random().toString(),
+        position: {
+          x: selectedTextBox.position.x + 10,
+          y: selectedTextBox.position.y + 10,
+        },
+      };
+      await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
 
-    const updatedSlideData = {
-      ...slideDataRef.current,
-      slides: [
-        ...slideDataRef.current.slides,
-        {...slideClipboard.current, id: Math.random().toString()},
-      ],
-    };
+      newSlideData = slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlideRef.current!.id) {
+          return {
+            ...slide,
+            textBoxes: slide.textBoxes.filter(
+              (textB) => textB.textBoxId !== selectedTextBox.textBoxId
+            ),
+          };
+        }
+        return slide;
+      });
+      setActiveEdit(undefined);
+    } else if (activeGroupSelectedTextBoxes) {
+      const copiedTextBoxes = activeGroupSelectedTextBoxes.flatMap(
+        (textBoxId) => {
+          return slideData?.slides.flatMap((slide) => {
+            if (slide.id === selectedSlide?.id) {
+              return slide.textBoxes
+                .filter((textBox) => textBox.textBoxId === textBoxId) // Filter out non-matching textBoxes
+                .map((textBox) => {
+                  return {
+                    ...textBox,
+                    textBoxId: Math.random().toString(),
+                    position: {
+                      x: textBox.position.x + 10,
+                      y: textBox.position.y + 10,
+                    },
+                  };
+                });
+            }
+            return [];
+          });
+        }
+      );
+      await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
+      newSlideData = slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlideRef.current!.id) {
+          return {
+            ...slide,
+            textBoxes: slide.textBoxes.filter(
+              (textB) =>
+                !activeGroupSelectedTextBoxes?.includes(textB.textBoxId)
+            ),
+          };
+        }
+        return slide;
+      });
+      setGroupSelectedTextBoxes(undefined);
+    }
+    if (newSlideData) {
+      setSlideData({...slideDataRef.current, slides: newSlideData});
+      setHistory([{...slideDataRef.current, slides: newSlideData}, ...history]);
+    }
+  }
 
-    setSlideData(updatedSlideData);
-    setHistory([updatedSlideData, ...history]);
-    setSelectedSlide(
-      updatedSlideData.slides[updatedSlideData.slides.length - 1]
-    );
-  };
+  async function pasteTextBox() {
+    if (!selectedSlideRef.current || !slideDataRef.current) return;
+    const text = await navigator.clipboard.readText();
+    let parsedData;
 
-  const textBoxClipboard = React.useRef<TextBoxType | undefined>();
-
-  const copyTextBox = () => {
-    if (!selectedTextBox) return;
-    textBoxClipboard.current = {
-      ...selectedTextBox,
-      textBoxId: Math.random().toString(),
-      position: {
-        x: selectedTextBox.position.x + 10,
-        y: selectedTextBox.position.y + 10,
-      },
-    };
-  };
-
-  const cutTextBox = () => {
-    if (!selectedTextBox) return;
-
-    textBoxClipboard.current = {
-      ...selectedTextBox,
-      textBoxId: Math.random().toString(),
-      position: {
-        x: selectedTextBox.position.x + 10,
-        y: selectedTextBox.position.y + 10,
-      },
-    };
-    // delete the selected text box
-    if (!selectedSlide || !slideData) return;
-    const newSlideData = slideData.slides.map((slide) => {
-      if (slide.id === selectedSlide.id) {
-        return {
-          ...slide,
-          textBoxes: slide.textBoxes.filter(
-            (textB) => textB.textBoxId !== selectedTextBox.textBoxId
-          ),
-        };
-      }
-      return slide;
-    });
-    setSlideData({...slideData, slides: newSlideData});
-    setHistory([{...slideData, slides: newSlideData}, ...history]);
-    setActiveEdit(undefined);
-  };
-
-  const pasteTextBox = () => {
-    if (
-      !selectedSlideRef.current ||
-      !slideDataRef.current ||
-      !textBoxClipboard.current
-    )
+    try {
+      parsedData = JSON.parse(text); // Try to parse the string as JSON
+    } catch (error) {
+      console.log("clipboard contains a string:", text);
       return;
-    const newSlideData = slideDataRef.current.slides.map((slide) => {
-      if (slide.id === selectedSlideRef.current!.id) {
-        return {
-          ...slide,
-          textBoxes: [...slide.textBoxes, textBoxClipboard.current!],
-        };
-      }
-      return slide;
-    });
+    }
 
-    setSlideData({...slideDataRef.current, slides: newSlideData});
-    setHistory([{...slideDataRef.current, slides: newSlideData}, ...history]);
-    setActiveEdit(textBoxClipboard.current.textBoxId);
-  };
+    let newSlideData: Slide[] | undefined;
+
+    if (isTextBoxType(parsedData)) {
+      newSlideData = slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlideRef.current!.id) {
+          return {
+            ...slide,
+            textBoxes: [...slide.textBoxes, parsedData],
+          };
+        }
+        return slide;
+      });
+      setTimeout(() => {
+        setActiveEdit(parsedData.textBoxId);
+      }, 10);
+    } else if (isTextBoxTypeArray(parsedData)) {
+      newSlideData = slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlideRef.current!.id) {
+          return {
+            ...slide,
+            textBoxes: [...slide.textBoxes, ...parsedData],
+          };
+        }
+        return slide;
+      });
+      setGroupSelectedTextBoxes(parsedData.map((tb) => tb.textBoxId));
+    } else if (isSlide(parsedData)) {
+      // add parsed data to slide data as a new slide
+      newSlideData = slideDataRef.current.slides.map((slide) => slide);
+      newSlideData.push(parsedData);
+      setSelectedSlide(parsedData);
+    }
+
+    if (newSlideData) {
+      setSlideData({...slideDataRef.current, slides: newSlideData});
+      setHistory([{...slideDataRef.current, slides: newSlideData}, ...history]);
+    }
+  }
 
   const slideDataRef = useRef<SlideData | undefined>(slideData);
 
@@ -706,6 +786,25 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   const [activeGroupSelectedTextBoxes, setActiveGroupSelectedTextBoxes] =
     useState<string[] | undefined>([]);
 
+  const deleteMultiTextBoxes = () => {
+    if (!selectedSlide || !slideData) return;
+    const newSlideData = slideData.slides.map((slide) => {
+      if (slide.id === selectedSlide.id) {
+        return {
+          ...slide,
+          textBoxes: slide.textBoxes.filter(
+            (textB) => !groupSelectedTextBoxes?.includes(textB.textBoxId)
+          ),
+        };
+      }
+      return slide;
+    });
+    setSlideData({...slideData, slides: newSlideData});
+    setHistory([{...slideData, slides: newSlideData}, ...history]);
+    setActiveGroupSelectedTextBoxes(undefined);
+    setGroupSelectedTextBoxes(undefined);
+  };
+
   // console.log("groupSelect", groupSelectedTextBoxes);
 
   const values = {
@@ -745,6 +844,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     setGroupSelectedTextBoxes,
     activeGroupSelectedTextBoxes,
     setActiveGroupSelectedTextBoxes,
+    selectedForAiWrite,
+    setSelectedForAiWrite,
     // functions -----------------------------
     Generate,
     updateData,
@@ -755,8 +856,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     deleteSlide,
     createNewSlide,
     copySlide,
-    cutSlide,
-    pasteSlide,
+    deleteMultiTextBoxes,
     selectedSlideRef,
     copyTextBox,
     cutTextBox,
@@ -764,6 +864,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     uploadImage,
     addImageToSlide,
     updateImageData,
+    updateMultipleTextBoxes,
   };
 
   return (

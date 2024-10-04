@@ -33,7 +33,6 @@ const Image = () => {
     updateImageData,
     copyTextBox,
     cutTextBox,
-    pasteTextBox,
     mode,
   } = usePresentation()!;
 
@@ -129,15 +128,6 @@ const Image = () => {
         if (e.key === "Backspace" && isSelected) {
           deleteImage();
         }
-        if (e.metaKey && e.key === "c") {
-          copyTextBox();
-        }
-        if (e.metaKey && e.key === "x") {
-          cutTextBox();
-        }
-        if (e.metaKey && e.key === "v") {
-          pasteTextBox();
-        }
       }
     };
 
@@ -146,7 +136,7 @@ const Image = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isSelected, deleteImage, copyTextBox, cutTextBox, pasteTextBox]);
+  }, [isSelected, deleteImage, copyTextBox, cutTextBox]);
 
   const [isCenteredX, setIsCenteredX] = React.useState<boolean>(false);
   const [isCenteredY, setIsCenteredY] = React.useState<boolean>(false);

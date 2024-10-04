@@ -135,8 +135,11 @@ const TextBoxCreate = ({
 
   return (
     <>
-      {localTextBox ? (
-        <TextBoxProvider textBox={localTextBox}>
+      {localTextBox && selectedSlide ? (
+        <TextBoxProvider
+          textBox={localTextBox}
+          // slideId={selectedSlide.id}
+        >
           <TextBox />
         </TextBoxProvider>
       ) : (

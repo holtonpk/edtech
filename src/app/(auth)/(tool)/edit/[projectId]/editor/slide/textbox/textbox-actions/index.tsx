@@ -16,12 +16,12 @@ const TextboxActions = () => {
     activeTransform,
     isRotating,
     position,
-    textBoxState,
+    textBox,
   } = useTextBox()!;
 
   const height =
-    document.getElementById(`ui-text-box-${textBoxState.textBoxId}`)
-      ?.clientHeight || 0;
+    document.getElementById(`ui-text-box-${textBox.textBoxId}`)?.clientHeight ||
+    0;
   const placeAtBottom = position.y + height + 60 < 562.5;
 
   return (

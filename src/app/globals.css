@@ -12,7 +12,7 @@
       --popover: 0 0% 100%;
       --popover-foreground: 224 71.4% 4.1%;
       /* purple */
-      --primary: 259 82% 67%;
+      /* --primary: 259 82% 67%; */
       /* blue */
       /* --primary: 212 90% 58%; */
       /* green */
@@ -24,6 +24,7 @@
       /* red */
       /* --primary: 0 100% 50%; */
 
+      --primary: 214 100% 55%;
       --primary-foreground: 210 20% 98%;
       --secondary: 220 14.3% 95.9%;
       --secondary-foreground: 220.9 39.3% 11%;
@@ -465,4 +466,187 @@ input[type="number"] {
   height: 90%;
 
   border-radius: 20px;
+}
+
+.slide-right {
+  -webkit-animation: slide-right 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-right 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@-webkit-keyframes slide-right {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateX(-100px);
+    transform: translateX(-100px);
+  }
+  100% {
+    opacity: 1;
+
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+@keyframes slide-right {
+  0% {
+    opacity: 0;
+
+    -webkit-transform: translateX(-100px);
+    transform: translateX(-100px);
+  }
+  100% {
+    opacity: 1;
+
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+}
+
+.slide-down-in {
+  -webkit-animation: slide-down 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-down 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@-webkit-keyframes slide-down {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-600px);
+    transform: translateY(-600px);
+  }
+  100% {
+    opacity: 1;
+
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+
+    -webkit-transform: translateY(-600px);
+    transform: translateY(-600px);
+  }
+  100% {
+    opacity: 1;
+
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+.slide-down-out {
+  -webkit-animation: slide-down-out 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slide-down-out 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@-webkit-keyframes slide-down-out {
+  0% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(600px);
+    transform: translateY(600px);
+  }
+}
+@keyframes slide-down-out {
+  0% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(600px);
+    transform: translateY(600px);
+  }
+}
+
+.slide-up-in {
+  -webkit-animation: slide-up 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-up 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@-webkit-keyframes slide-up {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(600px);
+    transform: translateY(600px);
+  }
+  100% {
+    opacity: 1;
+
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+
+    -webkit-transform: translateY(600px);
+    transform: translateY(600px);
+  }
+  100% {
+    opacity: 1;
+
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+.slide-up-out {
+  -webkit-animation: slide-up-out 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-up-out 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+@keyframes slide-up-out {
+  0% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(-600px);
+    transform: translateY(-600px);
+    display: none;
+  }
+}
+@-webkit-keyframes slide-up-out {
+  0% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(-600px);
+    transform: translateY(-600px);
+    display: none;
+  }
+}
+
+.top-transition {
+  transition: top 0.2s ease 0s;
+}
+
+.presentCard-content-closed {
+  display: -webkit-box;
+  max-width: 200px;
+  max-height: 48px;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.aiwrite-textBoxPreview-closed {
+  display: -webkit-box;
+  max-width: 100%;
+  max-height: 55px;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

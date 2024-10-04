@@ -30,6 +30,7 @@ interface SlideContextType {
   setIsRotating: React.Dispatch<React.SetStateAction<boolean>>;
   activeTransform: boolean;
   setActiveTransform: React.Dispatch<React.SetStateAction<boolean>>;
+  textBoxId: string;
   deleteTextBox: () => void;
 }
 
@@ -70,6 +71,8 @@ export const TextBoxProvider = ({children, textBox}: Props) => {
 
   //    the text value of the selected text box
   const [text, setText] = React.useState(textBox.text);
+
+  const textBoxId = textBox.textBoxId;
 
   useEffect(() => {
     if (!slideData || !selectedSlide) return;
@@ -179,6 +182,7 @@ export const TextBoxProvider = ({children, textBox}: Props) => {
     setIsRotating,
     activeTransform,
     setActiveTransform,
+    textBoxId,
   };
 
   return (

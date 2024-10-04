@@ -16,19 +16,21 @@ const ScaleHandle = ({
   setActiveHandle: React.Dispatch<React.SetStateAction<string | undefined>>;
 }) => {
   const {setActiveTransform} = useTextBox()!;
-  const localRef = useRef<HTMLDivElement | null>(null);
+  const startDragPos = useRef({x: 0, y: 0});
+
+  // const localRef = useRef<HTMLDivElement | null>(null);
   const isMouseDownRef = useRef(false); // Track if mouse is down
-  const initialPositionRef = React.useRef({left: 0, top: 0});
+  // const initialPositionRef = React.useRef({left: 0, top: 0});
 
   const calculateScale = useCallback(
     (e: MouseEvent) => {
-      if (!localRef.current || !isMouseDownRef.current) return;
+      if (!isMouseDownRef.current) return;
 
       const {clientX, clientY} = e;
-      const {left, top} = initialPositionRef.current;
+      const {x, y} = startDragPos.current;
 
-      const deltaX = clientX - left;
-      const deltaY = clientY - top;
+      const deltaX = clientX - x;
+      const deltaY = clientY - y;
       controlScale(handleAxis, deltaX, deltaY);
     },
     [handleAxis, controlScale]
@@ -46,9 +48,9 @@ const ScaleHandle = ({
       e.preventDefault();
       isMouseDownRef.current = true;
       // Capture the initial position of the element
-      if (!localRef.current) return;
-      const {left, top} = localRef.current.getBoundingClientRect();
-      initialPositionRef.current = {left, top};
+      // if (!localRef.current) return;
+      // const {left, top} = localRef.current.getBoundingClientRect();
+      startDragPos.current = {x: e.clientX, y: e.clientY};
 
       window.addEventListener("mousemove", calculateScale);
       window.addEventListener(
@@ -69,7 +71,6 @@ const ScaleHandle = ({
       {!hidden && (
         <div
           onMouseDown={onMouseDown}
-          ref={localRef}
           className={`absolute ${getHandleClass(
             handleAxis
           )} react-resizable-handle nodrag z-30  border border-foreground/30 shadow-lg rounded-full flex items-center justify-center group 

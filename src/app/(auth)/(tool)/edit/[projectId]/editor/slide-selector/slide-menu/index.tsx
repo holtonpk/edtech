@@ -178,12 +178,6 @@ export function SlideMenu({
                   key={slide.id}
                   slide={slide}
                   activeIndex={activeIndex}
-                  onRemove={() =>
-                    setSlideData((prev) => ({
-                      ...prev!,
-                      slides: prev!.slides.filter((s) => s.id !== slide.id),
-                    }))
-                  }
                 />
               ))}
             </ul>

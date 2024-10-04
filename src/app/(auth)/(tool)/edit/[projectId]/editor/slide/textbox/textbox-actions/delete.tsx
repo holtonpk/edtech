@@ -7,9 +7,9 @@ const Delete = () => {
   return (
     <ActionButton
       onClick={deleteTextBox}
-      className="nodrag bg-theme-red/30  p-2"
+      className="nodrag hover:bg-theme-red/30  p-2 text-theme-red "
     >
-      <Icons.trash className="h-4 w-4 text-theme-red" />
+      <Icons.trash className="h-4 w-4 " />
     </ActionButton>
   );
 };

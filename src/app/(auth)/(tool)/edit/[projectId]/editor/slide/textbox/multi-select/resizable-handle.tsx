@@ -22,75 +22,43 @@ const ResizableHandle = forwardRef<
     ...restProps
   } = props;
 
-  const localRef = useRef<HTMLDivElement | null>(null);
-
-  // const {setActiveTransform} = useTextBox()!;
-
-  const handleRef = (node: HTMLDivElement | null) => {
-    localRef.current = node;
-
-    if (typeof ref === "function") {
-      ref(node);
-    } else if (ref) {
-      (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-    }
-    if (typeof innerRef === "function") {
-      innerRef(node);
-    } else if (innerRef) {
-      (innerRef as React.MutableRefObject<HTMLDivElement | null>).current =
-        node;
-    }
-  };
+  // const localRef = useRef<HTMLDivElement | null>(null);
+  const startDragPos = useRef({x: 0, y: 0});
 
   const handleResize = useCallback(
     (e: MouseEvent) => {
-      const handleNode = localRef.current;
-      if (!handleNode) return;
-
-      const {clientX, clientY} = e;
-      const {left} = handleNode.getBoundingClientRect();
-
-      const deltaX = clientX - left;
-
+      const {clientX} = e;
+      const deltaX = clientX - startDragPos.current.x;
       onResize(handleAxis, deltaX);
+      startDragPos.current = {x: clientX, y: startDragPos.current.y};
     },
     [handleAxis, onResize]
   );
 
   const onMouseUp = useCallback(() => {
     console.log("mouse up");
-    // setActiveTransform(false);
     setActiveHandle(undefined);
-  }, [setActiveHandle]);
-  // }, [setActiveTransform, setActiveHandle]);
+    window.removeEventListener("mousemove", handleResize); // Ensure cleanup
+  }, [setActiveHandle, handleResize]);
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      // setActiveTransform(true);
+      startDragPos.current = {x: e.clientX, y: e.clientY};
+
       setActiveHandle(handleAxis);
       e.preventDefault();
       window.addEventListener("mousemove", handleResize);
 
-      window.addEventListener(
-        "mouseup",
-        () => {
-          window.removeEventListener("mousemove", handleResize);
-          onMouseUp();
-        },
-        {once: true}
-      );
+      window.addEventListener("mouseup", onMouseUp, {once: true});
     },
-    // [handleResize, setActiveTransform, handleAxis, onMouseUp, setActiveHandle]
     [handleResize, handleAxis, onMouseUp, setActiveHandle]
   );
-
   return (
     <>
       {!hidden && (
         <div
           onMouseDown={onMouseDown}
           // onMouseUp={onMouseUp}
-          ref={handleRef}
           className={`absolute ${getHandleClass(
             handleAxis
           )} react-resizable-handle nodrag  z-30 bg-background  border border-foreground/30 shadow-lg rounded-full 

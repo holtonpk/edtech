@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect} from "react";
+import React, {useCallback, useEffect} from "react";
 import {Button} from "@/components/ui/button";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
@@ -22,19 +22,36 @@ import {
 import {ColorMenu} from "./color-menu";
 import {applyCommand} from "@/lib/utils";
 import {defaultShortColors} from "./color-menu";
+import {TextBoxesToUpdate} from "@/config/data";
+
 export const TextColor = () => {
-  const {selectedTextBox, updateData, addRecentColor, textColor, setTextColor} =
-    usePresentation()!;
+  const {
+    selectedTextBox,
+    updateData,
+    addRecentColor,
+    textColor,
+    setTextColor,
+    groupSelectedTextBoxes,
+  } = usePresentation()!;
 
   const textColorCommand = (commandValue: string) => {
     setTextColor(commandValue);
-    if (!selectedTextBox) return;
-    applyCommand(selectedTextBox?.textBoxId, "foreColor", commandValue);
-    const newText = document.getElementById(
-      `text-box-${selectedTextBox.textBoxId}`
-    )?.innerHTML;
-    updateData({text: newText}, selectedTextBox.textBoxId);
-    addRecentColor(commandValue);
+    if (selectedTextBox) {
+      applyCommand(selectedTextBox?.textBoxId, "foreColor", commandValue);
+      const newText = document.getElementById(
+        `text-box-${selectedTextBox.textBoxId}`
+      )?.innerHTML;
+      updateData({text: newText}, selectedTextBox.textBoxId);
+      addRecentColor(commandValue);
+    } else if (groupSelectedTextBoxes) {
+      groupSelectedTextBoxes.forEach((textBoxId) => {
+        applyCommand(textBoxId, "foreColor", commandValue);
+        const newText = document.getElementById(
+          `text-box-${textBoxId}`
+        )?.innerHTML;
+        updateData({text: newText}, textBoxId);
+      });
+    }
   };
 
   return (
@@ -69,25 +86,45 @@ export const TextColor = () => {
 };
 
 export const TextColor2 = () => {
-  const {selectedTextBox, updateData, addRecentColor, textColor, setTextColor} =
-    usePresentation()!;
+  const {
+    selectedTextBox,
+    updateData,
+    addRecentColor,
+    textColor,
+    setTextColor,
+    groupSelectedTextBoxes,
+    slideData,
+    setSlideData,
+    updateMultipleTextBoxes,
+  } = usePresentation()!;
 
   const textColorCommand = (commandValue: string) => {
     setTextColor(commandValue);
-    if (!selectedTextBox) return;
-    applyColor(selectedTextBox?.textBoxId, commandValue);
-    const newText = document.getElementById(
-      `text-box-${selectedTextBox.textBoxId}`
-    )?.innerHTML;
-    console.log("newText", newText);
+    if (selectedTextBox) {
+      applyColor(selectedTextBox?.textBoxId, commandValue);
+      const newText = document.getElementById(
+        `text-box-${selectedTextBox.textBoxId}`
+      )?.innerHTML;
+      updateData({text: newText}, selectedTextBox.textBoxId);
+    } else if (groupSelectedTextBoxes) {
+      let textBoxesToUpdate: TextBoxesToUpdate[] = [];
+      groupSelectedTextBoxes.forEach((textBoxId) => {
+        applyColor(textBoxId, commandValue);
+        const newText = document.getElementById(
+          `text-box-${textBoxId}`
+        )?.innerHTML;
+        textBoxesToUpdate.push({value: {text: newText}, textBoxId});
+      });
+      updateMultipleTextBoxes(textBoxesToUpdate);
+    }
 
-    updateData({text: newText}, selectedTextBox.textBoxId);
     addRecentColor(commandValue);
   };
 
   const applyColor = (textBoxId: string, color: string) => {
     // if text is highlighted, do not select text box content
     const element = document.getElementById(`text-box-${textBoxId}`);
+
     if (!element) return;
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0 && selection.toString() !== "") {
@@ -102,6 +139,7 @@ export const TextColor2 = () => {
       const text = elementText.replaceAll(/<\/?font[^>]*>/g, "");
       const newText = `<font color="${color}">${text}</font>`;
       paragraph.innerHTML = newText;
+      console.log("newText == ", paragraph.innerHTML);
     }
   };
 
@@ -109,13 +147,13 @@ export const TextColor2 = () => {
 
   return (
     <div className="relative  w-fit ml-auto">
-      <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background rounded-md  items-center relative gap-2 overflow-hidden">
+      <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background border rounded-md  items-center relative gap-2 overflow-hidden">
         <Popover open={openMenu} onOpenChange={setOpenMenu}>
           <PopoverTrigger>
             <TooltipProvider>
               <Tooltip delayDuration={500}>
                 <TooltipTrigger asChild>
-                  <button className="w-full h-10 flex justify-center items-center bg-background hover:bg-muted px-2 py-1">
+                  <button className="w-full h-10 flex justify-center items-center  hover:bg-muted px-2 py-1">
                     <div
                       style={{background: textColor}}
                       className="bg-background h-6 aspect-square rounded-full border overflow-hidden flex justify-center items-center mx-auto"
@@ -144,7 +182,7 @@ export const TextColor2 = () => {
             </button>
           </PopoverContent>
         </Popover>
-        <div className="h-6 w-[2px] bg-muted absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="h-8 w-[2px] bg-muted absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
         <TooltipProvider>
           <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>

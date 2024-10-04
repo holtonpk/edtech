@@ -50,7 +50,7 @@
   transform-origin: center;
   position: absolute;
   /* max-width: 800px; */
-  background-image: radial-gradient(
+  /* background-image: radial-gradient(
       at 97% 21%,
       hsl(var(--orange)) 0px,
       hsla(125, 98%, 72%, 0) 50%
@@ -73,9 +73,11 @@
     ),
     radial-gradient(
       at 19% 93%,
-      hsl(var(--orange)) 0px,
+      hsl(var(--blue)) 0px,
       hsla(343, 68%, 79%, 0) 50%
-    );
+    ); */
+
+  background: #f3f6f8;
 
   /* background: hsl(var(--primary)); */
   position: absolute;
@@ -84,7 +86,7 @@
   filter: blur(0px);
   -webkit-filter: blur(0px);
   /* top: 80px; */
-  opacity: 0.2;
+  opacity: 1;
   /* animation: rotate 120s linear infinite; */
   /* top: -20%; */
 }

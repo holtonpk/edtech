@@ -67,6 +67,14 @@ import {
   FolderDown,
   Palette,
   LayoutDashboard,
+  CircleChevronRight,
+  Sparkles,
+  Pencil,
+  Ruler,
+  Smile,
+  ListRestart,
+  BookOpenText,
+  Wand2,
 } from "lucide-react";
 
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
@@ -93,7 +101,17 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ImageIcon from "@mui/icons-material/Image";
 import TitleIcon from "@mui/icons-material/Title";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 export const Icons = {
+  wand2: Wand2,
+  reWrite: ListRestart,
+  addMore: BookOpenText,
+  smile: Smile,
+  ruler: Ruler,
+  pencil: Pencil,
+  sparkles: AutoAwesomeIcon,
+  submit: CircleChevronRight,
   layout: DashboardIcon,
   theme: ColorLensIcon,
   drive: FolderDown,
@@ -194,6 +212,27 @@ export const Icons = {
       <path
         fill="#ffba00"
         d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25 59.8 53h27.45c0-1.55-.4-3.1-1.2-4.5z"
+      ></path>
+    </svg>
+  ),
+  menuArrow: (props: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+      fill="none"
+      viewBox="0 0 29 47"
+    >
+      <path
+        fill="#fff"
+        stroke="#E5E7EB"
+        strokeWidth="2"
+        d="M4.988 26.064L27 44V2L5.17 18.17c-2.621 1.942-2.711 5.833-.182 7.894z"
+      ></path>
+      <path
+        fill="#fff"
+        stroke="#fff"
+        strokeWidth="0.5"
+        d="M28 2l-1.75 2v37.781L28 44V2z"
       ></path>
     </svg>
   ),
