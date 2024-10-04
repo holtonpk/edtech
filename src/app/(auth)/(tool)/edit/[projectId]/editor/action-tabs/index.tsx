@@ -88,20 +88,7 @@ const RightPanel = () => {
         </HoverContainer>
       ),
     },
-    {
-      name: "Ai Write",
-      description: "Use the power of AI to quickly rewrite your content",
-      value: "aiRewrite",
-      icon: Icons.magicWand,
-      color: "hsla(138 40% 48% / 1)",
-      height: "440",
 
-      HoverElement: (
-        <HoverContainer id="aiRewrite">
-          <AiRewrite />
-        </HoverContainer>
-      ),
-    },
     {
       name: "Text",
       description: "Add text to your slides",
@@ -127,6 +114,20 @@ const RightPanel = () => {
       HoverElement: (
         <HoverContainer id="images">
           <Images />
+        </HoverContainer>
+      ),
+    },
+    {
+      name: "Ai Write",
+      description: "Use the power of AI to quickly rewrite your content",
+      value: "aiRewrite",
+      icon: Icons.magicWand,
+      color: "hsla(138 40% 48% / 1)",
+      height: "440",
+
+      HoverElement: (
+        <HoverContainer id="aiRewrite">
+          <AiRewrite />
         </HoverContainer>
       ),
     },
@@ -1028,7 +1029,8 @@ const AiRewrite = () => {
                     className="flex items-center gap-2 hover:bg-muted rounded-[4px] rounded-r-full p-1 h-fit justify-start poppins-semibold group pr-4"
                   >
                     <div
-                      className={`p-1 h-fit w-fit rounded-[4px] text-white ${preset.background}`}
+                      className={`p-1 h-fit w-fit rounded-[4px] text-white bg-primary`}
+                      // className={`p-1 h-fit w-fit rounded-[4px] text-white ${preset.background}`}
                     >
                       <preset.icon className="h-6 w-6" />
                     </div>

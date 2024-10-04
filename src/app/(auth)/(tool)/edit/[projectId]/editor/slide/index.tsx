@@ -186,11 +186,16 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     if (!isSelecting) {
       setSelectCoordinates({x: 0, y: 0, width: 0, height: 0});
       setActiveGroupSelectedTextBoxes(groupSelectedTextBoxes);
-      document.body.style.userSelect = "auto";
+      setTimeout(() => {
+        console.log("setting user select to auto");
+        document.body.style.userSelect = "auto";
+      }, 5000);
 
       // setGroupSelectedTextBoxes(undefined);
     }
     if (isSelecting) {
+      console.log("setting user select to none");
+
       document.body.style.userSelect = "none";
     }
   }, [isSelecting, groupSelectedTextBoxes, setActiveGroupSelectedTextBoxes]);
