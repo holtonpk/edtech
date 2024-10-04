@@ -65,7 +65,7 @@ export const ColorMenu = ({
 
           {recentColors && recentColors.length > 0 && (
             <>
-              <div className="flex items-center gap-1 mt-2">
+              <div className="flex items-center gap-1 mt-2 poppins-regular">
                 <Icons.history className="h-5 w-5" />
                 Recent colors
               </div>
@@ -102,7 +102,7 @@ export const ColorMenu = ({
           )}
         </TabsContent>
         <TabsContent value="default" className="w-full">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 poppins-regular">
             <Icons.palette className="h-5 w-5" />
             Default colors
           </div>

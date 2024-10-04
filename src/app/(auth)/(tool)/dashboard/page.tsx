@@ -31,7 +31,7 @@ const Dashboard = () => {
     <div className="h-screen w-screen flex flex-col ">
       <NavBar />
       <div className="flex flex-col container py-4">
-        <Banner />
+        {/* <Banner /> */}
         <CreateNew />
         <UserPresentations />
       </div>
@@ -67,24 +67,83 @@ const Banner = () => {
 
 const CreateNew = () => {
   const router = useRouter();
+  const {currentUser} = useAuth()!;
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const blankPresentation: FullSlideData = {
+    slideData: {
+      slides: [
+        {
+          textBoxes: [
+            {
+              textBoxId: "0.5025385440330408",
+              fontSize: 40,
+              rotation: 0,
+              size: {width: 600},
+              position: {x: 20, y: 20},
+              text: '<p><b><font color="#939393">New presentation</font></b></p>',
+            },
+            {
+              size: {width: 600},
+              position: {x: 20, y: 100},
+              text: '<p><font color="#939393">Add subheading here</font></p>',
+              rotation: 0,
+              textBoxId: "0.6930778945417186",
+              fontSize: 24,
+            },
+          ],
+          background: "white",
+          id: "1",
+          images: [],
+        },
+      ],
+    },
+    recentColors: [],
+    title: "Untitled presentation",
+  };
+
+  const saveToFirebase = async () => {
+    const docRef = await addDoc(
+      collection(db, "presentations"),
+      blankPresentation
+    );
+    const presentationId = docRef.id;
+
+    // update user storage with the new presentation
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser?.uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      const updatedPresentations = [...userData.presentations, presentationId];
+      await setDoc(userRef, {...userData, presentations: updatedPresentations});
+    }
+
+    return presentationId;
+  };
+
+  const createNew = async () => {
+    setIsLoading(true);
+    const projectId = await saveToFirebase();
+
+    router.push(`/edit/${projectId}`);
+    setIsLoading(false);
+  };
 
   return (
     <div className="flex flex-col items-center gap-2 w-full justify-center p-10">
       <Button
-        onClick={() => {
-          router.push("/create");
-        }}
+        onClick={createNew}
+        disabled={isLoading}
         className=" p-4 flex rounded-full font-bold items-center justify-center"
       >
-        <Icons.add className="w-6 h-6 " />
-        Create A New Presentation
-      </Button>
-      <Button
-        variant={"ghost"}
-        className=" p-4 flex rounded-md text-primary items-center justify-center"
-      >
-        <Icons.upload className="w-6 h-6 mr-2" />
-        Import A Presentation
+        {isLoading ? (
+          <Icons.spinner className="animate-spin w-6 h-6 mr-2" />
+        ) : (
+          <Icons.add className="w-6 h-6 " />
+        )}
+        Mohamed click here to make a new blank presentation
       </Button>
     </div>
   );

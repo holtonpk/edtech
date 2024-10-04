@@ -13,6 +13,7 @@ import {getDoc, doc} from "firebase/firestore";
 import {db} from "@/config/firebase";
 import {useAuth} from "@/context/user-auth";
 import ProfileNav from "../../../../components/profile-nav";
+import debounce from "lodash.debounce";
 
 type HoverContextType = {
   isHovering: boolean;
@@ -66,6 +67,7 @@ const RightPanel = () => {
       value: "themes",
       icon: Icons.theme,
       color: "hsla(0 100% 50 / 1)",
+      height: "380",
       HoverElement: (
         <HoverContainer id="themes">
           <Themes />
@@ -78,6 +80,8 @@ const RightPanel = () => {
       value: "layout",
       icon: Icons.layout,
       color: "hsla(21 92% 47% / 1)",
+      height: "380",
+
       HoverElement: (
         <HoverContainer id="layout">
           <Layouts />
@@ -90,6 +94,8 @@ const RightPanel = () => {
       value: "aiRewrite",
       icon: Icons.magicWand,
       color: "hsla(138 40% 48% / 1)",
+      height: "440",
+
       HoverElement: (
         <HoverContainer id="aiRewrite">
           <AiRewrite />
@@ -102,6 +108,8 @@ const RightPanel = () => {
       value: "text",
       icon: Icons.text,
       color: "hsla(212 90% 58% / 1)",
+      height: "350",
+
       HoverElement: (
         <HoverContainer id="text">
           <Text />
@@ -114,6 +122,8 @@ const RightPanel = () => {
       value: "images",
       icon: Icons.image,
       color: "hsla(259 82% 67% / 1)",
+      height: "300",
+
       HoverElement: (
         <HoverContainer id="images">
           <Images />
@@ -158,10 +168,12 @@ const RightPanel = () => {
       return;
     hoverContainer.style.top = buttonContainer?.offsetTop - 29 + "px";
     hoverContainer.style.left = buttonElement?.clientWidth + 31 + "px";
+    hoverContainer.style.height = TabButtons[index].height + "px";
     hoverContainer.style.display = "block";
     hoverPoint.style.display = "block";
     hoverContainerMain.style.top = buttonContainer?.offsetTop - 30 + "px";
     hoverContainerMain.style.left = buttonElement?.clientWidth + 30 + "px";
+    hoverContainerMain.style.height = TabButtons[index].height + "px";
 
     // hover indicator should animate to the top of the button
     hoverIndicator.style.height = buttonElement?.clientHeight + "px";
@@ -172,6 +184,8 @@ const RightPanel = () => {
     animatedHoverContainer.classList.remove("slide-right");
     animatedHoverContainer.classList.remove("slide-down-in");
     animatedHoverContainer.classList.remove("slide-up-in");
+
+    animatedHoverContainer.style.height = TabButtons[index].height + "px";
 
     console.log("hoveredIndex ===", hoveredIndex.current);
     if (hoveredIndex.current === null) {
@@ -257,6 +271,21 @@ const RightPanel = () => {
     prevHoveredElement.current = null;
   };
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      onHoverGroupOff();
+    }, 500);
+  };
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    onHoverGroup;
+  };
+
   return (
     <div className="flex h-full justify-center relative  origin-right  ">
       <div
@@ -266,8 +295,8 @@ const RightPanel = () => {
       >
         <div
           className="relative flex flex-col w-full h-fit gap-2"
-          onMouseEnter={onHoverGroup}
-          onMouseLeave={onHoverGroupOff}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {/* {isHovering && ( */}
           <span
@@ -315,10 +344,9 @@ ${mode === tab.value && "bg-muted-foreground/5"}
      : "currentColor group-hover:text-primary"
  }
                 `}
-                    // style={{color: mode === tab.value ? tab.color : "currentColor"}}
                   />
                   <span
-                    className={`text-[12px] whitespace-nowrap
+                    className={`text-[12px] whitespace-nowrap poppins-regular
                   ${
                     mode === tab.value || hoverValue === tab.value
                       ? "text-primary"
@@ -328,17 +356,6 @@ ${mode === tab.value && "bg-muted-foreground/5"}
                   >
                     {tab.name}
                   </span>
-
-                  {/* <div className="absolute w-[200px] h-20 bg-red-200 top-0"></div> */}
-
-                  {/* <div
-                  // style={{background: tab.color}}
-                  className={`h-[5px] w-[5px] rounded-full absolute  z-10 top-1/2 -translate-y-1/2 -right-[10px] fade-in-0 duration-500 bg-primary  ${
-                    mode === tab.value || hoverValue === tab.value
-                      ? "fade-in-500"
-                      : "fade-outs-500 opacity-0 group-hover:opacity-100"
-                  }`}
-                ></div> */}
                 </button>
                 {tab.HoverElement}
               </div>
@@ -347,9 +364,8 @@ ${mode === tab.value && "bg-muted-foreground/5"}
 
           <div
             id="hoverContainer"
-            className={`fixed hidden top-transition left-[200px] z-[9] bg-background  h-[400px] w-[350px] shadow-xl fade-in-500 rounded-md  border
+            className={`fixed hidden top-transition left-[200px] z-[9] bg-background   w-[350px] shadow-xl fade-in-500 rounded-md  border
 
-            
             `}
           >
             <div className="absolute left-[5px] top-[50px]  -translate-x-full z-20">
@@ -405,15 +421,15 @@ const HoverContainer = ({
   return (
     <div
       id={id + "-hoverContainer"}
-      className={`fixed  z-[10000]   hidden h-[398px] w-[348px] rounded-md 
+      className={`fixed  z-[10000]   hidden  w-[348px] rounded-md 
             
             
             `}
     >
-      <div className="relative overflow-hidden h-[400px] w-[350px] z-10">
+      <div className="relative overflow-hidden w-[350px] z-10">
         <div
           id={id + "-animated-hoverContainer"}
-          className="relative h-[400px] w-[350px] "
+          className="relative  w-[350px] "
         >
           {children}
         </div>
@@ -460,8 +476,8 @@ const TabContent = ({
           className="p-4 absolute  "
         >
           <div className="flex flex-col">
-            <h1 className="font-bold text-xl">{title}</h1>
-            <p className=" text-sm ">{description}</p>
+            <h1 className="font-bold text-xl poppins-bold">{title}</h1>
+            <p className=" text-sm poppins-regular">{description}</p>
           </div>
 
           <div className="h-full overflow-scrolls ">
@@ -603,7 +619,7 @@ const Text = () => {
 
   return (
     <TabContent title="Text" description="Add text to your slides">
-      <div className="flex flex-col gap-4 w-full mt-2">
+      <div className="flex flex-col gap-4 w-full mt-2 ">
         {/* <h1 className="font-bold text-lg">Text </h1> */}
 
         <div className="flex flex-col gap-2">
@@ -794,7 +810,7 @@ const AiRewrite = () => {
     setSelectedForAiWrite(undefined);
   };
 
-  const [editMode, setEditMode] = React.useState<boolean>(true);
+  const [editMode, setEditMode] = React.useState<boolean>(false);
 
   type Preset = {
     label: string;
@@ -860,11 +876,11 @@ const AiRewrite = () => {
     AiRewritePresets[0]
   );
 
-  console.log("selectedForAiWrite", selectedForAiWrite);
+  const {isHovering} = useHover()!;
 
   return (
     <>
-      <div className="flex flex-col overflow-scroll   disableTextboxListeners">
+      <div className="flex flex-col overflow-scroll h-full  disableTextboxListeners">
         {editMode ? (
           <TabContent
             title={selectedPreset?.label}
@@ -894,10 +910,12 @@ const AiRewrite = () => {
                   )}
                 </div>
                 <div
-                  className={`flex flex-wrap gap-1 bg-muted p-2 max-h-[450px] overflow-scroll
+                  className={`flex flex-wrap gap-1 bg-muted p-2  overflow-scroll
                   ${
                     selectedPreset && selectedPreset.label === "Custom Rewrite"
                       ? "max-h-[250px]"
+                      : isHovering
+                      ? "max-h-[225px]"
                       : "max-h-[450px]"
                   } }
                   `}
@@ -1007,7 +1025,7 @@ const AiRewrite = () => {
                       setSelectedPreset(preset);
                       setEditMode(true);
                     }}
-                    className="flex items-center gap-2 hover:bg-muted rounded-[4px] rounded-r-full p-1 h-fit justify-start font-bold group pr-4"
+                    className="flex items-center gap-2 hover:bg-muted rounded-[4px] rounded-r-full p-1 h-fit justify-start poppins-semibold group pr-4"
                   >
                     <div
                       className={`p-1 h-fit w-fit rounded-[4px] text-white ${preset.background}`}

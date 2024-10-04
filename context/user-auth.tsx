@@ -139,58 +139,58 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     }
   };
 
-  // useEffect(() => {
-  //   const unsubscribe = auth.onAuthStateChanged(async (user) => {
-  //     console.log("email ver ====", user?.emailVerified);
-  //     if (user?.uid) {
-  //       const token = await user.getIdToken();
-  //       // nookies.set(undefined, "token", token, { path: "/" });
-  //     }
-  //     if (user) {
-  //       if (user.emailVerified !== false) {
-  //         const userRef = doc(db, "users", user.uid);
-
-  //         const userSnap = await getDoc(userRef);
-  //         const userData = userSnap.data();
-  //         await auth.currentUser?.getIdToken(true);
-  //         const decodedToken = await auth.currentUser?.getIdTokenResult();
-  //         setCurrentUser({
-  //           ...user,
-  //           firstName: userData?.firstName,
-  //           lastName: userData?.lastName,
-  //           photoURL: userData?.photoURL,
-  //           presentations: userData?.presentations,
-  //         });
-  //       }
-  //     } else {
-  //       setRerender(true);
-  //     }
-  //     setLoading(false);
-  //   });
-  //   return unsubscribe;
-  // }, []);
-
-  async function getUserData() {
-    const userRef = doc(db, "users", "TrxCwQISFwc6ETvPYREqpgWdseg2");
-
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.data();
-    setCurrentUser({
-      ...userData,
-      firstName: userData?.firstName,
-      lastName: userData?.lastName,
-      photoURL: userData?.photoURL,
-      presentations: userData?.presentations,
-    } as UserData);
-  }
-
   useEffect(() => {
-    if (!currentUser) {
-      getUserData();
-      setRerender(false);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      console.log("email ver ====", user?.emailVerified);
+      if (user?.uid) {
+        const token = await user.getIdToken();
+        // nookies.set(undefined, "token", token, { path: "/" });
+      }
+      if (user) {
+        if (user.emailVerified !== false) {
+          const userRef = doc(db, "users", user.uid);
+
+          const userSnap = await getDoc(userRef);
+          const userData = userSnap.data();
+          await auth.currentUser?.getIdToken(true);
+          const decodedToken = await auth.currentUser?.getIdTokenResult();
+          setCurrentUser({
+            ...user,
+            firstName: userData?.firstName,
+            lastName: userData?.lastName,
+            photoURL: userData?.photoURL,
+            presentations: userData?.presentations,
+          });
+        }
+      } else {
+        setRerender(true);
+      }
       setLoading(false);
-    }
+    });
+    return unsubscribe;
   }, []);
+
+  // async function getUserData() {
+  //   const userRef = doc(db, "users", "TrxCwQISFwc6ETvPYREqpgWdseg2");
+
+  //   const userSnap = await getDoc(userRef);
+  //   const userData = userSnap.data();
+  //   setCurrentUser({
+  //     ...userData,
+  //     firstName: userData?.firstName,
+  //     lastName: userData?.lastName,
+  //     photoURL: userData?.photoURL,
+  //     presentations: userData?.presentations,
+  //   } as UserData);
+  // }
+
+  // useEffect(() => {
+  //   if (!currentUser) {
+  //     getUserData();
+  //     setRerender(false);
+  //     setLoading(false);
+  //   }
+  // }, []);
 
   const value = {
     currentUser,

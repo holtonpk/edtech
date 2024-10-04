@@ -50,7 +50,7 @@ export const Italicize = () => {
       const active = determineIfActive(activeEdit, "i");
       setIsActive(active);
     } else if (groupSelectedTextBoxes) {
-      let isActiveLocal = true;
+      let isActiveLocal = false;
       groupSelectedTextBoxes.forEach((textBoxId) => {
         isActiveLocal = isActiveLocal && determineIfActive(textBoxId, "i");
       });

@@ -35,11 +35,11 @@ const ToolBar = () => {
   const [isPublic, setIsPublic] = React.useState(false);
 
   return (
-    <div className="w-full px-2 pt-2 h-[68px] relative ">
+    <div className="w-full px-2 pt-2 h-[68px] relative z-30">
       <div className="h-[60px] w-full py-2 flex items-center justify-between px-4 border rounded-md bg-background relative z-[40]">
         <div className="flex gap-1 items-center ">
           <Icons.lightbulb className="w-6 h-6 " />
-          <h1 className="font-bold ">EDTech tool</h1>
+          <h1 className="font-bold poppins-bold">EDTech tool</h1>
         </div>
         <div className="flex items-center  gap-4">
           <Undo />
@@ -52,7 +52,7 @@ const ToolBar = () => {
                   placeholder="give your project a title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-96 overflow-hidden text-ellipsis disableSelector"
+                  className="w-96 overflow-hidden text-ellipsis disableSelector poppins-bold"
                 />
               </TooltipTrigger>
               <TooltipContent>

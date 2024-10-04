@@ -58,7 +58,7 @@ export const Underline = () => {
       const active = determineIfActive(activeEdit, "u");
       setIsActive(active);
     } else if (groupSelectedTextBoxes) {
-      let isActiveLocal = true;
+      let isActiveLocal = false;
       groupSelectedTextBoxes.forEach((textBoxId) => {
         isActiveLocal = isActiveLocal && determineIfActive(textBoxId, "u");
       });

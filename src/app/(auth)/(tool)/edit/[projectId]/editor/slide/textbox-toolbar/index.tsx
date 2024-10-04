@@ -39,8 +39,10 @@ export const TextBoxToolBar = () => {
         {toolMode === "default" && (
           <>
             <div className="flex flex-col">
-              <Label className="font-bold text-lg w-full">Edit</Label>
-              <p className="text-sm text-muted-foreground">
+              <Label className="font-bold poppins-bold text-lg w-full">
+                Edit
+              </Label>
+              <p className="text-sm text-muted-foreground poppins-regular">
                 Make changes to you presentation by selecting a text box or an
                 image
               </p>
@@ -85,7 +87,9 @@ const ToolbarRow = ({
 }) => {
   return (
     <div className="grid grid-cols-[80px_1fr] items-center gap-2 justify-between w-full">
-      <h1 className="text-muted-foreground text-base w-full ">{label}</h1>
+      <h1 className="text-muted-foreground text-base w-full poppins-regular ">
+        {label}
+      </h1>
 
       {children}
     </div>

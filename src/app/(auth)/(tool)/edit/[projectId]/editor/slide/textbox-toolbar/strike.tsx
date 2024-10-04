@@ -60,7 +60,7 @@ export const Strikethrough = () => {
       const active = determineIfActive(activeEdit, "strike");
       setIsActive(active);
     } else if (groupSelectedTextBoxes) {
-      let isActiveLocal = true;
+      let isActiveLocal = false;
       groupSelectedTextBoxes.forEach((textBoxId) => {
         isActiveLocal = isActiveLocal && determineIfActive(textBoxId, "strike");
       });

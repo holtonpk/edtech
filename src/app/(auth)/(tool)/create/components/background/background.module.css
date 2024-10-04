@@ -16,7 +16,7 @@
 }
 
 .main:before {
-  background: radial-gradient(circle, var(--muted) 0, var(--background) 100%);
+  /* background: radial-gradient(circle, var(--muted) 0, var(--background) 100%); */
 
   /* background: radial-gradient(
       circle,
@@ -35,6 +35,8 @@
 .main:after {
   content: "";
   /* background: var(--background-url); */
+  /* background: #f3f6f8; */
+
   z-index: 1;
   position: absolute;
   width: 100%;
@@ -50,43 +52,38 @@
   transform-origin: center;
   position: absolute;
   /* max-width: 800px; */
-  /* background-image: radial-gradient(
-      at 97% 21%,
+  background-image: radial-gradient(
+      at 0% 100%,
       hsl(var(--orange)) 0px,
       hsla(125, 98%, 72%, 0) 50%
     ),
     radial-gradient(
-      at 52% 99%,
+      at 40% 100%,
       hsl(var(--green)) 0px,
       hsla(354, 98%, 61%, 0) 50%
     ),
     radial-gradient(
-      at 10% 29%,
+      at 60% 100%,
       hsl(var(--purple)) 0px,
       hsla(256, 96%, 67%, 0) 50%
     ),
-    radial-gradient(at 97% 96%, hsl(var(--blue)) 0px, hsla(38, 60%, 74%, 0) 50%),
     radial-gradient(
-      at 33% 50%,
-      hsl(var(--green)) 0px,
-      hsla(222, 67%, 73%, 0) 50%
-    ),
-    radial-gradient(
-      at 19% 93%,
+      at 100% 96%,
       hsl(var(--blue)) 0px,
-      hsla(343, 68%, 79%, 0) 50%
-    ); */
+      hsla(38, 60%, 74%, 0) 50%
+    );
 
-  background: #f3f6f8;
+  /* background: #f3f6f8; */
 
   /* background: hsl(var(--primary)); */
   position: absolute;
   content: "";
   transform: rotate(0deg);
-  filter: blur(0px);
+  filter: blur(10px);
   -webkit-filter: blur(0px);
   /* top: 80px; */
-  opacity: 1;
+  opacity: 0.3;
+  /* opacity: 1; */
   /* animation: rotate 120s linear infinite; */
   /* top: -20%; */
 }

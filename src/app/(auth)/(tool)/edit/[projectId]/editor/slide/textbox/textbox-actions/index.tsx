@@ -31,7 +31,7 @@ const TextboxActions = () => {
           <Delete />
           <Rotate />
           <Move />
-          <AiRewriteButton />
+          {/* <AiRewriteButton /> */}
         </ActionMenu>
       )}
     </>

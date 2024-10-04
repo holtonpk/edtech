@@ -7,16 +7,14 @@ import RegisterForm from "@/components/register";
 const MainLayout = ({children}: {children: React.ReactNode}) => {
   const {currentUser} = useAuth()!;
 
-  const router = useRouter();
-
-  // if (!currentUser)
-  //   return (
-  //     <div className=" items-center justify-center w-screen h-screen flex ">
-  //       <div className="w-fit ">
-  //         <RegisterForm />
-  //       </div>
-  //     </div>
-  //   );
+  if (!currentUser)
+    return (
+      <div className=" items-center justify-center w-screen h-screen flex ">
+        <div className="w-fit ">
+          <RegisterForm />
+        </div>
+      </div>
+    );
 
   return <>{children}</>;
 };

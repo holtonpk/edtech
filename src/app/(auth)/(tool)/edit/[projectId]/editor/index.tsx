@@ -12,7 +12,7 @@ const Editor = () => {
   if (!slideData) return null;
 
   return (
-    <div className=" h-[calc(100vh-84px)]  w-[calc(100vw-16px)]  z-[50]  flex flex-col relative mx-auto">
+    <div className=" h-[calc(100vh-84px)]  w-[calc(100vw-16px)]  z-30  flex flex-col relative mx-auto">
       <div
         className={`  w-full h-full  items-center grid gap-2 relative 
         ${mode === "default" ? "default-grid" : "open-menu-grid"}

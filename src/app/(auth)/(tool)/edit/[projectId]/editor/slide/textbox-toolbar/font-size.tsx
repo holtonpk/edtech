@@ -115,7 +115,7 @@ export const FontSize = () => {
                     onBlur={() => updateFontSize(fontSize || 16)}
                     value={displayValue}
                     onChange={(e) => setFontSize(parseInt(e.target.value))}
-                    className="p-2 font-bold dark:bg-[#34323D] hover:bg-muted w-[60px] rounded-md text-center z-20 relative disableSelector disableTextboxListeners"
+                    className="poppins-bold p-2 font-bold dark:bg-[#34323D] hover:bg-muted w-[60px] rounded-md text-center z-20 relative disableSelector disableTextboxListeners"
                     onFocus={() => setOpenMenu(true)}
                     placeholder="--"
                     type="number"
