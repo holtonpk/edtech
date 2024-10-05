@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from "react";
+import React, {useRef, useEffect, use} from "react";
 import {Button} from "@/components/ui/button";
 import {usePresentation} from "@/context/presentation-context";
 import SlideSelector from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide-selector";
@@ -13,57 +13,139 @@ import {TextBoxToolBar} from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/sl
 import Image from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/image";
 import TextBox from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox";
 import {Icons} from "@/components/icons";
-import TextboxActions from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-actions";
 import GroupSelection from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/multi-select";
 
 const Slide = () => {
   const {selectedSlide, setSlideData, mode, activeGroupSelectedTextBoxes} =
     usePresentation()!;
 
+  const [shouldHideToolbar, setShouldHideToolbar] = React.useState(false);
+
+  const calculateSize = () => {
+    console.log("calculating size");
+
+    const slideArea = document.getElementById("slide-area");
+    if (!slideArea) return;
+
+    const slideAreaHeightReal = slideArea.getBoundingClientRect().height;
+    const slideAreaWidthReal = slideArea.getBoundingClientRect().width;
+
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+    let slideAreaHeight;
+    let slideAreaWidth;
+
+    if (shouldHideToolbar || mode === "default") {
+      slideAreaHeight = vh - 84;
+      slideAreaWidth = vw - 402;
+    } else {
+      slideAreaHeight = vh - 84;
+      slideAreaWidth = vw - 80;
+    }
+
+    console.log("slideAreaHeight", slideAreaHeightReal, slideAreaHeight);
+    console.log("slideAreaWidth", slideAreaWidthReal, slideAreaWidth);
+
+    let newHeight = slideAreaHeight - 108;
+    let newWidth = (slideAreaHeight - 108) * (16 / 9);
+
+    if (newWidth > slideAreaWidth) {
+      newWidth = slideAreaWidth;
+      newHeight = slideAreaWidth * (9 / 16);
+    }
+
+    return newWidth;
+  };
+
+  const calculateShouldHideToolbar = () => {
+    const slideWidth = calculateSize();
+    if (!slideWidth) return;
+    const space = window.innerWidth - 80 - 400 - slideWidth;
+
+    if (space < 320) {
+      setShouldHideToolbar(true);
+    } else {
+      setShouldHideToolbar(false);
+    }
+  };
+
+  useEffect(() => {
+    calculateShouldHideToolbar();
+  }, [mode]);
+
+  React.useEffect(() => {
+    window.addEventListener("resize", calculateShouldHideToolbar);
+    return () => {
+      window.removeEventListener("resize", calculateShouldHideToolbar);
+    };
+  }, []);
+
+  console.log("shouldHideToolbar", shouldHideToolbar);
+
   return (
     <div
-      className={`w-full h-full relative justify-center  items-start  gap-2 grid 
-      ${mode === "default" ? "default-slide-grid" : "open-menu-slide-grid"}
-    `}
+      className={`w-full h-full relative justify-between  items-start  gap-2 grid 
+     default-slide-grid-layout
+      ${
+        shouldHideToolbar
+          ? mode === "default"
+            ? "default-slide-grid"
+            : "open-menu-slide-grid"
+          : "default-slide-grid-layout"
+      }  
+      `}
     >
-      <div className="flex flex-col justify-between items-center w-full gap-2  ">
-        {selectedSlide && (
-          <SlideContainer>
-            <>
-              {selectedSlide.textBoxes &&
-                selectedSlide.textBoxes.map((textBox: TextBoxType) => (
-                  <TextBoxProvider
-                    key={selectedSlide.id + textBox.textBoxId}
-                    textBox={textBox}
-                    // textBoxId={textBox.textBoxId}
-                    // slideId={selectedSlide.id}
-                  >
-                    <TextBox />
-                  </TextBoxProvider>
-                ))}
-              {selectedSlide.images &&
-                selectedSlide.images.map((image: SlideImage) => (
-                  <ImageProvider key={image.imageId} image={image}>
-                    <Image />
-                  </ImageProvider>
-                ))}
+      <div
+        id={"slide-area"}
+        className="w-full h-full flex justify-center   overflow-hidden "
+      >
+        <div className="flex flex-col justify-between items-center w-full gap-2   mx-auto ">
+          {selectedSlide && (
+            <SlideContainer shouldHideToolbar={shouldHideToolbar}>
+              <>
+                {selectedSlide.textBoxes &&
+                  selectedSlide.textBoxes.map((textBox: TextBoxType) => (
+                    <TextBoxProvider
+                      key={selectedSlide.id + textBox.textBoxId}
+                      textBox={textBox}
+                      // textBoxId={textBox.textBoxId}
+                      // slideId={selectedSlide.id}
+                    >
+                      <TextBox />
+                    </TextBoxProvider>
+                  ))}
+                {selectedSlide.images &&
+                  selectedSlide.images.map((image: SlideImage) => (
+                    <ImageProvider key={image.imageId} image={image}>
+                      <Image />
+                    </ImageProvider>
+                  ))}
 
-              {activeGroupSelectedTextBoxes &&
-                activeGroupSelectedTextBoxes.length > 1 && <GroupSelection />}
-            </>
-          </SlideContainer>
-        )}
-        <SlideSelector />
+                {activeGroupSelectedTextBoxes &&
+                  activeGroupSelectedTextBoxes.length > 1 && <GroupSelection />}
+              </>
+            </SlideContainer>
+          )}
+          <div className="flex-grow flex items-centers justify-center w-full">
+            <SlideSelector shouldHideToolbar={shouldHideToolbar} />
+          </div>
+        </div>
       </div>
-
-      <TextBoxToolBar />
+      {/* <div className="w-full h-full "></div> */}
+      <TextBoxToolBar shouldHideToolbar={shouldHideToolbar} />
     </div>
   );
 };
 
 export default Slide;
 
-const SlideContainer = ({children}: {children: React.ReactNode}) => {
+const SlideContainer = ({
+  shouldHideToolbar,
+  children,
+}: {
+  shouldHideToolbar: boolean;
+  children: React.ReactNode;
+}) => {
   const textBoxArea = useRef<HTMLDivElement>(null);
 
   const {
@@ -76,7 +158,9 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     groupSelectedTextBoxes,
     setGroupSelectedTextBoxes,
     setActiveGroupSelectedTextBoxes,
-    selectedTextBox,
+    setGroupSelectedImages,
+    groupSelectedImages,
+    setActiveGroupSelectedImages,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -98,6 +182,8 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
           setActiveEdit(undefined);
           setGroupSelectedTextBoxes(undefined);
           setActiveGroupSelectedTextBoxes(undefined);
+          setGroupSelectedImages(undefined);
+          setActiveGroupSelectedImages(undefined);
         }
 
         mouseDownTime = null;
@@ -186,10 +272,11 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     if (!isSelecting) {
       setSelectCoordinates({x: 0, y: 0, width: 0, height: 0});
       setActiveGroupSelectedTextBoxes(groupSelectedTextBoxes);
+      setActiveGroupSelectedImages(groupSelectedImages);
       setTimeout(() => {
         console.log("setting user select to auto");
         document.body.style.userSelect = "auto";
-      }, 5000);
+      }, 50);
 
       // setGroupSelectedTextBoxes(undefined);
     }
@@ -198,7 +285,13 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
 
       document.body.style.userSelect = "none";
     }
-  }, [isSelecting, groupSelectedTextBoxes, setActiveGroupSelectedTextBoxes]);
+  }, [
+    isSelecting,
+    groupSelectedTextBoxes,
+    setActiveGroupSelectedTextBoxes,
+    groupSelectedImages,
+    setActiveGroupSelectedImages,
+  ]);
 
   useEffect(() => {
     if (!isSelecting) return;
@@ -234,10 +327,47 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
         textBoxY + textBoxHeight > selectY;
 
       if (isIntersecting) {
+        // console.log("intersecting...........");
         selectedTextBoxes.push(textBox.textBoxId);
       }
     });
 
+    let selectedImages: string[] = [];
+    selectedSlide?.images?.forEach((image) => {
+      const textBoxElement = document.getElementById(
+        `ui-image-${image.imageId}`
+      );
+      if (!textBoxElement) return;
+
+      const textBoxRect = textBoxElement.getBoundingClientRect();
+      const slideContainer = document.getElementById("slide-container");
+      if (!slideContainer) return;
+
+      const slideContainerRect = slideContainer.getBoundingClientRect();
+      const textBoxX = textBoxRect.left - slideContainerRect.left;
+      const textBoxY = textBoxRect.top - slideContainerRect.top;
+      const textBoxWidth = textBoxRect.width;
+      const textBoxHeight = textBoxRect.height;
+
+      // Calculate the selection rectangle
+      const selectX = selectCoordinates.x;
+      const selectY = selectCoordinates.y;
+      const selectWidth = selectCoordinates.width;
+      const selectHeight = selectCoordinates.height;
+
+      // Check if the text box intersects with the selection area
+      const isIntersecting =
+        textBoxX < selectX + selectWidth &&
+        textBoxX + textBoxWidth > selectX &&
+        textBoxY < selectY + selectHeight &&
+        textBoxY + textBoxHeight > selectY;
+
+      if (isIntersecting) {
+        selectedImages.push(image.imageId);
+      }
+    });
+
+    setGroupSelectedImages(selectedImages);
     setGroupSelectedTextBoxes(selectedTextBoxes);
   }, [
     selectCoordinates,
@@ -273,20 +403,85 @@ const SlideContainer = ({children}: {children: React.ReactNode}) => {
     };
   }, [copyTextBox, cutTextBox, pasteTextBox, groupSelectedTextBoxes]);
 
+  const [height, setHeight] = React.useState(0);
+  const [width, setWidth] = React.useState(0);
+  const [scale, setScale] = React.useState(1);
+
+  const calculateSize = () => {
+    console.log("calculating size");
+
+    const slideArea = document.getElementById("slide-area");
+    if (!slideArea) return;
+
+    const slideAreaHeightReal = slideArea.getBoundingClientRect().height;
+    const slideAreaWidthReal = slideArea.getBoundingClientRect().width;
+
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+    let slideAreaHeight;
+    let slideAreaWidth;
+
+    if (shouldHideToolbar || mode === "default") {
+      slideAreaHeight = vh - 84;
+      slideAreaWidth = vw - 402;
+    } else {
+      slideAreaHeight = vh - 84;
+      slideAreaWidth = vw - 80;
+    }
+
+    console.log("slideAreaHeight", slideAreaHeightReal, slideAreaHeight);
+    console.log("slideAreaWidth", slideAreaWidthReal, slideAreaWidth);
+
+    let newHeight = slideAreaHeight - 108;
+    let newWidth = (slideAreaHeight - 108) * (16 / 9);
+
+    if (newWidth > slideAreaWidth) {
+      newWidth = slideAreaWidth;
+      newHeight = slideAreaWidth * (9 / 16);
+    }
+
+    setHeight(newHeight);
+    setWidth(newWidth);
+    setScale(newWidth / 1000);
+  };
+
+  React.useEffect(() => {
+    window.addEventListener("resize", calculateSize);
+    return () => {
+      window.removeEventListener("resize", calculateSize);
+    };
+  }, []);
+
+  const {mode} = usePresentation()!;
+
+  React.useEffect(() => {
+    calculateSize();
+  }, [mode]);
+
   return (
     <div
-      style={{background: selectedSlide ? selectedSlide.background : "#ffffff"}}
-      className={`w-[1000px] overflow-hidden  aspect-[16/9] p-0 relative text-black flex flex-col border border-foreground/10 rounded-md  z-[50] 
+      style={{
+        background: selectedSlide ? selectedSlide.background : "#ffffff",
+        width: width,
+        height: height,
+      }}
+      className={` overflow-hidden  p-0 items-center justify-center relative text-black flex flex-col border border-foreground/10 rounded-md  z-[50] 
         ${isSelecting ? " cursor-crosshair" : ""}
         `}
     >
-      <div
-        ref={textBoxArea}
-        id="slide-container"
-        className="w-full h-full absolute"
-      />
+      {/* <div className="absolute w-[100%] aspect-[16/9] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "></div> */}
 
-      {children}
+      <div
+        className="w-[1000px]  absolute aspect-[16/9] "
+        style={{transform: `scale(${scale})`}}
+      >
+        <div
+          ref={textBoxArea}
+          id="slide-container"
+          className="w-full h-full absolute "
+        />
+        {children}
+      </div>
 
       {isSelecting && (
         <div

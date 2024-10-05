@@ -80,9 +80,7 @@ const ScaleHandle = ({
           }
           
           `}
-        >
-          {/* <Icons.scale className="h-4 w-4 text-primary/60 group-hover:text-primary" /> */}
-        </div>
+        />
       )}
     </>
   );

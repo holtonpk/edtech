@@ -132,8 +132,6 @@ export const ImageProvider = ({children, image}: Props) => {
     }
   }, [activeEdit]);
 
-  console.log("activeEdit", activeEdit);
-
   const values = {
     imageState,
     size,

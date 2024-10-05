@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, {useEffect} from "react";
 import {usePresentation} from "@/context/presentation-context";
 import SlideSelector from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide-selector";
 import {ActionTabs} from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/action-tabs";
@@ -11,10 +11,30 @@ const Editor = () => {
 
   if (!slideData) return null;
 
+  const updateVWandVH = () => {
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+    document.documentElement.style.setProperty("--dynamic-vw", `${vw}px`);
+    document.documentElement.style.setProperty("--dynamic-vh", `${vh}px`);
+  };
+
+  useEffect(() => {
+    // Set initial values when the component mounts
+    updateVWandVH();
+
+    // Update values on window resize
+    window.addEventListener("resize", updateVWandVH);
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener("resize", updateVWandVH);
+    };
+  }, []);
+
   return (
-    <div className=" h-[calc(100vh-84px)]  w-[calc(100vw-16px)]  z-30  flex flex-col relative mx-auto">
+    <div className="editor-container editorContainer-size  z-30  flex flex-col relative mx-auto">
       <div
-        className={`  w-full h-full  items-center grid gap-2 relative 
+        className={`  h-full  items-center grid gap-2 relative w-full 
         ${mode === "default" ? "default-grid" : "open-menu-grid"}
         `}
       >

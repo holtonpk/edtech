@@ -37,6 +37,8 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
     setActiveEdit,
     setActiveGroupSelectedTextBoxes,
     setGroupSelectedTextBoxes,
+    setGroupSelectedImages,
+    setActiveGroupSelectedImages,
   } = usePresentation()!;
 
   const [selectorScale, setSelectorScale] = React.useState<number | undefined>(
@@ -89,6 +91,8 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
               setActiveEdit(undefined);
               setActiveGroupSelectedTextBoxes(undefined);
               setGroupSelectedTextBoxes(undefined);
+              setGroupSelectedImages(undefined);
+              setActiveGroupSelectedImages(undefined);
             }}
             ref={selectorContainerRef}
             style={{

@@ -86,6 +86,15 @@ interface PresentationContextType {
   setSelectedForAiWrite: React.Dispatch<
     React.SetStateAction<string[] | undefined>
   >;
+  slideDataRef: React.MutableRefObject<SlideData | undefined>;
+  groupSelectedImages: string[] | undefined;
+  setGroupSelectedImages: React.Dispatch<
+    React.SetStateAction<string[] | undefined>
+  >;
+  activeGroupSelectedImages: string[] | undefined;
+  setActiveGroupSelectedImages: React.Dispatch<
+    React.SetStateAction<string[] | undefined>
+  >;
   // functions -----------------------------
   uploadImage: (file: File) => void;
   Generate: () => void;
@@ -452,7 +461,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     setSelectedSlide(updatedSlideData.slides[newIndex]);
   };
 
-  // const slideClipboard = useRef<Slide | undefined>(undefined);
+  const slideClipboard = useRef<string | undefined>(undefined);
 
   async function copySlide(slideId: string) {
     if (!slideData || !slideDataRef.current) return;
@@ -466,7 +475,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
       id: Math.random().toString(),
     };
     if (!copiedSlide) return;
-    await navigator.clipboard.writeText(JSON.stringify(copiedSlide));
+    slideClipboard.current = JSON.stringify(copiedSlide);
+    // await navigator.clipboard.writeText(JSON.stringify(copiedSlide));
   }
 
   // };
@@ -481,7 +491,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
           y: selectedTextBox.position.y + 10,
         },
       };
-      await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
+      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
+      slideClipboard.current = JSON.stringify(copiedTextBox);
     } else if (activeGroupSelectedTextBoxes) {
       const copiedTextBoxes = activeGroupSelectedTextBoxes.flatMap(
         (textBoxId) => {
@@ -504,7 +515,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
           });
         }
       );
-      await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
+      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
+      slideClipboard.current = JSON.stringify(copiedTextBoxes);
     }
   }
 
@@ -521,7 +533,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
           y: selectedTextBox.position.y + 10,
         },
       };
-      await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
+      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
+      slideClipboard.current = JSON.stringify(copiedTextBox);
 
       newSlideData = slideDataRef.current.slides.map((slide) => {
         if (slide.id === selectedSlideRef.current!.id) {
@@ -557,7 +570,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
           });
         }
       );
-      await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
+      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
+      slideClipboard.current = JSON.stringify(copiedTextBoxes);
       newSlideData = slideDataRef.current.slides.map((slide) => {
         if (slide.id === selectedSlideRef.current!.id) {
           return {
@@ -579,8 +593,13 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   }
 
   async function pasteTextBox() {
-    if (!selectedSlideRef.current || !slideDataRef.current) return;
-    const text = await navigator.clipboard.readText();
+    if (
+      !selectedSlideRef.current ||
+      !slideDataRef.current ||
+      !slideClipboard.current
+    )
+      return;
+    const text = slideClipboard.current;
     let parsedData;
 
     try {
@@ -786,6 +805,14 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   const [activeGroupSelectedTextBoxes, setActiveGroupSelectedTextBoxes] =
     useState<string[] | undefined>([]);
 
+  const [groupSelectedImages, setGroupSelectedImages] = useState<
+    string[] | undefined
+  >([]);
+
+  const [activeGroupSelectedImages, setActiveGroupSelectedImages] = useState<
+    string[] | undefined
+  >([]);
+
   const deleteMultiTextBoxes = () => {
     if (!selectedSlide || !slideData) return;
     const newSlideData = slideData.slides.map((slide) => {
@@ -795,6 +822,9 @@ export const PresentationProvider = ({children, projectId}: Props) => {
           textBoxes: slide.textBoxes.filter(
             (textB) => !groupSelectedTextBoxes?.includes(textB.textBoxId)
           ),
+          images: slide.images.filter(
+            (image) => !groupSelectedImages?.includes(image.imageId)
+          ),
         };
       }
       return slide;
@@ -803,6 +833,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     setHistory([{...slideData, slides: newSlideData}, ...history]);
     setActiveGroupSelectedTextBoxes(undefined);
     setGroupSelectedTextBoxes(undefined);
+    setActiveGroupSelectedImages(undefined);
+    setGroupSelectedImages(undefined);
   };
 
   // console.log("groupSelect", groupSelectedTextBoxes);
@@ -846,6 +878,9 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     setActiveGroupSelectedTextBoxes,
     selectedForAiWrite,
     setSelectedForAiWrite,
+    slideDataRef,
+    activeGroupSelectedImages,
+    setActiveGroupSelectedImages,
     // functions -----------------------------
     Generate,
     updateData,
@@ -865,6 +900,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     addImageToSlide,
     updateImageData,
     updateMultipleTextBoxes,
+    groupSelectedImages,
+    setGroupSelectedImages,
   };
 
   return (
@@ -910,170 +947,6 @@ const useDebouncedSave = (
 
   return [slideDataRef.current, updateSlideData] as const;
 };
-
-// const DummyData: SlideData = {
-//   slides: [
-//     {
-//       textBoxes: [
-//         {
-//           textBoxId: "1",
-//           text: '<font size="7">Introduction to the Civil War</font>',
-//           size: {
-//             width: 800,
-//             height: 90,
-//           },
-//           position: {
-//             x: 20,
-//             y: 20,
-//           },
-//         },
-//         {
-//           textBoxId: "2",
-
-//           text: '<font size="5">The American Civil War, fought from 1861 to 1865, was a pivotal conflict between the Northern states (Union) and the Southern states (Confederacy).</font>',
-//           size: {
-//             width: 700,
-//             height: 200,
-//           },
-//           position: {
-//             x: 20,
-//             y: 100,
-//           },
-//         },
-//       ],
-//       background: "#ffffff",
-//       id: "1",
-//     },
-//     {
-//       textBoxes: [
-//         {
-//           textBoxId: "1",
-
-//           text: '<font size="7">Causes of the Civil War</font>',
-//           size: {
-//             width: 900,
-//             height: 90,
-//           },
-//           position: {
-//             x: 20,
-//             y: 20,
-//           },
-//         },
-//         {
-//           textBoxId: "2",
-
-//           text: '<font size="5">Economic Differences: Industrial North vs. Agricultural South. Key debates on slavery and states\' rights influenced the onset of war.</font>',
-//           size: {
-//             width: 900,
-//             height: 200,
-//           },
-//           position: {
-//             x: 20,
-//             y: 100,
-//           },
-//         },
-//       ],
-//       background: "#ffffff",
-//       id: "2",
-//     },
-//     {
-//       textBoxes: [
-//         {
-//           textBoxId: "1",
-
-//           text: '<font size="7">Major Battles and Campaigns</font>',
-//           size: {
-//             width: 900,
-//             height: 90,
-//           },
-//           position: {
-//             x: 20,
-//             y: 20,
-//           },
-//         },
-//         {
-//           textBoxId: "2",
-
-//           text: '<font size="5">Notable among them were the First Battle of Bull Run, Battle of Gettysburg, Siege of Vicksburg, and Sherman\'s March to the Sea.</font>',
-//           size: {
-//             width: 900,
-//             height: 200,
-//           },
-//           position: {
-//             x: 20,
-//             y: 100,
-//           },
-//         },
-//       ],
-//       background: "#ffffff",
-//       id: "3",
-//     },
-//     {
-//       textBoxes: [
-//         {
-//           textBoxId: "1",
-
-//           text: '<font size="7">Key Figures</font>',
-//           size: {
-//             width: 900,
-//             height: 90,
-//           },
-//           position: {
-//             x: 20,
-//             y: 20,
-//           },
-//         },
-//         {
-//           textBoxId: "2",
-
-//           text: '<font size="5">Abraham Lincoln, Jefferson Davis, Ulysses S. Grant, and Robert E. Lee were pivotal leaders during the Civil War.</font>',
-//           size: {
-//             width: 900,
-//             height: 200,
-//           },
-//           position: {
-//             x: 20,
-//             y: 100,
-//           },
-//         },
-//       ],
-//       background: "#ffffff",
-//       id: "4",
-//     },
-//     {
-//       textBoxes: [
-//         {
-//           textBoxId: "1",
-
-//           text: '<font size="7">Impact and Reconstruction</font>',
-//           size: {
-//             width: 900,
-//             height: 90,
-//           },
-//           position: {
-//             x: 20,
-//             y: 20,
-//           },
-//         },
-//         {
-//           textBoxId: "2",
-
-//           text: '<font size="5">The end of the war marked the beginning of Reconstruction, aiming to rebuild the South and integrate former slaves into society.</font>',
-//           size: {
-//             width: 900,
-//             height: 200,
-//           },
-//           position: {
-//             x: 20,
-//             y: 100,
-//           },
-//         },
-//       ],
-//       background: "#ffffff",
-//       id: "5",
-//     },
-//   ],
-// };
 
 const DummyUpload =
   "Markets 	Hot Stocks 	Fear & Greed Index 	            Latest Market News 	            Hot Stocks 	Follow:            In the hours after President Joe Biden’s historic decision to step aside from the 2024 presidential race last month, journalists across three major US newsrooms began receiving emails from an anonymous person claiming to have tantalizing new information about the election.                The individual, who identified themself only as “Robert,” sent a trove of private documents from inside Donald Trump’s campaign operation to journalists at Politico, The New York Times and The Washington Post.                Beginning on July 22, Politico reported, it began receiving emails from an AOL email address that contained internal communications from a senior Trump campaign official and a research dossier the campaign had put together on Trump’s running mate, Ohio Sen. JD Vance. The dossier included what the Trump campaign identified as Vance’s potential vulnerabilities. Politico was also sent portions of a research document about Florida Sen. Marco Rubio, who had been among the contenders to join Trump on the GOP ticket.                Related article      Suspected Iranian hackers breached Roger Stone’s personal email as part of effort to target Trump campaign, sources say                The Times and The Post later reported that they, too, had been sent a similar cache, including a 271-page document on Vance dated Feb. 23 and labeled “privileged & confidential,” that the outlets said was based on publicly available information.                But despite receiving the sensitive campaign files, the three outlets opted to not publish reporting on the trove they’d been handed, even as the the person suggested they still had a variety of additional documents “from [Trump’s] legal and court documents to internal campaign discussions.”                “Politico editors made a judgment, based on the circumstances as our journalists understood them at the time, that the questions surrounding the origins of the documents and how they came to our attention were more newsworthy than the material that was in those documents,” Politico spokesperson Brad Dayspring told CNN in a statement.                Instead, the first public sign of any release of private information came Saturday, when the Trump campaign went public with its announcement that it had been hacked, pointing the finger at Iranian operatives.                “These documents were obtained illegally from foreign sources hostile to the United States, intended to interfere with the 2024 election and sow chaos throughout our Democratic process,” Trump campaign spokesperson Steven Cheung said.                On Monday, CNN reported that the FBI and other investigators were probing the apparent security breach, which sources said involved compromising the personal email account of longtime Republican and Trump operative Roger Stone.                Iran has denied the allegations, and the US government has declined to officially blame Tehran for the hack, a source told CNN, adding that the hackers’ techniques closely resembled those used by Iranian operatives.                But while the hacking incident, which occurred in June, set off a scramble in the Trump campaign, the FBI and Microsoft, the three news organizations that had received the files held off on publishing information from the trove. The decision marked a reversal from the 2016 election, when news outlets breathlessly reported embarrassing and damaging stories about Hillary Clinton’s campaign after Russian hackers stole a cache of emails from the Democratic National Committee, publishing them on the website Wikileaks.                The decision underscored the challenge news organizations face when presented with information potentially obtained by nefarious means and the shifting publishing standards of newsrooms in the wake of the 2016 election, during which Russian disinformation efforts we seen as playing a key role in Trump’s victory. In the run up to the 2020 election, newsrooms were presented with another conundrum when the contents of Hunter Biden’s laptop were shopped to news organizations, with most refusing to publish its contents over fears of a possible Russian disinformation effort.                “As with any information we receive, we take into account the authenticity of the materials, any motives of the source and assess the public interest in making decisions about what, if anything, to publish,” a Washington Post spokesperson told CNN on Tuesday.                A New York Times spokesperson declined to comment, saying that the newspaper doesn’t discuss editorial decisions about ongoing coverage.                Trump on Tuesday downplayed the significance of the hack, calling the materials “boring information.”                “I’ve been briefed, and a lot of people think it was Iran, probably was,” Trump said in an interview with Univision. “I think it’s pretty boring information, and we know pretty much what it is, it’s, it’s not very important information.”                During the 2016 campaign, then-presidential hopeful Trump publicly encouraged the hack and release of embarrassing emails about Clinton, which emerged shortly after a videotape showing Trump bragging about sexually assaulting women was unearthed.                “Russia, if you’re listening, I hope you’re able to find the 30,000 emails that are missing, I think you will probably be rewarded mightily by our press,” Trump said at a July 2016 news conference.                “WikiLeaks, I love WikiLeaks,” he later told rallygoers.                The website, founded in 2006 by Julian Assange to facilitate the anonymous leaking of secrets, had previously published tens of thousands of classified documents relating to the Afghanistan war and military documents from the Iraq War. While Trump embraced the release of hacked files to embarrass his opponent, some believe the press went too far in its eager coverage of WikiLeaks’ releases.                “News organizations should proceed with caution when dealing with hacked documents. As long as they’re verified and newsworthy, then they’re fair game, but motive is an important part of the story, too,” Dan Kennedy, a journalism professor at Northeastern University, told CNN. “In 2016, too many news outlets ran with stories about the Democratic National Committee’s emails without questioning why WikiLeaks, which had ties to the Russian government, had hacked them in the first place.”                Jane Kirtley, a professor of media ethics and law at the University of Minnesota, said that news organizations must always vet documents and “make every effort to ensure they are what they purport to be,” an increasingly difficult task with the rise of sophisticated manipulation tools, including artificial intelligence.                “From an ethical perspective, journalists should ask:  who benefits from this disclosure? The role of the media is to act independently in this situation,” Kirtley told CNN. “Again, the journalists’ loyalty should be to the public, not one political party or candidate.”                Related article      As Trump flails and invites conspiracies, allies plea for him to stay on message                Still, some criticized the decision by news outlets to withhold publication on the files as hypocritical after reporting in 2016 on the DNC emails obtained by Russian hackers, even as it remained unclear if some materials could still be published.                “Seriously the double standard here is incredible. For all the yapping on interviews, it would be great for people making these decisions to be accountable to the public,” Neera Tenden, a domestic policy adviser to President Biden, wrote Tuesday on X. “Do they now admit they were wrong in 2016 or is the rule hacked materials are only used when it hurts Dems? There’s no in between.”                While it remains unclear who “Robert” is, news organizations appear to be showing the lessons learned over the last decade, offering a more cautious approach to hacking and state-run influence operations.                “This episode probably reflects that news organizations aren’t going to snap at any hack that comes in and is marked as ‘exclusive’ or ‘inside dope’ and publish it for the sake of publishing,” Washington Post executive editor Matt Murray told the newspaper. Instead, “all of the news organizations in this case took a deep breath and paused, and thought about who was likely to be leaking the documents, what the motives of the hacker might have been, and whether this was truly newsworthy or not.”    Most stock quote data provided by BATS. US market indices are shown in real time, except for the S&P 500 which is refreshed every two minutes. All times are ET. Factset: FactSet Research Systems Inc. All rights reserved. Chicago Mercantile: Certain market data is the property of Chicago Mercantile Exchange Inc. and its licensors. All rights reserved. Dow Jones: The Dow Jones branded indices are proprietary to and are calculated, distributed and marketed by DJI Opco, a subsidiary of S&P Dow Jones Indices LLC and have been licensed for use to S&P Opco, LLC and CNN. Standard & Poor’s and S&P are registered trademarks of Standard & Poor’s Financial Services LLC and Dow Jones is a registered trademark of Dow Jones Trademark Holdings LLC. All content of the Dow Jones branded indices Copyright S&P Dow Jones Indices LLC and/or its affiliates. Fair value provided by IndexArb.com. Market holidays and trading hours provided by Copp Clark Limited.© 2024 Cable News Network. A Warner Bros. Discovery Company. All Rights Reserved.  CNN Sans ™ & © 2016 Cable News Network.";

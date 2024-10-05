@@ -18,15 +18,10 @@ const GroupSelection = () => {
     cutTextBox,
     groupSelectedTextBoxes,
     deleteMultiTextBoxes,
+    activeGroupSelectedImages,
   } = usePresentation()!;
 
   useEffect(() => {
-    if (
-      !activeGroupSelectedTextBoxes ||
-      activeGroupSelectedTextBoxes.length === 0
-    )
-      return;
-
     console.log("activeGroupSelectedTextBoxes");
     let xMin = Infinity;
     let yMin = Infinity;
@@ -38,29 +33,56 @@ const GroupSelection = () => {
 
     const slideContainerRect = slideContainer.getBoundingClientRect();
 
-    activeGroupSelectedTextBoxes.forEach((textBoxId) => {
-      const textBoxElement = document.getElementById(
-        `ui-text-box-${textBoxId}`
-      );
-      if (!textBoxElement) return;
+    activeGroupSelectedTextBoxes &&
+      activeGroupSelectedTextBoxes.length > 0 &&
+      activeGroupSelectedTextBoxes.forEach((textBoxId) => {
+        const textBoxElement = document.getElementById(
+          `ui-text-box-${textBoxId}`
+        );
+        if (!textBoxElement) return;
 
-      const textBoxRect = textBoxElement.getBoundingClientRect();
+        const textBoxRect = textBoxElement.getBoundingClientRect();
 
-      const textBoxX = textBoxRect.left - slideContainerRect.left;
-      const textBoxY = textBoxRect.top - slideContainerRect.top;
-      const textBoxRight = textBoxRect.right - slideContainerRect.left;
-      const textBoxBottom = textBoxRect.bottom - slideContainerRect.top;
+        const textBoxX = textBoxRect.left - slideContainerRect.left;
+        const textBoxY = textBoxRect.top - slideContainerRect.top;
+        const textBoxRight = textBoxRect.right - slideContainerRect.left;
+        const textBoxBottom = textBoxRect.bottom - slideContainerRect.top;
 
-      // Update boundaries for the box
-      xMin = Math.min(xMin, textBoxX);
-      yMin = Math.min(yMin, textBoxY);
-      xMax = Math.max(xMax, textBoxRight);
-      yMax = Math.max(yMax, textBoxBottom);
-    });
+        // Update boundaries for the box
+        xMin = Math.min(xMin, textBoxX);
+        yMin = Math.min(yMin, textBoxY);
+        xMax = Math.max(xMax, textBoxRight);
+        yMax = Math.max(yMax, textBoxBottom);
+      });
+
+    activeGroupSelectedImages &&
+      activeGroupSelectedImages.length > 0 &&
+      activeGroupSelectedImages.forEach((imageId) => {
+        const imageElement = document.getElementById(`ui-image-${imageId}`);
+        if (!imageElement) return;
+
+        const imageRect = imageElement.getBoundingClientRect();
+
+        const imageX = imageRect.left - slideContainerRect.left;
+        const imageY = imageRect.top - slideContainerRect.top;
+        const imageRight = imageRect.right - slideContainerRect.left;
+        const imageBottom = imageRect.bottom - slideContainerRect.top;
+
+        // Update boundaries for the box
+        xMin = Math.min(xMin, imageX);
+        yMin = Math.min(yMin, imageY);
+        xMax = Math.max(xMax, imageRight);
+        yMax = Math.max(yMax, imageBottom);
+      });
 
     // Calculate width and height based on the farthest text boxes
     const calculatedWidth = xMax - xMin;
     const calculatedHeight = yMax - yMin;
+
+    console.log("calculatedWidth", calculatedWidth);
+    console.log("calculatedHeight", calculatedHeight);
+    console.log("x", xMin);
+    console.log("y", yMin);
 
     setSize({
       width: calculatedWidth,
@@ -70,7 +92,7 @@ const GroupSelection = () => {
       x: xMin,
       y: yMin,
     });
-  }, [activeGroupSelectedTextBoxes]);
+  }, [activeGroupSelectedTextBoxes, activeGroupSelectedImages]);
 
   const resizeHandles = ["e", "w"];
   const scaleHandles = ["se"];
@@ -137,8 +159,8 @@ const GroupSelection = () => {
     setSlideData(updatedSlideData);
   };
 
-  const UpdateTextBoxesPosition = (deltaX: number, deltaY: number) => {
-    if (!selectedSlide || !activeGroupSelectedTextBoxes || !slideData) return;
+  const UpdatePositions = (deltaX: number, deltaY: number) => {
+    if (!selectedSlide || !slideData) return;
 
     const updatedSlideData = {
       ...slideData,
@@ -147,7 +169,10 @@ const GroupSelection = () => {
           return {
             ...slide,
             textBoxes: slide.textBoxes.map((textBox, idx) => {
-              if (!activeGroupSelectedTextBoxes.includes(textBox.textBoxId))
+              if (
+                activeGroupSelectedTextBoxes &&
+                !activeGroupSelectedTextBoxes.includes(textBox.textBoxId)
+              )
                 return textBox;
               else {
                 return {
@@ -155,6 +180,22 @@ const GroupSelection = () => {
                   position: {
                     x: textBox.position.x + deltaX,
                     y: textBox.position.y + deltaY,
+                  },
+                };
+              }
+            }),
+            images: slide.images.map((image, idx) => {
+              if (
+                activeGroupSelectedImages &&
+                !activeGroupSelectedImages.includes(image.imageId)
+              )
+                return image;
+              else {
+                return {
+                  ...image,
+                  position: {
+                    x: image.position.x + deltaX,
+                    y: image.position.y + deltaY,
                   },
                 };
               }
@@ -260,7 +301,7 @@ const GroupSelection = () => {
 
     if (deltaX === 0 && deltaY === 0) return;
 
-    UpdateTextBoxesPosition(deltaX, deltaY);
+    UpdatePositions(deltaX, deltaY);
     setPosition({x: newX, y: newY});
   };
 
@@ -394,7 +435,7 @@ const GroupSelection = () => {
         </Draggable>
 
         <div
-          className="absolute nodrag "
+          className="absolute nodrag z-40"
           style={{
             width: size.width,
             height: size.height,
@@ -407,21 +448,22 @@ const GroupSelection = () => {
             className={`absolute border-2 border-primary border-dashed top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px]`}
           />
 
-          {resizeHandles.map((handleAxis) => (
-            <ResizableHandle
-              key={handleAxis}
-              handleAxis={handleAxis}
-              innerRef={handleRef}
-              hidden={
-                activeDrag ||
-                isRotating ||
-                (activeTransform && activeResizeHandle !== handleAxis)
-              }
-              onResize={handleResize}
-              activeHandle={activeResizeHandle}
-              setActiveHandle={setActiveResizeHandle}
-            />
-          ))}
+          {!activeGroupSelectedImages &&
+            resizeHandles.map((handleAxis) => (
+              <ResizableHandle
+                key={handleAxis}
+                handleAxis={handleAxis}
+                innerRef={handleRef}
+                hidden={
+                  activeDrag ||
+                  isRotating ||
+                  (activeTransform && activeResizeHandle !== handleAxis)
+                }
+                onResize={handleResize}
+                activeHandle={activeResizeHandle}
+                setActiveHandle={setActiveResizeHandle}
+              />
+            ))}
         </div>
       </div>
       {activeDrag && isCenteredX && (

@@ -6,7 +6,10 @@ const Delete = () => {
   const {deleteImage} = useImage()!;
 
   return (
-    <ActionButton className="bg-red-500 nodrag" onClick={deleteImage}>
+    <ActionButton
+      className="nodrag hover:bg-theme-red/30  p-2 text-theme-red "
+      onClick={deleteImage}
+    >
       <Icons.trash className="h-4 w-4" />
     </ActionButton>
   );

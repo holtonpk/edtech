@@ -19,60 +19,61 @@ import {TextColor2} from "./text-color";
 import {usePresentation} from "@/context/presentation-context";
 import {ColorMenu} from "./color-menu";
 
-export const TextBoxToolBar = () => {
-  const {selectedTextBox, mode} = usePresentation()!;
-
-  type ToolMode = "color" | "default";
-
-  const toolMode: ToolMode = "default";
-  const colorCommand = (color: string) => {
-    return color;
-  };
+export const TextBoxToolBar = ({
+  shouldHideToolbar,
+}: {
+  shouldHideToolbar: boolean;
+}) => {
+  const {mode} = usePresentation()!;
 
   return (
-    <div className="h-full  relative z-[50]">
+    <div className="h-full w-[300px]  relative z-[50]">
       <div
-        className={`flex-grow h-full  gap-4 flex flex-col items-center p-4  bg-background blurBack  border rounded-md relative  z-[40]
-          ${mode === "default" ? "opacity-1" : "fade-out-500"}
+        className={`flex-grow h-full  gap-4 flex flex-col items-center p-4  bg-background   border rounded-md relative  z-[40]
+           ${
+             shouldHideToolbar
+               ? mode === "default"
+                 ? "opacity-1"
+                 : "fade-out-500"
+               : "opacity-1"
+           } 
           `}
       >
-        {toolMode === "default" && (
-          <>
-            <div className="flex flex-col">
-              <Label className="font-bold poppins-bold text-lg w-full">
-                Edit
-              </Label>
-              <p className="text-sm text-muted-foreground poppins-regular">
-                Make changes to you presentation by selecting a text box or an
-                image
-              </p>
-            </div>
-            <ToolbarRow label="Font">
-              <FontSelector />
-            </ToolbarRow>
-            <ToolbarRow label="Size">
-              <FontSize />
-            </ToolbarRow>
-            <ToolbarRow label="Text Color">
-              <TextColor2 />
-            </ToolbarRow>
-            <div className="grid grid-cols-4 w-full gap-2">
-              <Bold />
-              <Italicize />
-              <Underline />
-              <Strikethrough />
-            </div>
-            <ToolbarRow label="Align">
-              <TextAlign2 />
-            </ToolbarRow>
-            <ToolbarRow label="List">
-              <List2 />
-            </ToolbarRow>
-            <ToolbarRow label="Background">
-              <BackgroundColor />
-            </ToolbarRow>
-          </>
-        )}
+        <>
+          <div className="flex flex-col">
+            <Label className="font-bold poppins-bold text-lg w-full">
+              Edit
+            </Label>
+            <p className="text-sm text-muted-foreground poppins-regular">
+              Make changes to you presentation by selecting a text box or an
+              image
+            </p>
+          </div>
+          <ToolbarRow label="Font">
+            <FontSelector />
+          </ToolbarRow>
+          <ToolbarRow label="Size">
+            <FontSize />
+          </ToolbarRow>
+          <ToolbarRow label="Text Color">
+            <TextColor2 />
+          </ToolbarRow>
+          <div className="grid grid-cols-4 w-full gap-2">
+            <Bold />
+            <Italicize />
+            <Underline />
+            <Strikethrough />
+          </div>
+          <ToolbarRow label="Align">
+            <TextAlign2 />
+          </ToolbarRow>
+          <ToolbarRow label="List">
+            <List2 />
+          </ToolbarRow>
+          <ToolbarRow label="Background">
+            <BackgroundColor />
+          </ToolbarRow>
+        </>
       </div>
     </div>
   );

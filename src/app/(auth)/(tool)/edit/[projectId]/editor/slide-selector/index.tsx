@@ -5,7 +5,7 @@ import {TextBoxType, Slide} from "@/config/data";
 import {SlideMenu} from "./slide-menu";
 import {set} from "zod";
 
-const SlideSelector = () => {
+const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
   const {
     slideData,
     selectedSlide,
@@ -96,8 +96,60 @@ const SlideSelector = () => {
     });
   }, []);
 
+  const [width, setWidth] = React.useState(0);
+
+  const calculateSize = () => {
+    const slideArea = document.getElementById("slide-area");
+    if (!slideArea) return;
+
+    const slideAreaHeightReal = slideArea.getBoundingClientRect().height;
+    const slideAreaWidthReal = slideArea.getBoundingClientRect().width;
+
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+    let slideAreaHeight;
+    let slideAreaWidth;
+
+    if (shouldHideToolbar || mode === "default") {
+      slideAreaHeight = vh - 84;
+      slideAreaWidth = vw - 402;
+    } else {
+      slideAreaHeight = vh - 84;
+      slideAreaWidth = vw - 80;
+    }
+
+    console.log("slideAreaHeight", slideAreaHeightReal, slideAreaHeight);
+    console.log("slideAreaWidth", slideAreaWidthReal, slideAreaWidth);
+
+    let newHeight = slideAreaHeight - 108;
+    let newWidth = (slideAreaHeight - 108) * (16 / 9);
+
+    if (newWidth > slideAreaWidth) {
+      newWidth = slideAreaWidth;
+      newHeight = slideAreaWidth * (9 / 16);
+    }
+
+    setWidth(newWidth);
+  };
+
+  React.useEffect(() => {
+    window.addEventListener("resize", calculateSize);
+    return () => {
+      window.removeEventListener("resize", calculateSize);
+    };
+  }, []);
+
+  const {mode} = usePresentation()!;
+
+  React.useEffect(() => {
+    calculateSize();
+  }, [mode]);
+
   return (
-    <div className="w-[1000px]  flex-grow items-center justify-start  overflow-hidden flex flex-row relative bg-background  p-2 border shadow-md rounded-md">
+    <div
+      className=" h-[100px]  items-center justify-start  overflow-hidden flex flex-row relative bg-background  p-2 border shadow-md rounded-md"
+      style={{width: width}}
+    >
       <div
         id="slide-container"
         ref={slideContainer}

@@ -52,12 +52,12 @@ const HoverContextProvider = ({children}: {children: React.ReactNode}) => {
 export const ActionTabs = () => {
   return (
     <HoverContextProvider>
-      <RightPanel />
+      <ActionPanel />
     </HoverContextProvider>
   );
 };
 
-const RightPanel = () => {
+const ActionPanel = () => {
   const {mode, setMode} = usePresentation()!;
 
   const TabButtons = [
@@ -408,8 +408,6 @@ ${mode === tab.value && "bg-muted-foreground/5"}
   );
 };
 
-export default RightPanel;
-
 const HoverContainer = ({
   children,
   id,
@@ -473,7 +471,7 @@ const TabContent = ({
       )}
       <div className="w-full overflow-scroll relative h-full z-10">
         <div
-          style={{width: isHovering ? "100%" : "calc(100vw - 110px - 1000px)"}}
+          style={{width: isHovering ? "100%" : "100%"}}
           className="p-4 absolute  "
         >
           <div className="flex flex-col">
@@ -574,12 +572,12 @@ const Images = () => {
 
 const Text = () => {
   const {
-    slideData,
     selectedSlide,
     setSlideData,
     setActiveEdit,
     selectedTextBox,
     textColor,
+    slideDataRef,
   } = usePresentation()!;
 
   const createNewTextBox = (
@@ -587,11 +585,11 @@ const Text = () => {
     text: string,
     position: Position
   ) => {
-    if (slideData && selectedSlide) {
+    if (slideDataRef.current && selectedSlide) {
       const textBoxId = Math.random().toString();
       const updatedSlideData = {
-        ...slideData,
-        slides: slideData.slides.map((slide) => {
+        ...slideDataRef.current,
+        slides: slideDataRef.current.slides.map((slide) => {
           if (slide.id === selectedSlide.id) {
             return {
               ...slide,
@@ -614,7 +612,34 @@ const Text = () => {
         }),
       };
       setSlideData(updatedSlideData);
-      setActiveEdit(textBoxId);
+      setTimeout(() => {
+        setActiveEdit(textBoxId);
+      }, 5);
+    }
+  };
+
+  const calculateNewBoxPosition = () => {
+    if (selectedTextBox) {
+      const {x, y} = selectedTextBox.position;
+      const textboxHeight =
+        document
+          .getElementById(`ui-text-box-${selectedTextBox.textBoxId}`)
+          ?.getBoundingClientRect().height || 40;
+
+      let yPos = y + 10 + textboxHeight;
+
+      if (y + 10 + textboxHeight > 560) {
+        yPos = y - 40;
+      }
+
+      if (yPos < 0) {
+        yPos = 230;
+      }
+
+      const newBoxPosition = {x: x, y: yPos};
+      return newBoxPosition;
+    } else {
+      return {x: 200, y: 230};
     }
   };
 
@@ -629,7 +654,7 @@ const Text = () => {
               createNewTextBox(
                 24,
                 `<p><font color="${textColor}">Add text here</font></p>`,
-                {x: 20, y: 100}
+                calculateNewBoxPosition()
               );
             }}
           >

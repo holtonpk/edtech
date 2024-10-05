@@ -56,8 +56,6 @@ export const TextAlign2 = () => {
       ?.childNodes[0] as HTMLElement | null;
 
     const textAlign = element?.style.textAlign;
-
-    console.log("textAlign", textAlign);
     if (textAlign === "left") {
       return 0;
     }

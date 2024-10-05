@@ -223,7 +223,7 @@ const TextBox = () => {
     <>
       {mode !== "aiRewrite" ? (
         <>
-          <div className={`${isSelected ? "z-20" : ""}`}>
+          <div className={` relative ${isSelected ? "z-20" : "z-10"}`}>
             <Draggable
               cancel=".nodrag"
               // disabled={mode === "aiRewrite"}
@@ -238,7 +238,7 @@ const TextBox = () => {
             >
               <div
                 id={`ui-text-box-${textBox.textBoxId}`}
-                className=" absolute z-10 origin-center pointer-events-none group select-none"
+                className=" absolute z-10 origin-center pointer-events-none group select-none "
                 style={{
                   width: size.width,
                   height: "fit-content",

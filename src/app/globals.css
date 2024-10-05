@@ -115,6 +115,8 @@
 @layer base {
   @layer base {
     :root {
+      --dynamic-vw: 100vw;
+      --dynamic-vh: 100vh;
       --background: 0 0% 100%;
       --foreground: 224 71.4% 4.1%;
       --card: 220 33% 98%;
@@ -445,16 +447,22 @@ input[type="number"] {
   resize: none;
 }
 
+.editorContainer-size {
+  height: calc(var(--dynamic-vh) - 84px);
+  width: calc(var(--dynamic-vw) - 16px);
+}
+
 .default-grid {
+  width: var(--dynamic-vw);
   animation: changeGridSize 0.25s forwards;
 }
 
 @keyframes changeGridSize {
   from {
-    grid-template-columns: calc(100vw - 1000px - 16px) 1000px;
+    grid-template-columns: calc(var(--dynamic-vw) - 1000px - 16px) 1000px;
   }
   to {
-    grid-template-columns: 70px calc(100vw - 70px - 16px - 8px);
+    grid-template-columns: 70px calc(var(--dynamic-vw) - 70px - 16px - 8px);
   }
 }
 
@@ -464,10 +472,12 @@ input[type="number"] {
 
 @keyframes openMenuGrid {
   from {
-    grid-template-columns: 70px calc(100vw - 70px - 16px - 8px);
+    grid-template-columns: 70px calc(var(--dynamic-vw) - 70px - 16px - 8px);
+    /* grid-template-columns: 70px 1fr; */
   }
   to {
-    grid-template-columns: calc(100vw - 1000px - 16px) 1000px;
+    /* grid-template-columns: calc(var(--dynamic-vw) - 1000px - 16px) 1000px; */
+    grid-template-columns: 400px 1fr;
   }
 }
 
@@ -518,7 +528,7 @@ input[type="number"] {
 }
 
 .fade-out-500 {
-  animation: fadeOut 0.25s cubic-bezier(0.445, 0.05, 0.55, 0.95) forwards;
+  animation: fadeOut 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95) forwards;
 }
 
 @keyframes fadeOut {
@@ -531,7 +541,16 @@ input[type="number"] {
 }
 
 .default-slide-grid {
+  /* max-width: 1410px; */
+  /* justify-content: space-between; */
   animation: default-slide-grid-animate 0.25s forwards;
+}
+
+.default-slide-grid-layout {
+  /* max-width: 1410px; */
+  /* justify-content: space-between; */
+  /* animation: default-slide-grid-animate 0.25s forwards; */
+  grid-template-columns: 1fr 300px;
 }
 
 @keyframes default-slide-grid-animate {
@@ -539,7 +558,7 @@ input[type="number"] {
     grid-template-columns: 1fr 0px;
   }
   to {
-    grid-template-columns: 1000px 1fr;
+    grid-template-columns: 1fr 300px;
   }
 }
 
@@ -759,4 +778,12 @@ input[type="number"] {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.selectDisable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
 }

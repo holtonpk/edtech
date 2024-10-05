@@ -34,6 +34,7 @@ const Image = () => {
     copyTextBox,
     cutTextBox,
     mode,
+    groupSelectedImages,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -143,6 +144,10 @@ const Image = () => {
 
   const textBoxPlaceholderRef = useRef<HTMLDivElement>(null);
 
+  const isGroupSelected = groupSelectedImages
+    ? groupSelectedImages?.includes(image.imageId)
+    : false;
+
   useEffect(() => {
     if (!activeTransform) {
       updateImageData(
@@ -157,11 +162,9 @@ const Image = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTransform]);
 
-  console.log("imageState", imageState);
-
   return (
     <>
-      <div className={` ${isSelected ? "z-20" : ""}`}>
+      <div className={`relative ${isSelected ? "z-10" : "z-0"}`}>
         <Draggable
           cancel=".nodrag"
           disabled={mode === "aiRewrite"}
@@ -174,7 +177,7 @@ const Image = () => {
         >
           <div
             id={`ui-image-${imageState.imageId}`}
-            className=" absolute z-10 origin-center pointer-events-none group "
+            className=" absolute z-30 origin-center pointer-events-none group "
             style={{
               width: size.width,
               height: "fit-content",
@@ -193,12 +196,12 @@ const Image = () => {
                   setIsSelected(true);
                 }
               }}
-              className="pointer-events-auto p-2"
+              className="pointer-events-auto p-2 "
             >
               <img
                 src={image.image.path}
                 alt="slide"
-                className="pointer-events-none"
+                className="pointer-events-none "
                 style={{
                   // position: "absolute",
                   top: image.position.y,
@@ -210,6 +213,12 @@ const Image = () => {
               />
             </div>
             <ImageActions />
+            {!isGroupSelected && (
+              <div
+                id="drag-area"
+                className="w-full h-full absolute top-0  z-20"
+              ></div>
+            )}
             {!isSelected && !activeDragGlobal && mode !== "aiRewrite" && (
               <div
                 className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block`}
@@ -223,8 +232,8 @@ const Image = () => {
           </div>
         </Draggable>
 
-        {isSelected && (
-          <ResizableImage>
+        {(isSelected || isGroupSelected) && (
+          <ResizableImage disabled={isGroupSelected}>
             <img
               onClick={() => {
                 setActiveEdit(imageState.imageId);
@@ -233,7 +242,7 @@ const Image = () => {
               ref={imageRef}
               src={image.image.path}
               alt={image.image.title}
-              className="pointer-events-none h-full w-full "
+              className="selectDisable "
             />
           </ResizableImage>
         )}
