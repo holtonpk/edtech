@@ -50,6 +50,9 @@ function Present() {
     };
   }, [activeSlideIndex, slideData]);
 
+  const backgroundImagePath =
+    slideData?.slides?.[activeSlideIndex]?.backgroundImage?.path;
+
   return (
     <div>
       <Button
@@ -78,17 +81,14 @@ function Present() {
               className={`relative w-[1000px] z-20  overflow-hidden aspect-[16/9] p-6 flex items-center justify-center  text-black
                 `}
             >
-              {slideData &&
-                slideData?.slides?.[activeSlideIndex]?.backgroundImage?.path &&
-                slideData.slides[activeSlideIndex].backgroundImage.path !==
-                  "" && (
-                  <div
-                    className="absolute w-full h-full bg-cover bg-center z-10"
-                    style={{
-                      backgroundImage: `url(${slideData.slides[activeSlideIndex].backgroundImage.path})`,
-                    }}
-                  />
-                )}
+              {backgroundImagePath && backgroundImagePath !== "undefined" && (
+                <div
+                  className="absolute w-full h-full bg-cover bg-center z-10"
+                  style={{
+                    backgroundImage: `url(${backgroundImagePath})`,
+                  }}
+                />
+              )}
               {/* <div className="w-[1000px] b-b aspect-[16/9] absolute "> */}
               {slideData &&
                 slideData.slides &&
