@@ -47,7 +47,7 @@ const Editor = () => {
           ) : (
             <>
               <button
-                onClick={createNewSlide}
+                onClick={() => createNewSlide()}
                 className="relative h-full flex flex-col justify-center items-center w-full border-4 rounded-md border-dashed hover:border-primary  hover:text-primary transition-colors duration-200 col-span-3"
               >
                 <p className="text-2xl font-bold text-primary">
