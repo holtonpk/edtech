@@ -55,10 +55,10 @@ export const Highlight = () => {
       </PopoverTrigger>
       <PopoverContent className="w-fit h-fit grid ">
         <h1 className="font-bold text-lg">Highlight Color</h1>
-        <ColorMenu
+        {/* <ColorMenu
           colorCommand={highlightColorCommand}
           currentColor={selectedColor}
-        />
+        /> */}
         <Button
           variant={"outline"}
           onClick={() => highlightColorCommand("transparent")}
