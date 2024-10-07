@@ -21,9 +21,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {ColorMenu} from "./color-menu";
+import {DocumentColor} from "@/config/data";
 
 export const BackgroundColor = () => {
-  const {slideData, selectedSlide, setSlideData, addRecentColor} =
+  const {slideData, selectedSlide, setSlideData, addRecentColor, slideDataRef} =
     usePresentation()!;
 
   const [selectedColor, setSelectedColor] = React.useState<string>(
@@ -64,6 +65,32 @@ export const BackgroundColor = () => {
   };
   const [openMenu, setOpenMenu] = React.useState(false);
 
+  const documentColors = slideData?.slides.map((slide) => ({
+    usageId: slide.id,
+    color: slide.background,
+  }));
+
+  const changeMultiBackgroundColors = (color: string) => {
+    if (slideDataRef.current) {
+      const updatedSlideData = {
+        ...slideDataRef.current,
+        slides: slideDataRef.current.slides.map((slide) => {
+          if (color === slide.background)
+            return {
+              ...slide,
+              background: selectedColor,
+            };
+          else {
+            return slide;
+          }
+        }),
+      };
+      setSlideData(updatedSlideData);
+    }
+  };
+
+  console.log("documentColors", documentColors);
+
   return (
     <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background border rounded-md  items-center relative gap-2 overflow-hidden">
       <Popover open={openMenu} onOpenChange={setOpenMenu}>
@@ -71,7 +98,11 @@ export const BackgroundColor = () => {
           <TooltipProvider>
             <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
-                <button className="w-full h-10 flex justify-center items-center bg-background hover:bg-muted px-2 py-1">
+                <button
+                  className={`w-full h-10 flex justify-center items-center bg-background  px-2 py-1
+                  ${openMenu ? "bg-muted" : "hover:bg-muted"}
+                  `}
+                >
                   <div
                     style={{background: selectedColor}}
                     className="bg-background h-6 aspect-square rounded-full border overflow-hidden flex justify-center items-center mx-auto"
@@ -85,12 +116,15 @@ export const BackgroundColor = () => {
           </TooltipProvider>
         </PopoverTrigger>
         <PopoverContent
+          align="end"
           side="left"
-          className="w-[250px] bg-background/70 blurBack p-2"
+          className="w-[250px] bg-background/90 blurBack p-0"
         >
           <ColorMenu
             colorCommand={setBackgroundCommand}
             currentColor={selectedColor}
+            documentColors={documentColors as DocumentColor[]}
+            changeAllCommand={changeMultiBackgroundColors}
           />
           <button
             onClick={() => setOpenMenu(false)}

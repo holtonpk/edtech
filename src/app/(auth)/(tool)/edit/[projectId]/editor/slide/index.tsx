@@ -80,8 +80,6 @@ const Slide = () => {
     };
   }, []);
 
-  console.log("shouldHideToolbar", shouldHideToolbar);
-
   return (
     <div
       className={`w-full h-full relative justify-between  items-start  gap-2 grid 
@@ -461,7 +459,12 @@ const SlideContainer = ({
   return (
     <div
       style={{
-        background: selectedSlide ? selectedSlide.background : "#ffffff",
+        background:
+          selectedSlide &&
+          (!selectedSlide.backgroundImage ||
+            selectedSlide.backgroundImage.path === "undefined")
+            ? selectedSlide.background
+            : "#ffffff",
         width: width,
         height: height,
       }}
@@ -469,6 +472,17 @@ const SlideContainer = ({
         ${isSelecting ? " cursor-crosshair" : ""}
         `}
     >
+      {selectedSlide &&
+        selectedSlide.backgroundImage &&
+        selectedSlide.backgroundImage.path !== "undefined" && (
+          <div
+            className="absolute w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${selectedSlide.backgroundImage.path})`,
+            }}
+          />
+        )}
+
       {/* <div className="absolute w-[100%] aspect-[16/9] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "></div> */}
 
       <div

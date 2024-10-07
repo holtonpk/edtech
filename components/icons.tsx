@@ -75,6 +75,8 @@ import {
   ListRestart,
   BookOpenText,
   Wand2,
+  CopyPlus,
+  SquarePlus,
 } from "lucide-react";
 
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
@@ -104,6 +106,8 @@ import TitleIcon from "@mui/icons-material/Title";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 export const Icons = {
+  addPage: SquarePlus,
+  duplicate: CopyPlus,
   wand2: Wand2,
   reWrite: ListRestart,
   addMore: BookOpenText,

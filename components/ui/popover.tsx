@@ -14,7 +14,7 @@ const PopoverContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(
   (
-    {className, align = "start", side = "right", sideOffset = 4, ...props},
+    {className, align = "center", side = "right", sideOffset = 4, ...props},
     ref
   ) => (
     <PopoverPrimitive.Portal>

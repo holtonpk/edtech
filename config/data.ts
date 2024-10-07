@@ -58,6 +58,8 @@ export interface Slide {
   background: string;
   id: string;
   images: SlideImage[];
+  title?: string;
+  backgroundImage?: Image;
 }
 
 export interface SlideImage {
@@ -142,4 +144,7 @@ export interface PresentationFormat {
   numOfSlides: number;
 }
 
-type layout = {};
+export type DocumentColor = {
+  color: string;
+  usageId: string;
+};

@@ -1,5 +1,6 @@
 "use client";
 import React, {useEffect} from "react";
+import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
 import {
   Select,
@@ -38,6 +39,7 @@ export const FontSelector = () => {
     updateData,
     groupSelectedTextBoxes,
     updateMultipleTextBoxes,
+    slideData,
   } = usePresentation()!;
 
   const [fonts, setFonts] = React.useState<string[]>(googleFonts.fonts);
@@ -80,6 +82,7 @@ export const FontSelector = () => {
       const nodeFont = fontNode?.getAttribute("face");
 
       setSelectedFont(nodeFont ? nodeFont : fonts[0]);
+      setOriginalFont(nodeFont ? nodeFont : fonts[0]);
     } else if (groupSelectedTextBoxes) {
       const selectedFonts = new Set<string>();
 
@@ -113,6 +116,40 @@ export const FontSelector = () => {
 
   const [value, setValue] = React.useState("");
 
+  type DocumentFont = {
+    font: string;
+    usageId: string;
+  };
+
+  const [originalFont, setOriginalFont] = React.useState<string>("");
+
+  const [clickedFont, setClickedFont] = React.useState<string | undefined>();
+
+  const documentFonts =
+    slideData?.slides.flatMap((slide) => {
+      return slide.textBoxes.flatMap((textBox) => {
+        const element = document.getElementById(
+          `mini-slide-textbox-${textBox.textBoxId}`
+        );
+        if (!element) return []; // Return an empty array to skip this iteration
+
+        const paragraph = element.querySelector("p");
+        if (!paragraph) return []; // Skip this if no paragraph is found
+
+        const fontTag = paragraph.querySelector("font");
+        const font = fontTag?.getAttribute("face") || "Default";
+
+        return [{font, usageId: textBox.textBoxId}]; // Return an array with the object
+      });
+    }) ?? []; // Ensure `documentFonts` is an empty array if `slideData` is undefined
+
+  console.log("documentFonts:", documentFonts);
+
+  const suggestChangeAll =
+    clickedFont &&
+    documentFonts.some((font) => font.font === originalFont) &&
+    clickedFont !== originalFont;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <TooltipProvider>
@@ -135,7 +172,7 @@ export const FontSelector = () => {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent align="start" className="w-[300px] p-0">
         <Command value={selectedFont} onValueChange={setSelectedFont}>
           <CommandInput
             placeholder="Search for a font"
@@ -149,10 +186,12 @@ export const FontSelector = () => {
                   style={{fontFamily: font}}
                   key={font}
                   value={font}
+                  className="text-lg"
                   onSelect={(currentValue) => {
+                    setClickedFont(currentValue);
                     onSelectChange(currentValue);
                     setValue(currentValue === value ? "" : currentValue);
-                    // setOpen(false);
+                    setOpen(true);
                   }}
                 >
                   <Check
@@ -167,6 +206,39 @@ export const FontSelector = () => {
             </CommandGroup>
           </CommandList>
         </Command>
+
+        {suggestChangeAll && (
+          <div className="w-full  h-[60px]  overflow-hidden absolute bottom-0 left-0 bg-background ">
+            <div className="slide-top absolute top-0 border-t  bg-background rounded-b-md h-fit w-full flex items-center  py-2 px-2 justify-between">
+              <Button
+              // onClick={() => {
+              //   changeAllCommand(originalColor);
+              //   setOriginalColor(color);
+              // }}
+              >
+                Change all
+              </Button>
+              <div className="flex items-center gap-0 w-fit max-w-full mx-auto overflow-hidden">
+                <div
+                  style={{fontFamily: originalFont}}
+                  className="text-[10px] whitespace-nowrap text-ellipsis leading-[12px]"
+                  // style={{background: originalColor}}
+                >
+                  {originalFont}
+                </div>
+                <Icons.chevronRight className="h-3 w-3" />
+                <div
+                  className="text-[10px] whitespace-nowrap text-ellipsis leading-[12px]"
+                  style={{fontFamily: selectedFont}}
+
+                  // style={{background: color}}
+                >
+                  {selectedFont}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

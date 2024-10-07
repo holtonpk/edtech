@@ -14,10 +14,11 @@ import {Bold} from "./bold";
 import {Italicize} from "./italicize";
 import {BackgroundColor} from "./background-color";
 import {FontSize} from "./font-size";
-import {TextColor2} from "./text-color";
+import {TextColor} from "./text-color";
 
 import {usePresentation} from "@/context/presentation-context";
 import {ColorMenu} from "./color-menu";
+import {BackgroundImage} from "./background-image";
 
 export const TextBoxToolBar = ({
   shouldHideToolbar,
@@ -56,7 +57,7 @@ export const TextBoxToolBar = ({
             <FontSize />
           </ToolbarRow>
           <ToolbarRow label="Text Color">
-            <TextColor2 />
+            <TextColor />
           </ToolbarRow>
           <div className="grid grid-cols-4 w-full gap-2">
             <Bold />
@@ -73,6 +74,9 @@ export const TextBoxToolBar = ({
           <ToolbarRow label="Background">
             <BackgroundColor />
           </ToolbarRow>
+          <ToolbarRow label="Bg Image">
+            <BackgroundImage />
+          </ToolbarRow>
         </>
       </div>
     </div>
@@ -88,7 +92,7 @@ const ToolbarRow = ({
 }) => {
   return (
     <div className="grid grid-cols-[80px_1fr] items-center gap-2 justify-between w-full">
-      <h1 className="text-muted-foreground text-base w-full poppins-regular ">
+      <h1 className="text-muted-foreground text-sm w-full poppins-regular ">
         {label}
       </h1>
 

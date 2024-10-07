@@ -78,6 +78,16 @@ function Present() {
               className={`relative w-[1000px] z-20  overflow-hidden aspect-[16/9] p-6 flex items-center justify-center  text-black
                 `}
             >
+              {slideData.slides[activeSlideIndex].backgroundImage &&
+                slideData.slides[activeSlideIndex].backgroundImage.path !==
+                  "undefined" && (
+                  <div
+                    className="absolute w-full h-full bg-cover bg-center z-10"
+                    style={{
+                      backgroundImage: `url(${slideData.slides[activeSlideIndex].backgroundImage.path})`,
+                    }}
+                  />
+                )}
               {/* <div className="w-[1000px] b-b aspect-[16/9] absolute "> */}
               {slideData &&
                 slideData.slides &&
@@ -86,7 +96,7 @@ function Present() {
                   (textbox: TextBoxType, index: number) => (
                     <div
                       key={index}
-                      className=" p-2 absolute pointer-events-none"
+                      className=" p-2 absolute pointer-events-none z-20"
                       style={{
                         top: textbox.position.y,
                         left: textbox.position.x,
@@ -112,7 +122,7 @@ function Present() {
                         width: image.size.width,
                         transform: `rotate(${image.rotation}deg)`,
                       }}
-                      className="p-2 h-fit w-fit absolute origin-center pointer-events-none"
+                      className="p-2 h-fit w-fit absolute origin-center pointer-events-none z-20"
                     >
                       <img
                         src={image.image.path}

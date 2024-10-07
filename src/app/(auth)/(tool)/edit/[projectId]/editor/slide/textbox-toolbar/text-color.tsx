@@ -4,15 +4,7 @@ import {Button} from "@/components/ui/button";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
 import {Input} from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import googleFonts from "@/public/fonts/fonts.json";
 import {
   Tooltip,
   TooltipContent,
@@ -23,69 +15,9 @@ import {ColorMenu} from "./color-menu";
 import {applyCommand} from "@/lib/utils";
 import {defaultShortColors} from "./color-menu";
 import {TextBoxesToUpdate} from "@/config/data";
+import {DocumentColor} from "@/config/data";
 
 export const TextColor = () => {
-  const {
-    selectedTextBox,
-    updateData,
-    addRecentColor,
-    textColor,
-    setTextColor,
-    groupSelectedTextBoxes,
-  } = usePresentation()!;
-
-  const textColorCommand = (commandValue: string) => {
-    setTextColor(commandValue);
-    if (selectedTextBox) {
-      applyCommand(selectedTextBox?.textBoxId, "foreColor", commandValue);
-      const newText = document.getElementById(
-        `text-box-${selectedTextBox.textBoxId}`
-      )?.innerHTML;
-      updateData({text: newText}, selectedTextBox.textBoxId);
-      addRecentColor(commandValue);
-    } else if (groupSelectedTextBoxes) {
-      groupSelectedTextBoxes.forEach((textBoxId) => {
-        applyCommand(textBoxId, "foreColor", commandValue);
-        const newText = document.getElementById(
-          `text-box-${textBoxId}`
-        )?.innerHTML;
-        updateData({text: newText}, textBoxId);
-      });
-    }
-  };
-
-  return (
-    <Popover>
-      <PopoverTrigger>
-        <TooltipProvider>
-          <Tooltip delayDuration={500}>
-            <TooltipTrigger>
-              <Button
-                variant="ghost"
-                className="relative text-lg p-2 border-none flex-col h-fit leading-[20px]"
-              >
-                A
-                <div
-                  className="aspect-square h-2 w-5 rounded-[4px] border"
-                  style={{background: textColor}}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Text Color</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </PopoverTrigger>
-      <PopoverContent className="w-fit h-fit grid ">
-        <h1 className="font-bold text-lg">Text Color</h1>
-        <ColorMenu colorCommand={textColorCommand} currentColor={textColor} />
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-export const TextColor2 = () => {
   const {
     selectedTextBox,
     updateData,
@@ -96,6 +28,7 @@ export const TextColor2 = () => {
     slideData,
     setSlideData,
     updateMultipleTextBoxes,
+    slideDataRef,
   } = usePresentation()!;
 
   const textColorCommand = (commandValue: string) => {
@@ -143,7 +76,87 @@ export const TextColor2 = () => {
     }
   };
 
+  const applyColorToNotSelected = (textBoxId: string, color: string) => {
+    // if text is highlighted, do not select text box content
+    const element = document.getElementById(`mini-slide-textbox-${textBoxId}`);
+
+    if (!element) return;
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && selection.toString() !== "") {
+      // Apply the color using execCommand
+      document.execCommand("foreColor", false, color);
+      setOpenMenu(true);
+      return;
+    } else {
+      const paragraph = element.querySelector("p");
+      if (!paragraph) return;
+      const elementText = paragraph.innerHTML;
+      const text = elementText.replaceAll(/<\/?font[^>]*>/g, "");
+      const newText = `<font color="${color}">${text}</font>`;
+      paragraph.innerHTML = newText;
+      console.log("newText == ", paragraph.innerHTML);
+    }
+  };
+
   const [openMenu, setOpenMenu] = React.useState(false);
+
+  const documentColors = slideData?.slides.flatMap((slide) => {
+    return slide.textBoxes.flatMap((textBox) => {
+      const element = document.getElementById(
+        `mini-slide-textbox-${textBox.textBoxId}`
+      );
+      if (!element) return;
+
+      const paragraph = element.querySelector("p");
+      if (!paragraph) return;
+      const font = paragraph?.querySelector("font");
+      const color = font?.getAttribute("color");
+      return {
+        color: color,
+        usageId: textBox.textBoxId,
+      };
+    });
+  });
+
+  const changeMultipleTextBoxesColor = (color: string) => {
+    type UpdatedData = {
+      text: string;
+      textBoxId: string;
+    };
+
+    let updatedData: UpdatedData[] = [];
+
+    documentColors &&
+      documentColors.forEach((docColor) => {
+        if (!docColor) return;
+        if (docColor.color === color) {
+          applyColorToNotSelected(docColor.usageId, textColor);
+          const newText = document.getElementById(
+            `mini-slide-textbox-${docColor.usageId}`
+          )?.innerHTML;
+          if (!newText) return;
+          // updateData({text: newText}, docColor.usageId);
+          updatedData.push({text: newText, textBoxId: docColor.usageId});
+        }
+      });
+
+    if (updatedData) {
+      if (!slideDataRef.current) return;
+      const newSlideData = slideDataRef.current.slides.map((slide) => {
+        const textBoxes = slide.textBoxes.map((textBox) => {
+          const updatedTextBox = updatedData.find(
+            (data) => data.textBoxId === textBox.textBoxId
+          );
+          if (updatedTextBox) {
+            return {...textBox, text: updatedTextBox.text};
+          }
+          return textBox;
+        });
+        return {...slide, textBoxes};
+      });
+      setSlideData({...slideDataRef.current, slides: newSlideData});
+    }
+  };
 
   return (
     <div className="relative  w-fit ml-auto">
@@ -153,7 +166,12 @@ export const TextColor2 = () => {
             <TooltipProvider>
               <Tooltip delayDuration={500}>
                 <TooltipTrigger asChild>
-                  <button className="w-full h-10 flex justify-center items-center  hover:bg-muted px-2 py-1">
+                  <button
+                    className={`w-full h-10 flex justify-center items-center  px-2 py-1
+                  ${openMenu ? "bg-muted" : "hover:bg-muted"}
+                    
+                    `}
+                  >
                     <div
                       style={{background: textColor}}
                       className="bg-background h-6 aspect-square rounded-full border overflow-hidden flex justify-center items-center mx-auto"
@@ -168,11 +186,14 @@ export const TextColor2 = () => {
           </PopoverTrigger>
           <PopoverContent
             side="left"
-            className="w-[250px] bg-background/70 blurBack p-2"
+            align="start"
+            className="w-[250px] bg-background/90 blurBack p-0 "
           >
             <ColorMenu
               colorCommand={textColorCommand}
               currentColor={textColor}
+              documentColors={documentColors as DocumentColor[]}
+              changeAllCommand={changeMultipleTextBoxesColor}
             />
             <button
               onClick={() => setOpenMenu(false)}

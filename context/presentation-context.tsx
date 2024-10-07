@@ -95,6 +95,7 @@ interface PresentationContextType {
   setActiveGroupSelectedImages: React.Dispatch<
     React.SetStateAction<string[] | undefined>
   >;
+  selectedSlideIndexRef: React.MutableRefObject<number>;
   // functions -----------------------------
   uploadImage: (file: File) => void;
   Generate: () => void;
@@ -102,7 +103,7 @@ interface PresentationContextType {
   updateImageData: (value: Partial<TextBoxType>, imageId: string) => void;
   addRecentColor: (color: string) => void;
   deleteSlide: (slideId: string) => void;
-  createNewSlide: () => void;
+  createNewSlide: (index?: number) => void;
   copySlide: (slideId: string) => void;
   deleteMultiTextBoxes: () => void;
   copyTextBox: () => void;
@@ -110,6 +111,7 @@ interface PresentationContextType {
   pasteTextBox: () => void;
   addImageToSlide: (image: Image, position?: Position, size?: Size) => void;
   updateMultipleTextBoxes: (textBoxesToUpdate: TextBoxesToUpdate[]) => void;
+  addImageToBackground: (image: Image) => void;
 }
 
 const PresentationContext = createContext<PresentationContextType | null>(null);
@@ -419,25 +421,30 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     );
   }, 5000);
 
-  const createNewSlide = () => {
-    if (!slideData) return;
-    const updatedSlideData: SlideData = {
-      ...slideData,
-      slides: [
-        ...slideData.slides,
-        {
-          id: Math.random().toString(),
-          background: "#fff",
-          textBoxes: [],
-          images: [],
-        },
-      ] as Slide[],
+  const createNewSlide = (index?: number) => {
+    if (!slideDataRef.current) return;
+
+    const newSlide: Slide = {
+      id: Math.random().toString(),
+      background: "#fff",
+      textBoxes: [],
+      images: [],
     };
+
+    const insertPosition = index ?? slideDataRef.current.slides.length; // Default to the end if no index is provided
+
+    const updatedSlideData: SlideData = {
+      ...slideDataRef.current,
+      slides: [
+        ...slideDataRef.current.slides.slice(0, insertPosition),
+        newSlide,
+        ...slideDataRef.current.slides.slice(insertPosition),
+      ],
+    };
+
     setSlideData(updatedSlideData);
     setHistory([updatedSlideData, ...history]);
-    setSelectedSlide(
-      updatedSlideData.slides[updatedSlideData.slides.length - 1]
-    );
+    setSelectedSlide(updatedSlideData.slides[insertPosition]);
   };
 
   const deleteSlide = (slideId: string) => {
@@ -655,8 +662,10 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   }, [slideData]);
 
   const selectedSlideRef = useRef<Slide | undefined>(selectedSlide);
+  const selectedSlideIndexRef = useRef<number>(0);
 
   useEffect(() => {
+    console.log("selectedSlideIndex", selectedSlideIndexRef);
     selectedSlideRef.current = selectedSlide;
   }, [selectedSlide]);
 
@@ -699,7 +708,6 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     const image = await saveImageToFirebase(file);
     setUserImages([...(userImages || []), image]);
     saveImageToUserStorage([...(userImages || []), image]);
-    addImageToSlide(image, {x: 400, y: 200});
   };
 
   const saveImageToFirebase = async (
@@ -798,6 +806,25 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     setSlideData(updatedSlideData);
   };
 
+  const addImageToBackground = (image: Image) => {
+    if (!selectedSlide || !slideDataRef.current) return;
+
+    const updatedSlideData = {
+      ...slideDataRef.current,
+      slides: slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlide.id) {
+          return {
+            ...slide,
+            backgroundImage: image,
+          };
+        }
+        return slide;
+      }),
+    };
+
+    setSlideData(updatedSlideData);
+  };
+
   const [groupSelectedTextBoxes, setGroupSelectedTextBoxes] = useState<
     string[] | undefined
   >([]);
@@ -881,6 +908,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     slideDataRef,
     activeGroupSelectedImages,
     setActiveGroupSelectedImages,
+    selectedSlideIndexRef,
     // functions -----------------------------
     Generate,
     updateData,
@@ -902,6 +930,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     updateMultipleTextBoxes,
     groupSelectedImages,
     setGroupSelectedImages,
+    addImageToBackground,
   };
 
   return (

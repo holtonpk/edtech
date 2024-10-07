@@ -11,13 +11,19 @@ import {
 } from "@/components/ui/tooltip";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import debounce from "lodash.debounce";
+import {Button} from "@/components/ui/button";
+import {DocumentColor} from "@/config/data";
 
 export const ColorMenu = ({
   colorCommand,
   currentColor,
+  documentColors,
+  changeAllCommand,
 }: {
   colorCommand: (color: string) => void;
   currentColor: string;
+  documentColors: DocumentColor[];
+  changeAllCommand: (color: string) => void;
 }) => {
   const {recentColors} = usePresentation()!;
 
@@ -32,102 +38,178 @@ export const ColorMenu = ({
     debounceColorCommand(color);
   }, [color]);
 
+  const [originalColor, setOriginalColor] =
+    React.useState<string>(currentColor);
+
+  useEffect(() => {
+    setOriginalColor(currentColor);
+  }, []);
+
+  function removeDuplicateColors(colors: DocumentColor[]): DocumentColor[] {
+    const seenColors = new Set<string>();
+
+    return colors.filter((colorObj) => {
+      if (seenColors.has(colorObj.color)) {
+        return false; // Skip duplicates
+      }
+      seenColors.add(colorObj.color);
+      return true; // Keep the first occurrence
+    });
+  }
+
+  const suggestChangeAll =
+    documentColors.map((color) => color.color).includes(originalColor) &&
+    currentColor !== originalColor;
+
+  useEffect(() => {
+    if (suggestChangeAll) {
+      const colorTab = document.getElementById("color-tab");
+      const height = colorTab?.getBoundingClientRect().height;
+      colorTab?.setAttribute("style", `height: ${height}px`);
+      colorTab?.classList.add("pb-[54px]");
+      colorTab?.classList.add("overflow-y-scroll");
+      colorTab?.scrollTo(0, 0);
+    } else {
+      const colorTab = document.getElementById("color-tab");
+      colorTab?.setAttribute("style", `height: auto`);
+      colorTab?.classList.remove("pb-[54px]");
+      colorTab?.classList.remove("overflow-y-scroll");
+    }
+  }, [suggestChangeAll]);
+
   return (
-    <div className=" relative w-full ">
-      <Tabs defaultValue="custom" className="w-full">
-        <TabsList className="w-fit">
-          <TabsTrigger value="custom">Custom</TabsTrigger>
-          <TabsTrigger value="default">Default</TabsTrigger>
-        </TabsList>
-        <TabsContent value="custom" className="h-fit w-full">
-          <section className="color-picker   rounded-md flex flex-col gap-3">
-            <HexColorPicker color={color} onChange={setColor} />
-            <div className="grid grid-cols-[30px_1fr] items-center gap-2">
-              <div
-                style={{background: currentColor}}
-                className="w-full aspect-square border rounded-[12px]"
-              ></div>
-              {/* <input
+    <>
+      <div className=" relative w-full ">
+        <Tabs defaultValue="custom" className="w-full  p-3">
+          <TabsList className="w-fit">
+            <TabsTrigger value="custom">Custom</TabsTrigger>
+            <TabsTrigger value="default">Default</TabsTrigger>
+          </TabsList>
+          <div id="color-tab" className="p-2">
+            <TabsContent value="custom" className="h-fit w-full">
+              <section className="color-picker   rounded-md flex flex-col gap-3">
+                <HexColorPicker color={color} onChange={setColor} />
+                <div className="grid grid-cols-[30px_1fr] items-center gap-2">
+                  <div
+                    style={{background: currentColor}}
+                    className="w-full aspect-square border rounded-[12px]"
+                  ></div>
+                  {/* <input
               onChange={(e) => setColor(e.target.value)}
                 type="text"
                 value={currentColor}
                 placeholder="Enter color code"
                 className="w-full p-2 rounded-md border border-border"
               /> */}
-              <HexColorInput
-                prefixed={true}
-                color={color}
-                onChange={setColor}
-                className="w-full p-2 rounded-md border border-border disableSelector"
-              />
-            </div>
-          </section>
+                  <HexColorInput
+                    prefixed={true}
+                    color={color}
+                    onChange={setColor}
+                    className="w-full p-2 rounded-md border border-border disableSelector"
+                  />
+                </div>
+              </section>
 
-          {recentColors && recentColors.length > 0 && (
-            <>
-              <div className="flex items-center gap-1 mt-2 poppins-regular">
-                <Icons.history className="h-5 w-5" />
-                Recent colors
-              </div>
+              {recentColors && recentColors.length > 0 && (
+                <>
+                  <div className="flex items-center gap-1 mt-2 poppins-regular">
+                    <Icons.history className="h-5 w-5" />
+                    Recent colors
+                  </div>
 
-              <div className="grid grid-cols-6 gap-1 w-full mt-1">
-                {recentColors.slice(0, 12).map((color) => {
-                  return (
-                    <TooltipProvider key={color}>
-                      <Tooltip delayDuration={500}>
-                        <TooltipTrigger>
-                          <button
-                            key={color}
-                            onClick={() => setColor(color)}
-                            style={{background: color}}
-                            className={`rounded-full w-full aspect-square border hover:border-4 hover:border-border 
+                  <div className="grid grid-cols-5 gap-2 w-full mt-1">
+                    {recentColors.slice(0, 5).map((color) => {
+                      return (
+                        <TooltipProvider key={color}>
+                          <Tooltip delayDuration={500}>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() => setColor(color)}
+                                style={{background: color}}
+                                className={`rounded-full w-full aspect-square border-2  border-border  
                     
                     ${
                       currentColor === color
-                        ? "border-border hover:border-4"
-                        : " "
+                        ? "ring ring-primary border-background  "
+                        : "hover:ring hover:ring-primary/40 hover:border-background"
                     }
                     `}
-                          ></button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{color}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </TabsContent>
-        <TabsContent value="default" className="w-full">
-          <div className="flex items-center gap-1 poppins-regular">
-            <Icons.palette className="h-5 w-5" />
-            Default colors
-          </div>
+                              ></button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{color}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+              {documentColors && documentColors.length > 0 && (
+                <>
+                  <div className="flex items-center gap-1 mt-2 poppins-regular">
+                    <Icons.palette className="h-5 w-5" />
+                    Document colors
+                  </div>
 
-          <div className="flex flex-col  mt-2 w-full flex-grow  rounded-md ">
-            {colors.map((color) => {
-              return (
-                <div
-                  key={color.paletteName}
-                  className="grid grid-cols-8 w-full  h-fit overflow-hidden gap-0"
-                >
-                  {color.swatches.reverse().map((swatch) => (
-                    <TooltipProvider key={swatch.color}>
-                      <Tooltip delayDuration={500}>
-                        <TooltipTrigger>
-                          <button
-                            onClick={() => setColor(swatch.color)}
-                            style={{background: swatch.color}}
-                            className={`rounded-full w-full aspect-square border-[2px]  hover:border-muted-foreground relative
+                  <div className="grid grid-cols-5 gap-2 w-full mt-1">
+                    {removeDuplicateColors(documentColors).map((color) => {
+                      return (
+                        <TooltipProvider key={color.color}>
+                          <Tooltip delayDuration={500}>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() => setColor(color.color)}
+                                style={{background: color.color}}
+                                className={`rounded-full w-full aspect-square border-2  border-border  
+                    
+                    ${
+                      currentColor === color.color
+                        ? "ring ring-primary border-background  "
+                        : "hover:ring hover:ring-primary/40 hover:border-background"
+                    }
+                    `}
+                              ></button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{color.color}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </TabsContent>
+            <TabsContent value="default" className="w-full">
+              <div className="flex items-center gap-1 poppins-regular">
+                <Icons.palette className="h-5 w-5" />
+                Default colors
+              </div>
+
+              <div className="flex flex-col  mt-2 w-full flex-grow  rounded-md ">
+                {colors.map((color) => {
+                  return (
+                    <div
+                      key={color.paletteName}
+                      className="grid grid-cols-8 w-full  h-fit overflow-hidden gap-0"
+                    >
+                      {color.swatches.reverse().map((swatch) => (
+                        <TooltipProvider key={swatch.color}>
+                          <Tooltip delayDuration={500}>
+                            <TooltipTrigger>
+                              <button
+                                onClick={() => setColor(swatch.color)}
+                                style={{background: swatch.color}}
+                                className={`rounded-full w-full aspect-square border-[2px]  hover:border-muted-foreground relative
                   
                     `}
-                          >
-                            {currentColor === swatch.color && (
-                              <Icons.check
-                                className={`h-4 w-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                              >
+                                {currentColor === swatch.color && (
+                                  <Icons.check
+                                    className={`h-4 w-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                                 ${
                                   ["900", "800", "700", "600"].includes(
                                     swatch.name
@@ -137,23 +219,50 @@ export const ColorMenu = ({
                                 }
                                 
                                 `}
-                              />
-                            )}
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{swatch.color}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ))}
-                </div>
-              );
-            })}
+                                  />
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{swatch.color}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
           </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+        </Tabs>
+      </div>
+      {suggestChangeAll && (
+        <div className="w-full  h-[60px]  overflow-hidden absolute bottom-0 left-0 ">
+          <div className="slide-top absolute top-0 border-t  bg-background rounded-b-md h-fit w-full flex items-center  py-2 px-2 justify-between">
+            <Button
+              onClick={() => {
+                changeAllCommand(originalColor);
+                setOriginalColor(color);
+              }}
+            >
+              Change all
+            </Button>
+            <div className="flex items-center gap-1">
+              <div
+                className="h-6 w-6 rounded-full border"
+                style={{background: originalColor}}
+              />
+              <Icons.chevronRight className="h-5 w-5" />
+              <div
+                className="h-6 w-6 rounded-full border "
+                style={{background: color}}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -17,10 +17,11 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
     copySlide,
     selectedSlideRef,
     groupSelectedTextBoxes,
+    selectedSlideIndexRef,
   } = usePresentation()!;
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (!selectedSlide || !slideData) return;
+    if (!selectedSlide || !slideData || !selectedSlideRef.current) return;
 
     // see if element with class disableSelector is present
 
@@ -30,6 +31,7 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
         : false;
 
     if (disableSelector) return;
+
     if (
       e.key === "Backspace" &&
       !activeEdit &&
@@ -48,39 +50,37 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
       e.key === "ArrowUp" ||
       (e.key === "ArrowLeft" && selectedSlideRef.current)
     ) {
+      e.preventDefault();
       if (slideData.slides.indexOf(selectedSlideRef.current!) === 0) return;
-      setSelectedSlide(
-        slideData.slides[
-          slideData.slides.indexOf(selectedSlideRef.current!) - 1
-        ]
-      );
+      selectedSlideIndexRef.current = selectedSlideIndexRef.current - 1;
+      setSelectedSlide(slideData.slides[selectedSlideIndexRef.current]);
     }
     if (
       e.key === "ArrowDown" ||
       (e.key === "ArrowRight" && selectedSlideRef.current)
     ) {
+      e.preventDefault();
+
       if (
         slideData.slides.indexOf(selectedSlideRef.current!) ===
         slideData.slides.length - 1
       )
         return;
-      setSelectedSlide(
-        slideData.slides[
-          slideData.slides.indexOf(selectedSlideRef.current!) + 1
-        ]
-      );
+
+      selectedSlideIndexRef.current = selectedSlideIndexRef.current + 1;
+      setSelectedSlide(slideData.slides[selectedSlideIndexRef.current]);
     }
   };
 
   useEffect(() => {
-    if (selectedTextBox || activeEdit) return;
+    if (selectedTextBox || activeEdit || !selectedSlideRef.current) return;
 
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeEdit, selectedTextBox]);
+  }, [activeEdit, selectedTextBox, selectedSlideRef]);
 
   const slideContainer = React.useRef<HTMLDivElement>(null);
 

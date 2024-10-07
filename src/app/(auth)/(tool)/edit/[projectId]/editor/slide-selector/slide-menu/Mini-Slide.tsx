@@ -1,10 +1,12 @@
 import React, {forwardRef, HTMLAttributes} from "react";
 import type {UniqueIdentifier} from "@dnd-kit/core";
 import classNames from "classnames";
-import {Slide, TextBoxType} from "@/config/data";
+import {SlideData, Slide, TextBoxType} from "@/config/data";
 import {usePresentation} from "@/context/presentation-context";
-import {removeIcon} from "./icons";
+import {Icons} from "@/components/icons";
 import styles from "./Slide.module.css";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {set} from "zod";
 
 export enum Position {
   Before = -1,
@@ -39,6 +41,7 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
     setGroupSelectedTextBoxes,
     setGroupSelectedImages,
     setActiveGroupSelectedImages,
+    selectedSlideIndexRef,
   } = usePresentation()!;
 
   const [selectorScale, setSelectorScale] = React.useState<number | undefined>(
@@ -64,6 +67,10 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
     setScale();
   }, [slide]);
 
+  const [open, setOpen] = React.useState(false);
+
+  const [showMenuTrigger, setShowMenuTrigger] = React.useState(false);
+
   return (
     <li
       className={classNames(
@@ -73,11 +80,42 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
         insertPosition === Position.Before && styles.insertBefore,
         insertPosition === Position.After && styles.insertAfter,
         styles.horizontal,
-        "h-full"
+        "h-full relative "
       )}
       style={style}
       ref={ref}
+      onMouseEnter={() => setShowMenuTrigger(true)}
+      onMouseLeave={() => setShowMenuTrigger(false)}
     >
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          className={`absolute top-2 right-2 z-40 rounded-full py-0 px-2  transition-colors duration-500
+            ${
+              (showMenuTrigger && !clone && !active) || open
+                ? "visible"
+                : "invisible"
+            }
+            ${open ? "bg-primary" : "bg-black/70  hover:bg-primary"}
+            `}
+        >
+          <Icons.ellipsis className="h-4 w-4  text-background " />
+        </PopoverTrigger>
+        <PopoverContent
+          side="top"
+          align="start"
+          className="p-0 overflow-hidden py-2"
+        >
+          {slide && (
+            <SelectorToolbar slide={slide} setOpen={setOpen} index={index} />
+          )}
+        </PopoverContent>
+      </Popover>
+      {!active && !clone && (
+        <span className=" absolute bottom-0 p-2 px-3 pb-1 left-0 text-[12px] poppins-regular z-40 w-full overflow-hidden text-ellipsis h-fit whitespace-nowrap">
+          {index} {slide?.title && ` - ${slide.title}`}
+        </span>
+      )}
+
       {slide && (
         <button
           className={styles.Page}
@@ -88,6 +126,7 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
           <div
             onClick={() => {
               setSelectedSlide(slide);
+              selectedSlideIndexRef.current = index ? index - 1 : 0;
               setActiveEdit(undefined);
               setActiveGroupSelectedTextBoxes(undefined);
               setGroupSelectedTextBoxes(undefined);
@@ -98,11 +137,20 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
             style={{
               background: slide.background,
             }}
-            className={`rounded-lg h-[80px]    relative aspect-[16/9] p-6 flex items-center justify-center bg-white text-black  transition-colors duration-300 cursor-pointer border-4
+            className={`rounded-lg h-[80px]  overflow-hidden  relative aspect-[16/9] p-6 flex items-center justify-center bg-white text-black  transition-colors duration-300 cursor-pointer border-4
 ${selectedSlide?.id === slide.id ? "border-primary" : "border-border"}
 
 `}
           >
+            {slide.backgroundImage &&
+              slide.backgroundImage.path !== "undefined" && (
+                <div
+                  className="absolute w-full h-full bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${slide.backgroundImage.path})`,
+                  }}
+                />
+              )}
             {selectorScale ? (
               <div
                 className="w-[1000px] aspect-[16/9] absolute overflow-hidden"
@@ -122,6 +170,7 @@ ${selectedSlide?.id === slide.id ? "border-primary" : "border-border"}
                       }}
                     >
                       <div
+                        id={"mini-slide-textbox-" + textbox.textBoxId}
                         className="h-fit w-full relative  whitespace-pre-wrap break-words overflow-hidden pointer-events-none text-left"
                         dangerouslySetInnerHTML={{__html: textbox.text}}
                         style={{
@@ -159,3 +208,126 @@ ${selectedSlide?.id === slide.id ? "border-primary" : "border-border"}
     </li>
   );
 });
+
+const SelectorToolbar = ({
+  slide,
+  setOpen,
+  index,
+}: {
+  slide: Slide;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  index: number | undefined;
+}) => {
+  const [editTitle, setEditTitle] = React.useState(false);
+  const [title, setTitle] = React.useState<string | undefined>(slide.title);
+
+  const {
+    setSlideData,
+    slideDataRef,
+    createNewSlide,
+    setSelectedSlide,
+    deleteSlide,
+  } = usePresentation()!;
+
+  const updateSlideTitle = () => {
+    if (!slideDataRef.current || !title) return;
+    const updatedSlide = {...slide, title};
+    const newSlideData = slideDataRef.current.slides.map((s) => {
+      if (s.id === slide.id) {
+        return updatedSlide;
+      }
+      return s;
+    });
+    setSlideData({...slideDataRef.current, slides: newSlideData});
+    setTitle(title);
+    setEditTitle(false);
+  };
+
+  const duplicateSlide = () => {
+    if (!slideDataRef.current) return;
+    let copiedSlide = slideDataRef.current.slides.filter(
+      (oldSlide) => oldSlide.id === slide.id
+    )[0];
+    copiedSlide = {
+      ...copiedSlide,
+      id: Math.random().toString(),
+    };
+
+    setSlideData({
+      ...slideDataRef.current,
+      slides: [
+        ...slideDataRef.current.slides.slice(
+          0,
+          index ? index : slideDataRef.current.slides.length
+        ),
+        copiedSlide,
+        ...slideDataRef.current.slides.slice(
+          index ? index : slideDataRef.current.slides.length
+        ),
+      ],
+    });
+
+    setSelectedSlide(copiedSlide);
+  };
+
+  return (
+    <div className="flex flex-col ">
+      <div className="p-2 py-2">
+        {editTitle ? (
+          <div className=" overflow-hidden w-full">
+            <input
+              value={title}
+              onBlur={updateSlideTitle}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+              className="text-lg disableSelector noFocus border-primary w-[75%] max-w-full px-4 py-1 poppins-bold"
+            />
+          </div>
+        ) : (
+          <button
+            onClick={() => setEditTitle(true)}
+            className="flex items-center group w-fit max-w-full   px-4"
+          >
+            <span className="group-hover:underline font-bold text-lg poppins-bold whitespace-nowrap overflow-hidden w-fit  max-w-full text-ellipsis">
+              {title || "Add slide title"}
+            </span>
+            <div className=" h-fit w-fit hover:bg-muted rounded-[12px] ml-2 flex items-center justify-center p-2">
+              <Icons.pencil className="h-5 w-5 " />
+            </div>
+          </button>
+        )}
+      </div>
+      <div className="h-[1px] w-full bg-border"></div>
+      <button
+        onClick={() => {
+          createNewSlide(index);
+          setOpen(false);
+        }}
+        className="flex items-center w-full p-2 hover:bg-muted poppins-regular px-4"
+      >
+        <Icons.addPage className="h-4 w-4 mr-2" />
+        Add slide
+      </button>
+      <button
+        onClick={() => {
+          duplicateSlide();
+          setOpen(false);
+        }}
+        className="flex items-center w-full p-2 hover:bg-muted poppins-regular px-4"
+      >
+        <Icons.duplicate className="h-4 w-4 mr-2" />
+        Duplicate slide
+      </button>
+      <button
+        onClick={() => {
+          deleteSlide(slide.id);
+          setOpen(false);
+        }}
+        className="flex items-center w-full p-2 hover:bg-muted poppins-regular px-4"
+      >
+        <Icons.trash className="h-4 w-4 mr-2" />
+        Delete slide
+      </button>
+    </div>
+  );
+};

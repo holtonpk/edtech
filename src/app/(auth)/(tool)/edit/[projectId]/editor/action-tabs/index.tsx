@@ -1,13 +1,13 @@
 import React, {Children, useEffect, useRef} from "react";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
 import {Button} from "@/components/ui/button";
 import {set} from "zod";
 import {Description} from "@radix-ui/react-dialog";
+import {Label} from "@/components/ui/label";
 import {Modes, Position, Image as ImageType} from "@/config/data";
 import {getDoc, doc} from "firebase/firestore";
 import {db} from "@/config/firebase";
@@ -851,7 +851,7 @@ const AiRewrite = () => {
     {
       label: "Write More",
       icon: Icons.pencil,
-      description: "Ai will write more content for you",
+      description: "write more content",
       background: "bg-primary",
       buttonLabel: "Write More",
       prompt: "Write more content",
@@ -859,7 +859,7 @@ const AiRewrite = () => {
     {
       label: "Make it shorter",
       icon: Icons.ruler,
-      description: "Ai will shorten the content",
+      description: "shorten the content",
       background: "bg-theme-purple",
       buttonLabel: "Shorten",
       prompt: "Shorten the content",
@@ -867,7 +867,7 @@ const AiRewrite = () => {
     {
       label: "Rewrite",
       icon: Icons.reWrite,
-      description: "Ai will rewrite the content",
+      description: "rewrite the content",
       background: "bg-theme-red",
       buttonLabel: "Rewrite textboxes",
       prompt: "Rewrite the content",
@@ -875,7 +875,7 @@ const AiRewrite = () => {
     {
       label: "More fun",
       icon: Icons.smile,
-      description: "Ai will make the content more fun",
+      description: "make the content more fun",
       background: "bg-theme-yellow",
       buttonLabel: "Make more fun",
       prompt: "Make the content more fun",
@@ -883,7 +883,7 @@ const AiRewrite = () => {
     {
       label: "More detail",
       icon: Icons.addMore,
-      description: "Ai will add more detail to the content",
+      description: "Add more detail & info",
       background: "bg-theme-orange",
       buttonLabel: "Add more detail",
       prompt: "Add more detail to the content",
@@ -891,7 +891,7 @@ const AiRewrite = () => {
     {
       label: "Custom Rewrite",
       icon: Icons.wand2,
-      description: "Tell Ai how to rewrite the content",
+      description: "Prompt Ai on how to rewrite ",
       background: "bg-theme-green",
       buttonLabel: "Apply Instructions",
       prompt: "",
@@ -1015,7 +1015,7 @@ const AiRewrite = () => {
                 disabled={
                   !selectedForAiWrite || selectedForAiWrite.length === 0
                 }
-                className={`text-white rounded-md py-2 group flex items-center justify-center gap-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 ${selectedPreset.background}`}
+                className={`text-white rounded-md py-2 group flex items-center justify-center gap-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 bg-primary`}
               >
                 {isGenerating && (
                   <Icons.spinner className="h-6 w-6 animate-spin mr-2" />
@@ -1059,7 +1059,12 @@ const AiRewrite = () => {
                     >
                       <preset.icon className="h-6 w-6" />
                     </div>
-                    {preset.label}
+                    <div className="flex flex-col items-start">
+                      {preset.label}
+                      <span className="text-[12px] poppins-regular">
+                        {preset.description}
+                      </span>
+                    </div>
                     <Icons.chevronRight className="h-4 w-4 ml-auto " />
                   </button>
                 ))}
