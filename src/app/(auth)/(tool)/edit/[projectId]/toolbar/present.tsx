@@ -80,7 +80,7 @@ function Present() {
             >
               {slideData?.slides?.[activeSlideIndex]?.backgroundImage?.path &&
                 slideData.slides[activeSlideIndex].backgroundImage.path !==
-                  "undefined" && (
+                  "" && (
                   <div
                     className="absolute w-full h-full bg-cover bg-center z-10"
                     style={{
