@@ -78,7 +78,9 @@ function Present() {
               className={`relative w-[1000px] z-20  overflow-hidden aspect-[16/9] p-6 flex items-center justify-center  text-black
                 `}
             >
-              {slideData.slides[activeSlideIndex].backgroundImage &&
+              {slideData &&
+                slideData.slides &&
+                slideData.slides[activeSlideIndex].backgroundImage &&
                 slideData.slides[activeSlideIndex].backgroundImage.path !==
                   "undefined" && (
                   <div
