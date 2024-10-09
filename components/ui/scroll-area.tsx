@@ -7,7 +7,9 @@ import {cn} from "@/lib/utils";
 
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
+    viewPortRef?: React.Ref<HTMLDivElement>;
+  } // Add viewPortRef to the prop types
 >(({className, children, onScroll, viewPortRef, ...props}, ref) => (
   <ScrollAreaPrimitive.Root
     ref={ref}
