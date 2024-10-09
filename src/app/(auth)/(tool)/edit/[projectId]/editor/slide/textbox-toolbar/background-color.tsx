@@ -53,6 +53,10 @@ export const BackgroundColor = () => {
             return {
               ...slide,
               background: color,
+              backgroundImage: {
+                path: "undefined",
+                title: "undefined",
+              },
             };
           }
           return slide;
@@ -79,6 +83,10 @@ export const BackgroundColor = () => {
             return {
               ...slide,
               background: selectedColor,
+              backgroundImage: {
+                path: "undefined",
+                title: "undefined",
+              },
             };
           else {
             return slide;
@@ -88,8 +96,6 @@ export const BackgroundColor = () => {
       setSlideData(updatedSlideData);
     }
   };
-
-  console.log("documentColors", documentColors);
 
   return (
     <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background border rounded-md  items-center relative gap-2 overflow-hidden">

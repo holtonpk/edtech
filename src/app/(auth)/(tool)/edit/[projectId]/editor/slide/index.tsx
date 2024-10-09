@@ -16,8 +16,15 @@ import {Icons} from "@/components/icons";
 import GroupSelection from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/multi-select";
 
 const Slide = () => {
-  const {selectedSlide, setSlideData, mode, activeGroupSelectedTextBoxes} =
-    usePresentation()!;
+  const {
+    selectedSlide,
+    setSlideData,
+    mode,
+    activeGroupSelectedTextBoxes,
+    activeGroupSelectedImages,
+    activeSlide,
+    setActiveSlide,
+  } = usePresentation()!;
 
   const [shouldHideToolbar, setShouldHideToolbar] = React.useState(false);
 
@@ -80,6 +87,11 @@ const Slide = () => {
     };
   }, []);
 
+  const isGroupSelected =
+    (activeGroupSelectedTextBoxes &&
+      activeGroupSelectedTextBoxes?.length > 0) ||
+    (activeGroupSelectedImages && activeGroupSelectedImages?.length > 0);
+
   return (
     <div
       className={`w-full h-full relative justify-between  items-start  gap-2 grid 
@@ -114,13 +126,15 @@ const Slide = () => {
                   ))}
                 {selectedSlide.images &&
                   selectedSlide.images.map((image: SlideImage) => (
-                    <ImageProvider key={image.imageId} image={image}>
+                    <ImageProvider
+                      key={selectedSlide.id + image.imageId}
+                      image={image}
+                    >
                       <Image />
                     </ImageProvider>
                   ))}
 
-                {activeGroupSelectedTextBoxes &&
-                  activeGroupSelectedTextBoxes.length > 1 && <GroupSelection />}
+                {isGroupSelected && <GroupSelection />}
               </>
             </SlideContainer>
           )}
@@ -149,9 +163,9 @@ const SlideContainer = ({
   const {
     setActiveEdit,
     selectedSlide,
-    copyTextBox,
-    cutTextBox,
-    pasteTextBox,
+    copySelected,
+    cutSelected,
+    pasteSelected,
     activeEdit,
     groupSelectedTextBoxes,
     setGroupSelectedTextBoxes,
@@ -159,6 +173,8 @@ const SlideContainer = ({
     setGroupSelectedImages,
     groupSelectedImages,
     setActiveGroupSelectedImages,
+    activeSlide,
+    setActiveSlide,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -182,6 +198,7 @@ const SlideContainer = ({
           setActiveGroupSelectedTextBoxes(undefined);
           setGroupSelectedImages(undefined);
           setActiveGroupSelectedImages(undefined);
+          setActiveSlide(undefined);
         }
 
         mouseDownTime = null;
@@ -269,18 +286,35 @@ const SlideContainer = ({
   useEffect(() => {
     if (!isSelecting) {
       setSelectCoordinates({x: 0, y: 0, width: 0, height: 0});
-      setActiveGroupSelectedTextBoxes(groupSelectedTextBoxes);
-      setActiveGroupSelectedImages(groupSelectedImages);
+      const anImageIsSelected =
+        groupSelectedImages && groupSelectedImages.length > 0;
+      const aTextBoxIsSelected =
+        groupSelectedTextBoxes && groupSelectedTextBoxes.length > 0;
+      const singleImageIsSelected =
+        groupSelectedImages && groupSelectedImages.length === 1;
+      const singleTextBoxIsSelected =
+        groupSelectedTextBoxes && groupSelectedTextBoxes.length === 1;
+
+      if (anImageIsSelected && aTextBoxIsSelected) {
+        setActiveGroupSelectedTextBoxes(groupSelectedTextBoxes!);
+        setActiveGroupSelectedImages(groupSelectedImages!);
+      } else if (singleImageIsSelected && !aTextBoxIsSelected) {
+        setActiveEdit(groupSelectedImages![0]);
+      } else if (singleTextBoxIsSelected && !anImageIsSelected) {
+        setActiveEdit(groupSelectedTextBoxes![0]);
+      } else {
+        setActiveGroupSelectedTextBoxes(
+          aTextBoxIsSelected ? groupSelectedTextBoxes! : []
+        );
+        setActiveGroupSelectedImages(
+          anImageIsSelected ? groupSelectedImages! : []
+        );
+      }
       setTimeout(() => {
-        console.log("setting user select to auto");
         document.body.style.userSelect = "auto";
       }, 50);
-
-      // setGroupSelectedTextBoxes(undefined);
     }
     if (isSelecting) {
-      console.log("setting user select to none");
-
       document.body.style.userSelect = "none";
     }
   }, [
@@ -325,7 +359,7 @@ const SlideContainer = ({
         textBoxY + textBoxHeight > selectY;
 
       if (isIntersecting) {
-        // console.log("intersecting...........");
+        console.log("intersecting...........", textBox.textBoxId);
         selectedTextBoxes.push(textBox.textBoxId);
       }
     });
@@ -388,8 +422,8 @@ const SlideContainer = ({
       if (disableTextboxListeners) return;
 
       if (selection?.focusNode?.nodeName !== "#text") {
-        if (e.metaKey && e.key === "v") {
-          pasteTextBox();
+        if ((e.metaKey || e.ctrlKey) && e.key === "v") {
+          pasteSelected();
         }
       }
     };
@@ -399,7 +433,7 @@ const SlideContainer = ({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [copyTextBox, cutTextBox, pasteTextBox, groupSelectedTextBoxes]);
+  }, [copySelected, cutSelected, pasteSelected, groupSelectedTextBoxes]);
 
   const [height, setHeight] = React.useState(0);
   const [width, setWidth] = React.useState(0);

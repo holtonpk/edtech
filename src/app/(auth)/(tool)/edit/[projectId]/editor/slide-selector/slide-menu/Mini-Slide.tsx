@@ -1,7 +1,7 @@
 import React, {forwardRef, HTMLAttributes} from "react";
 import type {UniqueIdentifier} from "@dnd-kit/core";
 import classNames from "classnames";
-import {SlideData, Slide, TextBoxType} from "@/config/data";
+import {SlideData, Slide, TextBoxType, SlideImage} from "@/config/data";
 import {usePresentation} from "@/context/presentation-context";
 import {Icons} from "@/components/icons";
 import styles from "./Slide.module.css";
@@ -42,6 +42,8 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
     setGroupSelectedImages,
     setActiveGroupSelectedImages,
     selectedSlideIndexRef,
+    activeSlide,
+    setActiveSlide,
   } = usePresentation()!;
 
   const [selectorScale, setSelectorScale] = React.useState<number | undefined>(
@@ -70,6 +72,8 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
   const [open, setOpen] = React.useState(false);
 
   const [showMenuTrigger, setShowMenuTrigger] = React.useState(false);
+
+  const slideIsActive = slide && activeSlide === slide.id;
 
   return (
     <li
@@ -132,25 +136,38 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
               setGroupSelectedTextBoxes(undefined);
               setGroupSelectedImages(undefined);
               setActiveGroupSelectedImages(undefined);
+              setActiveSlide(slide.id);
             }}
             ref={selectorContainerRef}
-            style={{
-              background: slide.background,
-            }}
+            // style={{
+            //   background: slide.background,
+            // }}
             className={`rounded-lg h-[80px]  overflow-hidden  relative aspect-[16/9] p-6 flex items-center justify-center bg-white text-black  transition-colors duration-300 cursor-pointer border-4
-${selectedSlide?.id === slide.id ? "border-primary" : "border-border"}
+${
+  slideIsActive
+    ? "border-primary"
+    : selectedSlide?.id === slide.id
+    ? "border-primary/40"
+    : "border-border hover:border-primary/30"
+}
 
 `}
           >
-            {slide.backgroundImage &&
-              slide.backgroundImage.path !== "undefined" && (
-                <div
-                  className="absolute w-full h-full bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url(${slide.backgroundImage.path})`,
-                  }}
-                />
-              )}
+            <div
+              className="absolute w-full h-full bg-cover bg-center"
+              style={
+                slide &&
+                slide.backgroundImage &&
+                slide.backgroundImage.path !== "undefined"
+                  ? {
+                      backgroundImage: `url(${slide.backgroundImage.path})`,
+                    }
+                  : {
+                      background: slide.background,
+                    }
+              }
+            />
+
             {selectorScale ? (
               <div
                 className="w-[1000px] aspect-[16/9] absolute overflow-hidden"
@@ -248,9 +265,24 @@ const SelectorToolbar = ({
     let copiedSlide = slideDataRef.current.slides.filter(
       (oldSlide) => oldSlide.id === slide.id
     )[0];
+
+    const copiedTextBoxes = copiedSlide.textBoxes.map(
+      (textBox: TextBoxType) => ({
+        ...textBox,
+        textBoxId: Math.random().toString(),
+      })
+    );
+
+    const copiedDataImage = copiedSlide.images.map((image: SlideImage) => ({
+      ...image,
+      imageId: Math.random().toString(),
+    }));
+
     copiedSlide = {
       ...copiedSlide,
       id: Math.random().toString(),
+      textBoxes: copiedTextBoxes,
+      images: copiedDataImage,
     };
 
     setSlideData({

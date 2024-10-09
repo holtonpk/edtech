@@ -1,9 +1,9 @@
 import React, {useEffect, useCallback, useRef} from "react";
 import {usePresentation} from "@/context/presentation-context";
 import {Icons} from "@/components/icons";
-import {TextBoxType, Slide} from "@/config/data";
+
 import {SlideMenu} from "./slide-menu";
-import {set} from "zod";
+import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area";
 
 const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
   const {
@@ -18,10 +18,15 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
     selectedSlideRef,
     groupSelectedTextBoxes,
     selectedSlideIndexRef,
+    activeSlide,
+    activeSlideRef,
+    slideDataRef,
+    setActiveSlide,
   } = usePresentation()!;
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (!selectedSlide || !slideData || !selectedSlideRef.current) return;
+    if (!selectedSlide || !selectedSlideRef.current || !slideDataRef.current)
+      return;
 
     // see if element with class disableSelector is present
 
@@ -34,14 +39,13 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
 
     if (
       e.key === "Backspace" &&
-      !activeEdit &&
       selectedSlideRef.current &&
-      !groupSelectedTextBoxes
+      activeSlideRef.current
     ) {
       console.log("deleting", selectedSlideRef.current.id);
       deleteSlide(selectedSlideRef.current.id);
     }
-    if (e.metaKey && e.key === "c" && selectedSlideRef.current) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "c" && selectedSlideRef.current) {
       console.log("copy", selectedSlideRef.current.id);
       copySlide(selectedSlideRef.current.id);
     }
@@ -51,9 +55,15 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
       (e.key === "ArrowLeft" && selectedSlideRef.current)
     ) {
       e.preventDefault();
-      if (slideData.slides.indexOf(selectedSlideRef.current!) === 0) return;
+      if (slideDataRef.current.slides.indexOf(selectedSlideRef.current!) === 0)
+        return;
       selectedSlideIndexRef.current = selectedSlideIndexRef.current - 1;
-      setSelectedSlide(slideData.slides[selectedSlideIndexRef.current]);
+      setSelectedSlide(
+        slideDataRef.current.slides[selectedSlideIndexRef.current]
+      );
+      setActiveSlide(
+        slideDataRef.current.slides[selectedSlideIndexRef.current].id
+      );
     }
     if (
       e.key === "ArrowDown" ||
@@ -62,13 +72,18 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
       e.preventDefault();
 
       if (
-        slideData.slides.indexOf(selectedSlideRef.current!) ===
-        slideData.slides.length - 1
+        slideDataRef.current.slides.indexOf(selectedSlideRef.current!) ===
+        slideDataRef.current.slides.length - 1
       )
         return;
 
       selectedSlideIndexRef.current = selectedSlideIndexRef.current + 1;
-      setSelectedSlide(slideData.slides[selectedSlideIndexRef.current]);
+      setSelectedSlide(
+        slideDataRef.current.slides[selectedSlideIndexRef.current]
+      );
+      setActiveSlide(
+        slideDataRef.current.slides[selectedSlideIndexRef.current].id
+      );
     }
   };
 
@@ -87,8 +102,12 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
   const [isScrolled, setIsScrolled] = React.useState<boolean>(false);
 
   useEffect(() => {
-    slideContainer.current?.addEventListener("scroll", () => {
-      if (slideContainer.current?.scrollLeft !== 0) {
+    const slideContainerElem = document.getElementById("slide-container");
+    if (!slideContainer) return;
+
+    slideContainerElem?.addEventListener("scroll", () => {
+      if (slideContainerElem?.scrollLeft !== 0) {
+        console.log("scrolled", slideContainerElem?.scrollLeft);
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -145,20 +164,35 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
     calculateSize();
   }, [mode]);
 
+  const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const scrollLeft = e.currentTarget.scrollLeft;
+    if (scrollLeft !== 0) {
+      setIsScrolled(true);
+    } else {
+      setIsScrolled(false);
+    }
+  };
+
   return (
     <div
-      className=" h-[100px]  items-center justify-start  overflow-hidden flex flex-row relative bg-background  p-2 border shadow-md rounded-md"
+      className=" h-[100px]  items-center justify-start  overflow-hidden flex flex-row relative bg-background p-2 pb-0 border shadow-md rounded-md "
       style={{width: width}}
     >
-      <div
+      <ScrollArea
+        onScroll={onScroll}
         id="slide-container"
-        ref={slideContainer}
-        className="h-full  w-full max-h-full relative overflow-scroll"
+        viewPortRef={slideContainer}
+        style={{width: width}}
+        className="h-full  max-h-full  overflow-scroll pb-2 "
       >
         <div className="flex pr-16  flex-row w-fit  h-full justify-start items-start gap-4 z-20  relative ">
           <SlideMenu container={slideContainer} />
         </div>
-      </div>
+        <ScrollBar
+          orientation="horizontal"
+          className=" absolute z-30 bottom-0 "
+        />
+      </ScrollArea>
       {isScrolled && (
         <div className="absolute left-0 h-full  z-30 animate-in fade-in-0 duration-500">
           <div className="upload-row-edge-grad-left h-full w-20 z-30 pointer-events-none"></div>
@@ -171,7 +205,7 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
             createNewSlide();
             setTimeout(() => {
               slideContainer.current?.scrollTo({
-                top: slideContainer.current?.scrollHeight,
+                left: slideContainer.current?.scrollWidth,
                 behavior: "smooth",
               });
             }, 100);

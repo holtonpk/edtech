@@ -58,7 +58,7 @@ export function isTextBoxTypeArray(obj: any): obj is TextBoxType[] {
   return Array.isArray(obj) && obj.every(isTextBoxType);
 }
 
-function isSlideImage(obj: any): obj is SlideImage {
+export function isSlideImage(obj: any): obj is SlideImage {
   return (
     typeof obj === "object" &&
     obj !== null &&
@@ -73,7 +73,7 @@ function isSlideImage(obj: any): obj is SlideImage {
   );
 }
 
-function isSlideImageArray(obj: any): obj is SlideImage[] {
+export function isSlideImageArray(obj: any): obj is SlideImage[] {
   return Array.isArray(obj) && obj.every(isSlideImage);
 }
 

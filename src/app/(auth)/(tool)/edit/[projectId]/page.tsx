@@ -7,7 +7,10 @@ import Background from "./background";
 const EditPage = ({params}: {params: {projectId: string}}) => {
   return (
     <PresentationProvider projectId={params.projectId}>
-      <div className="h-screen  flex flex-col  gap-2">
+      <div
+        id="editPage-root"
+        className="h-screen w-screen  flex flex-col overflow-hidden gap-2"
+      >
         <Background />
         <ToolBar />
         <Editor />

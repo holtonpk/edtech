@@ -106,6 +106,7 @@ import TitleIcon from "@mui/icons-material/Title";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 export const Icons = {
+  imagePlaceholder: Image,
   addPage: SquarePlus,
   duplicate: CopyPlus,
   wand2: Wand2,

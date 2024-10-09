@@ -162,12 +162,14 @@ const Undo = () => {
     setHistoryIndex,
     setSelectedSlide,
     selectedSlide,
+    historyRef,
   } = usePresentation()!;
 
   const handleChangeIndex = (index: number) => {
-    if (index < 0 || index >= history.length) return;
+    if (!historyRef.current) return;
+    if (index < 0 || index >= historyRef.current.length) return;
     setHistoryIndex(index);
-    setSlideData(history[index]);
+    setSlideData(historyRef.current[index]);
     if (
       !history[historyIndex + index].slides.find(
         (slide) => slide.id === selectedSlide?.id
@@ -183,7 +185,7 @@ const Undo = () => {
         <Tooltip delayDuration={500}>
           <TooltipTrigger asChild>
             <Button
-              disabled={historyIndex >= history.length - 1}
+              disabled={historyIndex >= historyRef.current.length - 1}
               onClick={() => {
                 handleChangeIndex(historyIndex + 1);
               }}

@@ -44,12 +44,9 @@ const Move = () => {
 const Delete = () => {
   const {deleteMultiTextBoxes} = usePresentation()!;
 
-  const deleteTextBox = () => {
-    deleteMultiTextBoxes();
-  };
   return (
     <ActionButton
-      onClick={deleteTextBox}
+      onClick={deleteMultiTextBoxes}
       className="nodrag hover:bg-theme-red/30  p-2 text-theme-red "
     >
       <Icons.trash className="h-4 w-4 " />

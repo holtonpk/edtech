@@ -6,7 +6,8 @@ import {usePresentation} from "@/context/presentation-context";
 import {useTextBox} from "@/context/textbox-context";
 import TextboxActions from "./textbox-actions";
 import {Icons} from "@/components/icons";
-import {TextBoxType} from "@/config/data";
+import RotationDisplay from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-actions/rotation-display";
+
 const TextBox = () => {
   const {
     text,
@@ -34,8 +35,8 @@ const TextBox = () => {
     activeDragGlobal,
     setActiveDragGlobal,
     updateData,
-    copyTextBox,
-    cutTextBox,
+    copySelected,
+    cutSelected,
 
     mode,
     groupSelectedTextBoxes,
@@ -44,6 +45,8 @@ const TextBox = () => {
     setGroupSelectedTextBoxes,
     selectedForAiWrite,
     setSelectedForAiWrite,
+    setActiveSlide,
+    activeSlide,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -147,12 +150,12 @@ const TextBox = () => {
           if (e.key === "Backspace" && isSelected) {
             deleteTextBox();
           }
-          if (e.metaKey && e.key === "c") {
-            console.log("copyTextBox ==========");
-            copyTextBox();
+          if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+            console.log("copySelected ==========");
+            copySelected();
           }
-          if (e.metaKey && e.key === "x") {
-            cutTextBox();
+          if ((e.metaKey || e.ctrlKey) && e.key === "x") {
+            cutSelected();
           }
         }
       }
@@ -163,7 +166,7 @@ const TextBox = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isSelected, deleteTextBox, copyTextBox, cutTextBox]);
+  }, [isSelected, deleteTextBox, copySelected, cutSelected]);
 
   const [isCenteredX, setIsCenteredX] = React.useState<boolean>(false);
   const [isCenteredY, setIsCenteredY] = React.useState<boolean>(false);
@@ -230,6 +233,7 @@ const TextBox = () => {
               onDrag={handleDrag}
               position={position}
               onStop={() => {
+                setActiveSlide(undefined);
                 setActiveEdit(textBox.textBoxId);
                 setActiveTransform(false);
                 setActiveGroupSelectedTextBoxes(undefined);
@@ -247,16 +251,19 @@ const TextBox = () => {
               >
                 <div
                   ref={textBoxPlaceholderRef}
-                  className="h-fit w-full relative whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
+                  className="h-fit  w-full relative whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
                   dangerouslySetInnerHTML={{__html: text}}
                   id={`ui-focus-text-box-${textBox.textBoxId}`}
                   style={{
                     fontSize,
                     visibility: isSelected ? "hidden" : "visible",
                     transform: `rotate(${rotation}deg) `,
+                    textAlign: textBox.textAlign ? textBox.textAlign : "left",
                   }}
                   onClick={() => {
                     setActiveEdit(textBox.textBoxId);
+
+                    setActiveSlide(undefined);
                     setIsSelected(true);
                     setActiveGroupSelectedTextBoxes(undefined);
                   }}
@@ -273,11 +280,7 @@ const TextBox = () => {
                 )}
                 <TextboxActions />
 
-                {isRotating && (
-                  <div className="bg-black rounded-md border shadow-sm absolute p-2 text-white  left-1/2 -translate-x-1/2 -bottom-20 translate-y-full w-[50px] flex items-center justify-center">
-                    {rotation}°
-                  </div>
-                )}
+                {isRotating && <RotationDisplay rotation={rotation} />}
               </div>
             </Draggable>
 
@@ -291,7 +294,10 @@ const TextBox = () => {
                     className="h-fit w-full z-[50] relative nodrag whitespace-pre-wrap break-words overflow-hidden "
                     id={`text-box-${textBox.textBoxId}`}
                     dangerouslySetInnerHTML={{__html: text}}
-                    style={{fontSize}}
+                    style={{
+                      fontSize,
+                      textAlign: textBox.textAlign ? textBox.textAlign : "left",
+                    }}
                     contentEditable={true}
                   />
                 </ResizableBox>
@@ -311,6 +317,8 @@ const TextBox = () => {
       ) : (
         <div
           onClick={() => {
+            setActiveSlide(undefined);
+            setActiveSlide(undefined);
             if (!selectedForAiWrite) return;
             if (selectedForAiWrite.includes(textBox.textBoxId)) {
               setSelectedForAiWrite(

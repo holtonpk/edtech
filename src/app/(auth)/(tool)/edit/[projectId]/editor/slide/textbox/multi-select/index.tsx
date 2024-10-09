@@ -1,11 +1,9 @@
 import React, {useRef, useEffect, useState} from "react";
 import {usePresentation} from "@/context/presentation-context";
 import ResizableHandle from "./resizable-handle";
-import ScaleHandle from "./scale-handle";
-import {Position} from "@/config/data";
-import {set} from "zod";
 import Draggable from "react-draggable";
 import TextboxActions from "./multi-textbox-actions";
+import RotationDisplay from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-actions/rotation-display";
 
 const GroupSelection = () => {
   const {
@@ -14,15 +12,18 @@ const GroupSelection = () => {
     slideData,
     selectedSlide,
     setSlideData,
-    copyTextBox,
-    cutTextBox,
+    copySelected,
+    cutSelected,
     groupSelectedTextBoxes,
     deleteMultiTextBoxes,
     activeGroupSelectedImages,
   } = usePresentation()!;
 
   useEffect(() => {
-    console.log("activeGroupSelectedTextBoxes");
+    console.log(
+      "activeGroupSelectedTextBoxes ******************* ",
+      activeGroupSelectedTextBoxes
+    );
     let xMin = Infinity;
     let yMin = Infinity;
     let xMax = -Infinity;
@@ -368,11 +369,11 @@ const GroupSelection = () => {
           if (e.key === "Backspace") {
             deleteMultiTextBoxes();
           }
-          if (e.metaKey && e.key === "c") {
-            copyTextBox();
+          if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+            copySelected();
           }
-          if (e.metaKey && e.key === "x") {
-            cutTextBox();
+          if ((e.metaKey || e.ctrlKey) && e.key === "x") {
+            cutSelected();
           }
         }
       }
@@ -383,7 +384,11 @@ const GroupSelection = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [copyTextBox, cutTextBox, groupSelectedTextBoxes]);
+  }, [copySelected, cutSelected, groupSelectedTextBoxes]);
+
+  const showResizeHandles =
+    (activeGroupSelectedImages && activeGroupSelectedImages?.length === 0) ||
+    !activeGroupSelectedImages;
 
   return (
     <>
@@ -426,11 +431,7 @@ const GroupSelection = () => {
           />
         ))} */}
 
-            {isRotating && (
-              <div className="bg-black rounded-md border shadow-sm absolute p-2 text-white  left-1/2 -translate-x-1/2 -bottom-20 translate-y-full w-[50px] flex items-center justify-center">
-                {rotation}°
-              </div>
-            )}
+            {isRotating && <RotationDisplay rotation={rotation} />}
           </div>
         </Draggable>
 
@@ -448,7 +449,7 @@ const GroupSelection = () => {
             className={`absolute border-2 border-primary border-dashed top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px]`}
           />
 
-          {!activeGroupSelectedImages &&
+          {showResizeHandles &&
             resizeHandles.map((handleAxis) => (
               <ResizableHandle
                 key={handleAxis}

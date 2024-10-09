@@ -143,8 +143,6 @@ export const FontSelector = () => {
       });
     }) ?? []; // Ensure `documentFonts` is an empty array if `slideData` is undefined
 
-  console.log("documentFonts:", documentFonts);
-
   const suggestChangeAll =
     clickedFont &&
     documentFonts.some((font) => font.font === originalFont) &&

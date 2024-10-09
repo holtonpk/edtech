@@ -71,12 +71,14 @@ export interface SlideImage {
 }
 
 export interface TextBoxType {
+  boxType?: "heading" | "body";
   text: string;
   position: {x: number; y: number};
   size: {width: number};
   rotation: number;
   textBoxId: string;
   fontSize: number;
+  textAlign?: "left" | "center" | "right" | "justify";
 }
 
 export interface Size {

@@ -129,6 +129,9 @@ export const BackgroundImage = () => {
     selectedImage &&
     originalImage !== selectedImage;
 
+  console.log("selectedImage", selectedImage?.title);
+  console.log("orignialImage", originalImage?.title);
+
   useEffect(() => {
     if (suggestChangeAll) {
       const colorTab = document.getElementById("image-tab");
@@ -161,25 +164,41 @@ export const BackgroundImage = () => {
     setOriginalImage(selectedImage);
   };
 
+  const [defaultImages, setDefaultImages] = React.useState<ImageType[]>([]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const userRef = doc(db, "users", "TV8IByKFFFaupS1HV4qg6Xaw1Xc2");
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        console.log("ud", userSnap.data());
+        const defaultImages = userSnap.data().userImagesLocal;
+        setDefaultImages(defaultImages);
+      }
+    };
+    fetchImages();
+  }, []);
+
   return (
     <div className="w-full justify-end gap-1 items-center flex">
-      {selectedSlide?.backgroundImage && (
-        <TooltipProvider>
-          <Tooltip delayDuration={500}>
-            <TooltipTrigger asChild>
-              <button
-                onClick={removeBackgroundImage}
-                className="p-2 rounded-full h-fit w-fit hover:bg-muted"
-              >
-                <Icons.close className="h-4 w-4 " />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Remove background image</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
+      {selectedSlide?.backgroundImage &&
+        selectedSlide?.backgroundImage.path !== "undefined"! && (
+          <TooltipProvider>
+            <Tooltip delayDuration={500}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={removeBackgroundImage}
+                  className="p-2 rounded-full h-fit w-fit hover:bg-muted"
+                >
+                  <Icons.close className="h-4 w-4 " />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Remove background image</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       <Popover open={openMenu} onOpenChange={setOpenMenu}>
         <PopoverTrigger className="w-fit ">
           <TooltipProvider>
@@ -260,17 +279,18 @@ export const BackgroundImage = () => {
                 </div>
               </div>
             )}
-            {userImages && userImages.length > 0 && (
+            {defaultImages && defaultImages.length > 0 && (
               <div className="flex flex-col gap-2">
                 <Label className="font-bold">Default Images</Label>
 
                 <div className="h-fit max-h-[250px] overflow-scroll">
                   <div className="grid grid-cols-3 gap-2">
-                    {userImages.map((image: ImageType) => (
+                    {defaultImages.map((image: ImageType) => (
                       <button
                         key={image.title}
                         onClick={() => {
                           addImageToBackground(image);
+                          setSelectedImage(image);
                         }}
                         style={{
                           background: selectedSlide

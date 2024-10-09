@@ -5,6 +5,7 @@ import {usePresentation} from "@/context/presentation-context";
 import {ResizableImage} from "./resizable-image";
 import Draggable from "react-draggable";
 import ImageActions from "./image-actions";
+import RotationDisplay from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-actions/rotation-display";
 
 const Image = () => {
   const {
@@ -31,10 +32,13 @@ const Image = () => {
     activeDragGlobal,
     setActiveDragGlobal,
     updateImageData,
-    copyTextBox,
-    cutTextBox,
+    copySelected,
+    cutSelected,
     mode,
     groupSelectedImages,
+    selectedTextBox,
+    selectedImage,
+    setActiveSlide,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -120,24 +124,24 @@ const Image = () => {
     }
   };
 
-  useEffect(() => {
-    // listen for delete key
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // if textBoxRef is being edited, don't delete the text box. determine this by checking if the carrot is visible
-      const selection = window.getSelection();
-      if (selection?.focusNode?.nodeName !== "#text") {
-        if (e.key === "Backspace" && isSelected) {
-          deleteImage();
-        }
-      }
-    };
+  // useEffect(() => {
+  //   // listen for delete key
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     // if textBoxRef is being edited, don't delete the text box. determine this by checking if the carrot is visible
+  //     const selection = window.getSelection();
+  //     if (selection?.focusNode?.nodeName !== "#text") {
+  //       if (e.key === "Backspace" && isSelected) {
+  //         deleteImage();
+  //       }
+  //     }
+  //   };
 
-    document.addEventListener("keydown", handleKeyDown);
+  //   document.addEventListener("keydown", handleKeyDown);
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isSelected, deleteImage, copyTextBox, cutTextBox]);
+  //   return () => {
+  //     document.removeEventListener("keydown", handleKeyDown);
+  //   };
+  // }, [isSelected, deleteImage, copySelected, cutSelected]);
 
   const [isCenteredX, setIsCenteredX] = React.useState<boolean>(false);
   const [isCenteredY, setIsCenteredY] = React.useState<boolean>(false);
@@ -161,6 +165,42 @@ const Image = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTransform]);
+
+  useEffect(() => {
+    // listen for delete key
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // if textBoxRef is being edited, don't delete the text box. determine this by checking if the carrot is visible
+      const selection = window.getSelection();
+
+      const disableTextboxListeners =
+        e.target instanceof Element
+          ? e.target.classList.contains("disableTextboxListeners")
+          : false;
+
+      if (disableTextboxListeners) return;
+
+      if (selection?.focusNode?.nodeName !== "#text") {
+        if (selectedImage) {
+          if (e.key === "Backspace" && isSelected) {
+            deleteImage();
+          }
+          if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+            console.log("copySelected ==========");
+            copySelected();
+          }
+          if ((e.metaKey || e.ctrlKey) && e.key === "x") {
+            cutSelected();
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isSelected, deleteImage, copySelected, cutSelected, selectedImage]);
 
   return (
     <>
@@ -194,6 +234,7 @@ const Image = () => {
                 if (mode !== "aiRewrite") {
                   setActiveEdit(imageState.imageId);
                   setIsSelected(true);
+                  setActiveSlide(undefined);
                 }
               }}
               className="pointer-events-auto p-2 "
@@ -224,11 +265,7 @@ const Image = () => {
                 className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block`}
               />
             )}
-            {isRotating && (
-              <div className="bg-black rounded-md border shadow-sm absolute p-2 text-white  left-1/2 -translate-x-1/2 -bottom-20 translate-y-full w-[50px] flex items-center justify-center">
-                {rotation}°
-              </div>
-            )}
+            {isRotating && <RotationDisplay rotation={rotation} />}
           </div>
         </Draggable>
 

@@ -20,11 +20,18 @@ import {
   Position,
   Size,
   TextBoxesToUpdate,
+  SlideImage,
 } from "@/config/data";
 import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
 import {db} from "@/config/firebase";
 import {useRouter} from "next/navigation";
-import {isTextBoxType, isTextBoxTypeArray, isSlide} from "@/lib/utils";
+import {
+  isTextBoxType,
+  isTextBoxTypeArray,
+  isSlide,
+  isSlideImage,
+  isSlideImageArray,
+} from "@/lib/utils";
 import {
   getStorage,
   ref,
@@ -35,6 +42,7 @@ import {
 } from "firebase/storage";
 import {app} from "@/config/firebase";
 import debounce from "lodash.debounce";
+import {set} from "zod";
 
 interface PresentationContextType {
   // states -----------------------------
@@ -61,9 +69,11 @@ interface PresentationContextType {
   align: AlignType;
   setAlign: React.Dispatch<React.SetStateAction<AlignType>>;
   selectedTextBox: TextBoxType | undefined;
+  selectedImage: SlideImage | undefined;
   activeDragGlobal: boolean;
   setActiveDragGlobal: React.Dispatch<React.SetStateAction<boolean>>;
   history: SlideData[];
+  historyRef: React.MutableRefObject<SlideData[]>;
   setHistory: React.Dispatch<React.SetStateAction<SlideData[]>>;
   historyIndex: number;
   setHistoryIndex: React.Dispatch<React.SetStateAction<number>>;
@@ -96,9 +106,11 @@ interface PresentationContextType {
     React.SetStateAction<string[] | undefined>
   >;
   selectedSlideIndexRef: React.MutableRefObject<number>;
+  activeSlide: string | undefined;
+  setActiveSlide: React.Dispatch<React.SetStateAction<string | undefined>>;
+  activeSlideRef: React.MutableRefObject<string | undefined>;
   // functions -----------------------------
   uploadImage: (file: File) => void;
-  Generate: () => void;
   updateData: (value: Partial<TextBoxType>, textBoxId: string) => void;
   updateImageData: (value: Partial<TextBoxType>, imageId: string) => void;
   addRecentColor: (color: string) => void;
@@ -106,9 +118,9 @@ interface PresentationContextType {
   createNewSlide: (index?: number) => void;
   copySlide: (slideId: string) => void;
   deleteMultiTextBoxes: () => void;
-  copyTextBox: () => void;
-  cutTextBox: () => void;
-  pasteTextBox: () => void;
+  copySelected: () => void;
+  cutSelected: () => void;
+  pasteSelected: () => void;
   addImageToSlide: (image: Image, position?: Position, size?: Size) => void;
   updateMultipleTextBoxes: (textBoxesToUpdate: TextBoxesToUpdate[]) => void;
   addImageToBackground: (image: Image) => void;
@@ -143,6 +155,15 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   const [selectedSlide, setSelectedSlide] = React.useState<Slide | undefined>(
     undefined
   );
+
+  const [activeSlide, setActiveSlide] = useState<string | undefined>();
+
+  const activeSlideRef = useRef<string | undefined>(activeSlide);
+
+  useEffect(() => {
+    activeSlideRef.current = activeSlide;
+  }, [activeSlide]);
+
   // const [selectedSlide, setSelectedSlide] = React.useState<Slide | undefined>(
   //   DummyData.slides[0]
   // );
@@ -167,11 +188,16 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     [selectedSlide, activeEdit]
   );
 
+  const selectedImage = useMemo(
+    () => selectedSlide?.images.find((image) => image.imageId === activeEdit),
+    [selectedSlide, activeEdit]
+  );
+
   const [history, setHistory] = useState<SlideData[]>([]);
 
   const [historyIndex, setHistoryIndex] = useState<number>(0);
 
-  const historyRef = useRef<SlideData[] | undefined>();
+  const historyRef = useRef<SlideData[]>([]);
 
   const [selectedForAiWrite, setSelectedForAiWrite] = useState<
     string[] | undefined
@@ -189,26 +215,29 @@ export const PresentationProvider = ({children, projectId}: Props) => {
 
   const handleChangeIndex = useCallback(
     (index: number) => {
-      if (historyIndex + index < 0 || index + historyIndex >= history.length)
+      if (
+        historyIndex + index < 0 ||
+        index + historyIndex >= historyRef.current.length
+      )
         return;
       setHistoryIndex(historyIndex + index);
-      setSlideData(history[historyIndex + index]);
+      setSlideData(historyRef.current[historyIndex + index]);
 
       if (
-        !history[historyIndex + index].slides.find(
+        !historyRef.current[historyIndex + index].slides.find(
           (slide) => slide.id === selectedSlide?.id
         )
       ) {
-        setSelectedSlide(history[historyIndex + index].slides[0]);
+        setSelectedSlide(historyRef.current[historyIndex + index].slides[0]);
       }
     },
-    [historyIndex, setHistoryIndex, history]
+    [historyIndex, setHistoryIndex, historyRef.current]
   );
 
   const handleCommandZ = (e: KeyboardEvent) => {
-    if (e.metaKey && e.shiftKey && e.key === "z") {
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "z") {
       handleChangeIndex(-1);
-    } else if (e.metaKey && e.key === "z") {
+    } else if ((e.metaKey || e.ctrlKey) && e.key === "z") {
       handleChangeIndex(1);
     }
   };
@@ -234,37 +263,6 @@ export const PresentationProvider = ({children, projectId}: Props) => {
       slideData.slides.find((slide) => slide.id === selectedSlide.id)
     );
   }, [slideData]);
-
-  const router = useRouter();
-
-  // functions -----------------------------
-  async function Generate() {
-    setIsGenerating(true);
-    const response = await fetch("/api/gen-presentation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title,
-        studyMaterial: DummyUpload,
-        description,
-        numOfSlides: numOfSlides[0],
-      }),
-    });
-    const data = await response.json();
-
-    setSlideData(JSON.parse(data.response));
-    setSelectedSlide(JSON.parse(data.response).slides[0]);
-    setIsGenerating(false);
-    // save to db
-
-    const docRef = await addDoc(collection(db, "presentations"), {
-      slideData: JSON.parse(data.response),
-    });
-
-    router.push(`/edit/${docRef.id}`);
-  }
 
   const dataIsFetched = useRef(false);
 
@@ -466,6 +464,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         : slideDataRef.current.slides.indexOf(selectedSlideRef.current!);
 
     setSelectedSlide(updatedSlideData.slides[newIndex]);
+    setActiveSlide(updatedSlideData.slides[newIndex].id);
   };
 
   const slideClipboard = useRef<string | undefined>(undefined);
@@ -488,118 +487,50 @@ export const PresentationProvider = ({children, projectId}: Props) => {
 
   // };
 
-  async function copyTextBox() {
+  async function copySelected() {
     if (selectedTextBox) {
-      const copiedTextBox = {
-        ...selectedTextBox,
-        textBoxId: Math.random().toString(),
-        position: {
-          x: selectedTextBox.position.x + 10,
-          y: selectedTextBox.position.y + 10,
-        },
-      };
-      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
-      slideClipboard.current = JSON.stringify(copiedTextBox);
-    } else if (activeGroupSelectedTextBoxes) {
-      const copiedTextBoxes = activeGroupSelectedTextBoxes.flatMap(
-        (textBoxId) => {
-          return slideData?.slides.flatMap((slide) => {
-            if (slide.id === selectedSlide?.id) {
-              return slide.textBoxes
-                .filter((textBox) => textBox.textBoxId === textBoxId) // Filter out non-matching textBoxes
-                .map((textBox) => {
-                  return {
-                    ...textBox,
-                    textBoxId: Math.random().toString(),
-                    position: {
-                      x: textBox.position.x + 10,
-                      y: textBox.position.y + 10,
-                    },
-                  };
-                });
-            }
-            return [];
-          });
-        }
-      );
-      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
-      slideClipboard.current = JSON.stringify(copiedTextBoxes);
+      slideClipboard.current = JSON.stringify(selectedTextBox);
+    } else if (selectedImage) {
+      slideClipboard.current = JSON.stringify(selectedImage);
+    } else {
+      const copiedTextBoxes = activeGroupSelectedTextBoxes?.length
+        ? activeGroupSelectedTextBoxes.flatMap((textBoxId) =>
+            slideData?.slides.flatMap((slide) =>
+              slide.id === selectedSlide?.id
+                ? slide.textBoxes
+                    .filter((tb) => tb.textBoxId === textBoxId)
+                    .map((tb) => tb)
+                : []
+            )
+          )
+        : [];
+
+      const copiedImages = activeGroupSelectedImages?.length
+        ? activeGroupSelectedImages.flatMap((imageId) =>
+            slideData?.slides.flatMap((slide) =>
+              slide.id === selectedSlide?.id
+                ? slide.images
+                    .filter((img) => img.imageId === imageId)
+                    .map((img) => img)
+                : []
+            )
+          )
+        : [];
+
+      if (copiedTextBoxes.length > 0 || copiedImages.length > 0) {
+        const copiedData = {textBoxes: copiedTextBoxes, images: copiedImages};
+        slideClipboard.current = JSON.stringify(copiedData);
+      }
     }
   }
 
-  async function cutTextBox() {
-    if (!selectedSlideRef.current || !slideDataRef.current) return;
-
-    let newSlideData;
-    if (selectedTextBox) {
-      const copiedTextBox = {
-        ...selectedTextBox,
-        textBoxId: Math.random().toString(),
-        position: {
-          x: selectedTextBox.position.x + 10,
-          y: selectedTextBox.position.y + 10,
-        },
-      };
-      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBox));
-      slideClipboard.current = JSON.stringify(copiedTextBox);
-
-      newSlideData = slideDataRef.current.slides.map((slide) => {
-        if (slide.id === selectedSlideRef.current!.id) {
-          return {
-            ...slide,
-            textBoxes: slide.textBoxes.filter(
-              (textB) => textB.textBoxId !== selectedTextBox.textBoxId
-            ),
-          };
-        }
-        return slide;
-      });
-      setActiveEdit(undefined);
-    } else if (activeGroupSelectedTextBoxes) {
-      const copiedTextBoxes = activeGroupSelectedTextBoxes.flatMap(
-        (textBoxId) => {
-          return slideData?.slides.flatMap((slide) => {
-            if (slide.id === selectedSlide?.id) {
-              return slide.textBoxes
-                .filter((textBox) => textBox.textBoxId === textBoxId) // Filter out non-matching textBoxes
-                .map((textBox) => {
-                  return {
-                    ...textBox,
-                    textBoxId: Math.random().toString(),
-                    position: {
-                      x: textBox.position.x + 10,
-                      y: textBox.position.y + 10,
-                    },
-                  };
-                });
-            }
-            return [];
-          });
-        }
-      );
-      // await navigator.clipboard.writeText(JSON.stringify(copiedTextBoxes));
-      slideClipboard.current = JSON.stringify(copiedTextBoxes);
-      newSlideData = slideDataRef.current.slides.map((slide) => {
-        if (slide.id === selectedSlideRef.current!.id) {
-          return {
-            ...slide,
-            textBoxes: slide.textBoxes.filter(
-              (textB) =>
-                !activeGroupSelectedTextBoxes?.includes(textB.textBoxId)
-            ),
-          };
-        }
-        return slide;
-      });
-      setGroupSelectedTextBoxes(undefined);
-    }
-    if (newSlideData) {
-      setSlideData({...slideDataRef.current, slides: newSlideData});
-      setHistory([{...slideDataRef.current, slides: newSlideData}, ...history]);
-    }
-  }
-
-  async function pasteTextBox() {
+  async function pasteSelected() {
+    console.log(
+      "pasteSelected",
+      selectedSlideRef.current,
+      slideDataRef.current,
+      slideClipboard.current
+    );
     if (
       !selectedSlideRef.current ||
       !slideDataRef.current ||
@@ -617,41 +548,322 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     }
 
     let newSlideData: Slide[] | undefined;
+    if (isSlide(parsedData)) {
+      // add parsed data to slide data as a new slide
+      // newSlideData = slideDataRef.current.slides.map((slide) => slide);
+      // newSlideData.push(parsedData);
+      console.log("newSlideData &&&&&&&&&&&&&", selectedSlideIndexRef.current);
+      const copiedTextBoxes = parsedData.textBoxes.map(
+        (textBox: TextBoxType) => ({
+          ...textBox,
+          textBoxId: Math.random().toString(),
+        })
+      );
 
-    if (isTextBoxType(parsedData)) {
+      const copiedDataImage = parsedData.images.map((image: SlideImage) => ({
+        ...image,
+        imageId: Math.random().toString(),
+      }));
+
+      const copiedSlideData = {
+        ...parsedData,
+        id: Math.random().toString(),
+        textBoxes: copiedTextBoxes,
+        images: copiedDataImage,
+      };
+
+      setSlideData({
+        ...slideDataRef.current,
+        slides: [
+          ...slideDataRef.current.slides.slice(
+            0,
+            selectedSlideIndexRef.current !== undefined
+              ? selectedSlideIndexRef.current + 1
+              : slideDataRef.current.slides.length
+          ),
+          copiedSlideData,
+          ...slideDataRef.current.slides.slice(
+            selectedSlideIndexRef.current !== undefined
+              ? selectedSlideIndexRef.current + 1
+              : slideDataRef.current.slides.length
+          ),
+        ],
+      });
+
+      return;
+    } else if (
+      isTextBoxTypeArray(parsedData.textBoxes) &&
+      parsedData.textBoxes.length > 0 &&
+      isSlideImageArray(parsedData.images) &&
+      parsedData.images.length > 0
+    ) {
+      // Ensure newSlideData is correctly updated and no undefined is returned
+
+      const copiedData = {
+        textBoxes: parsedData.textBoxes.map((textBox: TextBoxType) => ({
+          ...textBox,
+          textBoxId: Math.random().toString(),
+          position: {
+            x: textBox.position.x + 20,
+            y: textBox.position.y + 20,
+          },
+        })),
+        images: parsedData.images.map((image: SlideImage) => ({
+          ...image,
+          imageId: Math.random().toString(),
+          position: {
+            x: image.position.x + 20,
+            y: image.position.y + 20,
+          },
+        })),
+      };
+      slideClipboard.current = JSON.stringify(copiedData);
+
+      newSlideData = slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlideRef.current!.id) {
+          // Update the selected slide with the new text boxes and images
+          return {
+            ...slide,
+            textBoxes: [...slide.textBoxes, ...copiedData.textBoxes],
+            images: [...slide.images, ...copiedData.images],
+          };
+        }
+        // Return the slide unchanged if it doesn't match the selectedSlide id
+        return slide;
+      });
+
+      // Set the group selections with the newly pasted textBoxes and images
+      setTimeout(() => {
+        setGroupSelectedTextBoxes([
+          ...copiedData.textBoxes.flatMap((tb: TextBoxType) => tb.textBoxId),
+        ]);
+        setGroupSelectedImages([
+          ...copiedData.images.flatMap((img: SlideImage) => img.imageId),
+        ]);
+      }, 10);
+    } else if (isTextBoxType(parsedData)) {
+      const copiedData = {
+        ...parsedData,
+        textBoxId: Math.random().toString(),
+        position: {
+          x: parsedData.position.x + 20,
+          y: parsedData.position.y + 20,
+        },
+      };
+      slideClipboard.current = JSON.stringify(copiedData);
+
       newSlideData = slideDataRef.current.slides.map((slide) => {
         if (slide.id === selectedSlideRef.current!.id) {
           return {
             ...slide,
-            textBoxes: [...slide.textBoxes, parsedData],
+            textBoxes: [...slide.textBoxes, copiedData],
           };
         }
         return slide;
       });
       setTimeout(() => {
-        setActiveEdit(parsedData.textBoxId);
+        setActiveEdit(copiedData.textBoxId);
       }, 10);
-    } else if (isTextBoxTypeArray(parsedData)) {
+    } else if (
+      isTextBoxTypeArray(parsedData.textBoxes) &&
+      parsedData.textBoxes.length > 0
+    ) {
+      const copiedData = parsedData.textBoxes.map((textBox: TextBoxType) => ({
+        ...textBox,
+        textBoxId: Math.random().toString(),
+        position: {
+          x: textBox.position.x + 20,
+          y: textBox.position.y + 20,
+        },
+      }));
+      slideClipboard.current = JSON.stringify(copiedData);
+
       newSlideData = slideDataRef.current.slides.map((slide) => {
         if (slide.id === selectedSlideRef.current!.id) {
           return {
             ...slide,
-            textBoxes: [...slide.textBoxes, ...parsedData],
+            textBoxes: [...slide.textBoxes, ...copiedData],
           };
         }
         return slide;
       });
-      setGroupSelectedTextBoxes(parsedData.map((tb) => tb.textBoxId));
-    } else if (isSlide(parsedData)) {
-      // add parsed data to slide data as a new slide
-      newSlideData = slideDataRef.current.slides.map((slide) => slide);
-      newSlideData.push(parsedData);
-      setSelectedSlide(parsedData);
+      setTimeout(() => {
+        setGroupSelectedTextBoxes(
+          copiedData.map((tb: TextBoxType) => tb.textBoxId)
+        );
+      }, 10);
+    } else if (isSlideImage(parsedData)) {
+      const copiedData = {
+        ...parsedData,
+        imageId: Math.random().toString(),
+        position: {
+          x: parsedData.position.x + 20,
+          y: parsedData.position.y + 20,
+        },
+      };
+
+      slideClipboard.current = JSON.stringify(copiedData);
+      newSlideData = slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlideRef.current!.id) {
+          return {
+            ...slide,
+            images: [...slide.images, copiedData],
+          };
+        }
+        return slide;
+      });
+      setTimeout(() => {
+        setActiveEdit(copiedData.imageId);
+      }, 10);
+    } else if (
+      isSlideImageArray(parsedData.images) &&
+      parsedData.images.length > 0
+    ) {
+      const copiedData = parsedData.images.map((image: SlideImage) => ({
+        ...image,
+        imageId: Math.random().toString(),
+        position: {
+          x: image.position.x + 20,
+          y: image.position.y + 20,
+        },
+      }));
+      slideClipboard.current = JSON.stringify(copiedData);
+
+      newSlideData = slideDataRef.current.slides.map((slide) => {
+        if (slide.id === selectedSlideRef.current!.id) {
+          return {
+            ...slide,
+            images: [...slide.images, ...copiedData],
+          };
+        }
+        return slide;
+      });
+      setTimeout(() => {
+        setGroupSelectedImages(
+          copiedData.images.map((img: SlideImage) => img.imageId)
+        );
+      }, 10);
     }
+    console.log(
+      "newSlideData -----------------------",
+      isSlide(parsedData),
+      parsedData
+    );
 
     if (newSlideData) {
       setSlideData({...slideDataRef.current, slides: newSlideData});
       setHistory([{...slideDataRef.current, slides: newSlideData}, ...history]);
+    }
+  }
+
+  async function cutSelected() {
+    await copySelected();
+
+    if (slideClipboard.current && slideDataRef.current) {
+      // remove clipboard items from slideData
+      const parsedData = JSON.parse(slideClipboard.current);
+      let newSlideData: Slide[] | undefined;
+      if (
+        isTextBoxTypeArray(parsedData.textBoxes) &&
+        parsedData.textBoxes.length > 0 &&
+        isSlideImageArray(parsedData.images) &&
+        parsedData.images.length > 0
+      ) {
+        newSlideData = slideDataRef.current.slides.map((slide) => {
+          if (slide.id === selectedSlideRef.current!.id) {
+            return {
+              ...slide,
+              textBoxes: slide.textBoxes.filter(
+                (textBox) =>
+                  !parsedData.textBoxes
+                    .map((tb: TextBoxType) => tb.textBoxId)
+                    .includes(textBox.textBoxId)
+              ),
+              images: slide.images.filter(
+                (image) =>
+                  !parsedData.images
+                    .map((img: SlideImage) => img.imageId)
+                    .includes(image.imageId)
+              ),
+            };
+          }
+          return slide;
+        });
+        setGroupSelectedTextBoxes(undefined);
+        setGroupSelectedImages(undefined);
+      } else if (isTextBoxType(parsedData)) {
+        newSlideData = slideDataRef.current.slides.map((slide) => {
+          if (slide.id === selectedSlideRef.current!.id) {
+            return {
+              ...slide,
+              textBoxes: slide.textBoxes.filter(
+                (textBox) => textBox.textBoxId !== parsedData.textBoxId
+              ),
+            };
+          }
+          return slide;
+        });
+        setActiveEdit(undefined);
+      } else if (
+        isTextBoxTypeArray(parsedData.textBoxes) &&
+        parsedData.textBoxes.length > 0
+      ) {
+        newSlideData = slideDataRef.current.slides.map((slide) => {
+          if (slide.id === selectedSlideRef.current!.id) {
+            return {
+              ...slide,
+              textBoxes: slide.textBoxes.filter(
+                (textBox) =>
+                  !parsedData.textBoxes
+                    .map((tb: TextBoxType) => tb.textBoxId)
+                    .includes(textBox.textBoxId)
+              ),
+            };
+          }
+          return slide;
+        });
+        setGroupSelectedTextBoxes(undefined);
+      } else if (isSlideImage(parsedData)) {
+        newSlideData = slideDataRef.current.slides.map((slide) => {
+          if (slide.id === selectedSlideRef.current!.id) {
+            return {
+              ...slide,
+              images: slide.images.filter(
+                (image) => image.imageId !== parsedData.imageId
+              ),
+            };
+          }
+          return slide;
+        });
+        setActiveEdit(undefined);
+      } else if (
+        isSlideImageArray(parsedData.images) &&
+        parsedData.images.length > 0
+      ) {
+        newSlideData = slideDataRef.current.slides.map((slide) => {
+          if (slide.id === selectedSlideRef.current!.id) {
+            return {
+              ...slide,
+              images: slide.images.filter(
+                (image) =>
+                  !parsedData.images
+                    .map((img: SlideImage) => img.imageId)
+                    .includes(image.imageId)
+              ),
+            };
+          }
+          return slide;
+        });
+        setGroupSelectedImages(undefined);
+      }
+
+      if (newSlideData) {
+        setSlideData({...slideDataRef.current, slides: newSlideData});
+        setHistory([
+          {...slideDataRef.current, slides: newSlideData},
+          ...history,
+        ]);
+      }
     }
   }
 
@@ -667,6 +879,10 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   useEffect(() => {
     console.log("selectedSlideIndex", selectedSlideIndexRef);
     selectedSlideRef.current = selectedSlide;
+    if (selectedSlide) {
+      selectedSlideIndexRef.current =
+        slideData?.slides.indexOf(selectedSlide) || 0;
+    }
   }, [selectedSlide]);
 
   const defaultColor = "#000000";
@@ -804,6 +1020,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     };
 
     setSlideData(updatedSlideData);
+    setActiveEdit(imageId);
   };
 
   const addImageToBackground = (image: Image) => {
@@ -841,8 +1058,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   >([]);
 
   const deleteMultiTextBoxes = () => {
-    if (!selectedSlide || !slideData) return;
-    const newSlideData = slideData.slides.map((slide) => {
+    if (!selectedSlide || !slideDataRef.current) return;
+    const newSlideData = slideDataRef.current.slides.map((slide) => {
       if (slide.id === selectedSlide.id) {
         return {
           ...slide,
@@ -856,15 +1073,17 @@ export const PresentationProvider = ({children, projectId}: Props) => {
       }
       return slide;
     });
-    setSlideData({...slideData, slides: newSlideData});
-    setHistory([{...slideData, slides: newSlideData}, ...history]);
+    setSlideData({...slideDataRef.current, slides: newSlideData});
+    setHistory([{...slideDataRef.current, slides: newSlideData}, ...history]);
     setActiveGroupSelectedTextBoxes(undefined);
     setGroupSelectedTextBoxes(undefined);
     setActiveGroupSelectedImages(undefined);
     setGroupSelectedImages(undefined);
   };
 
-  // console.log("groupSelect", groupSelectedTextBoxes);
+  useEffect(() => {
+    console.log("groupSelect &&&&&&", activeGroupSelectedTextBoxes);
+  }, [activeGroupSelectedTextBoxes]);
 
   const values = {
     // states -----------------------------
@@ -891,7 +1110,9 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     align,
     setAlign,
     selectedTextBox,
+    selectedImage,
     history,
+    historyRef,
     setHistory,
     historyIndex,
     setHistoryIndex,
@@ -909,8 +1130,11 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     activeGroupSelectedImages,
     setActiveGroupSelectedImages,
     selectedSlideIndexRef,
+    activeSlide,
+    setActiveSlide,
+    activeSlideRef,
     // functions -----------------------------
-    Generate,
+
     updateData,
     activeDragGlobal,
     setActiveDragGlobal,
@@ -921,9 +1145,9 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     copySlide,
     deleteMultiTextBoxes,
     selectedSlideRef,
-    copyTextBox,
-    cutTextBox,
-    pasteTextBox,
+    copySelected,
+    cutSelected,
+    pasteSelected,
     uploadImage,
     addImageToSlide,
     updateImageData,
