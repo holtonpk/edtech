@@ -5,6 +5,9 @@ import SlideSelector from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide
 import {ActionTabs} from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/action-tabs";
 import Slide from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide";
 import {Button} from "@/components/ui/button";
+import {Progress} from "@/components/ui/progress";
+import {Icons} from "@/components/icons";
+import Background from "../background";
 
 const Editor = () => {
   const {slideData, createNewSlide, mode} = usePresentation()!;
@@ -31,8 +34,37 @@ const Editor = () => {
     };
   }, []);
 
+  const [loadingProgress, setLoadingProgress] = React.useState(0);
+
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  useEffect(() => {
+    if (loadingProgress <= 100) {
+      setTimeout(() => {
+        setLoadingProgress(loadingProgress + 1);
+        if (loadingProgress === 100) {
+          setIsLoading(false);
+        }
+      }, 5);
+    }
+  }, [loadingProgress]);
+
   return (
     <div className="editor-container editorContainer-size  z-30  flex flex-col relative mx-auto">
+      {isLoading && (
+        <div className="flex fixed flex-col items-center justify-center  gap-4 top-0 z-[9999] w-screen h-screen bg-background">
+          <Background />
+          <div className="p-6 rounded-lg h-fit w-fit bg-primary/20">
+            <Icons.logo className="h-20 w-20 text-theme-blue" />
+          </div>
+          {/* <Icons.spinner className="animate-spin h-10 w-10 text-theme-blue" /> */}
+          <Progress
+            value={loadingProgress}
+            className="w-[200px] bg-primary/5 border border-border"
+          />
+        </div>
+      )}
+
       {slideData && (
         <div
           className={`  h-full  items-center grid gap-2 relative w-full 

@@ -77,6 +77,7 @@ import {
   Wand2,
   CopyPlus,
   SquarePlus,
+  Shrink,
 } from "lucide-react";
 
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
@@ -106,6 +107,8 @@ import TitleIcon from "@mui/icons-material/Title";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 export const Icons = {
+  logo: Lightbulb,
+  exitFullScreen: Shrink,
   imagePlaceholder: Image,
   addPage: SquarePlus,
   duplicate: CopyPlus,

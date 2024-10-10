@@ -69,8 +69,6 @@ const LayoutPreview = ({layout}: {layout: Layout}) => {
     }, 250);
   }, [hoveredIndex]);
 
-  console.log("hoverIndex *************", hoveredIndex);
-
   const {slideDataRef, selectedSlideRef, setSlideData} = usePresentation()!;
 
   const applyLayout = () => {

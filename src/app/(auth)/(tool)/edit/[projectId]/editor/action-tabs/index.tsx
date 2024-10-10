@@ -52,84 +52,12 @@ export const ActionTabs = () => {
 };
 
 const ActionPanel = () => {
-  const {mode, setMode} = usePresentation()!;
-
-  const TabButtons = [
-    {
-      name: "Themes",
-      description: "Change the look and feel of your presentation",
-      value: "themes",
-      icon: Icons.theme,
-      color: "hsla(0 100% 50 / 1)",
-      height: "380",
-      HoverElement: (
-        <HoverContainer id="themes">
-          <Themes />
-        </HoverContainer>
-      ),
-    },
-    {
-      name: "Layouts",
-      description: "Change the layout of your slides",
-      value: "layout",
-      icon: Icons.layout,
-      color: "hsla(21 92% 47% / 1)",
-      height: "500",
-
-      HoverElement: (
-        <HoverContainer id="layout">
-          <Layouts />
-        </HoverContainer>
-      ),
-    },
-
-    {
-      name: "Text",
-      description: "Add text to your slides",
-      value: "text",
-      icon: Icons.text,
-      color: "hsla(212 90% 58% / 1)",
-      height: "350",
-
-      HoverElement: (
-        <HoverContainer id="text">
-          <Text />
-        </HoverContainer>
-      ),
-    },
-    {
-      name: "Images",
-      description: "Add images to your slides",
-      value: "images",
-      icon: Icons.image,
-      color: "hsla(259 82% 67% / 1)",
-      height: "300",
-
-      HoverElement: (
-        <HoverContainer id="images">
-          <Images />
-        </HoverContainer>
-      ),
-    },
-    {
-      name: "Ai Write",
-      description: "Use the power of AI to quickly rewrite your content",
-      value: "aiRewrite",
-      icon: Icons.magicWand,
-      color: "hsla(138 40% 48% / 1)",
-      height: "440",
-
-      HoverElement: (
-        <HoverContainer id="aiRewrite">
-          <AiRewrite />
-        </HoverContainer>
-      ),
-    },
-  ];
+  const {mode, setMode, uploadImage} = usePresentation()!;
 
   // const [hoverValue, setHoverValue] = React.useState<string | null>(null);
 
-  const {isHovering, setIsHovering, setHoveredIndex} = useHover()!;
+  const {isHovering, setIsHovering, setHoveredIndex, setIsHoveringGroup} =
+    useHover()!;
   const [hoverValue, setHoverValue] = React.useState<string | null>(null);
 
   const hoveredIndex = useRef<number | null>(null);
@@ -282,6 +210,96 @@ const ActionPanel = () => {
     onHoverGroup;
   };
 
+  const [isLoaderImage, setIsLoaderImage] = React.useState(false);
+
+  const TabButtons = [
+    {
+      name: "Themes",
+      description: "Change the look and feel of your presentation",
+      value: "themes",
+      icon: Icons.theme,
+      color: "hsla(0 100% 50 / 1)",
+      height: "380",
+      HoverElement: (
+        <HoverContainer id="themes">
+          <Themes />
+        </HoverContainer>
+      ),
+    },
+    {
+      name: "Layouts",
+      description: "Change the layout of your slides",
+      value: "layout",
+      icon: Icons.layout,
+      color: "hsla(21 92% 47% / 1)",
+      height: "500",
+
+      HoverElement: (
+        <HoverContainer id="layout">
+          <Layouts />
+        </HoverContainer>
+      ),
+    },
+
+    {
+      name: "Text",
+      description: "Add text to your slides",
+      value: "text",
+      icon: Icons.text,
+      color: "hsla(212 90% 58% / 1)",
+      height: "350",
+
+      HoverElement: (
+        <HoverContainer id="text">
+          <Text />
+        </HoverContainer>
+      ),
+    },
+    {
+      name: "Images",
+      description: "Add images to your slides",
+      value: "images",
+      icon: Icons.image,
+      color: "hsla(259 82% 67% / 1)",
+      height: "240",
+
+      HoverElement: (
+        <HoverContainer id="images">
+          <Images
+            onFileChange={onFileChange}
+            isLoaderImage={isLoaderImage}
+            setIsLoaderImage={setIsLoaderImage}
+          />
+        </HoverContainer>
+      ),
+    },
+    {
+      name: "Ai Write",
+      description: "Use the power of AI to quickly rewrite your content",
+      value: "aiRewrite",
+      icon: Icons.magicWand,
+      color: "hsla(138 40% 48% / 1)",
+      height: "440",
+
+      HoverElement: (
+        <HoverContainer id="aiRewrite">
+          <AiRewrite />
+        </HoverContainer>
+      ),
+    },
+  ];
+
+  // this is for image tab probably should be moved to images component but for now it's here
+  async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setIsLoaderImage(true);
+    setMode("images");
+    setIsHovering(false);
+    setIsHoveringGroup(false);
+    // onHoverGroupOff();
+    await uploadImage(e.target.files![0]);
+    setIsLoaderImage(false);
+  }
+
   return (
     <div className="flex h-full justify-center relative  origin-right  ">
       <div
@@ -397,7 +415,13 @@ ${mode === tab.value && "bg-muted-foreground/5"}
       {mode === "aiRewrite" && <AiRewrite />}
       {mode === "themes" && <Themes />}
       {mode === "text" && <Text />}
-      {mode === "images" && <Images />}
+      {mode === "images" && (
+        <Images
+          onFileChange={onFileChange}
+          isLoaderImage={isLoaderImage}
+          setIsLoaderImage={setIsLoaderImage}
+        />
+      )}
       {mode === "layout" && <Layouts />}
     </div>
   );

@@ -502,7 +502,7 @@ const SlideContainer = ({
         width: width,
         height: height,
       }}
-      className={` overflow-hidden  p-0 items-center justify-center relative text-black flex flex-col border border-foreground/10 rounded-md  z-[50] 
+      className={` p-0 items-center justify-center relative text-black flex flex-col border overflow-hidden border-foreground/10 rounded-md  z-[50] 
         ${isSelecting ? " cursor-crosshair" : ""}
         `}
     >

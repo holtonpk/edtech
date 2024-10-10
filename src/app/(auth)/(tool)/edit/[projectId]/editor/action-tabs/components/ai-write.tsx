@@ -133,14 +133,14 @@ const AiRewrite = () => {
       buttonLabel: "Replace",
       prompt: "Make this more fun",
     },
-    {
-      label: "Add More Detail",
-      icon: Icons.pencil,
-      description: "Expand on this",
-      background: "bg-primary",
-      buttonLabel: "Replace",
-      prompt: "Expand on this",
-    },
+    // {
+    //   label: "Add More Detail",
+    //   icon: Icons.pencil,
+    //   description: "Expand on this",
+    //   background: "bg-primary",
+    //   buttonLabel: "Replace",
+    //   prompt: "Expand on this",
+    // },
     {
       label: "Custom Rewrite",
       icon: Icons.wand2,
@@ -165,7 +165,7 @@ const AiRewrite = () => {
             title={selectedPreset?.label}
             description={selectedPreset?.description}
           >
-            <div className="h-fit">
+            <div className="h-fit ">
               <div className="flex flex-col gap-2 h-full">
                 <div className="flex flex-col   rounded-sm mt-3 border ">
                   <div className="flex justify-between  w-full  p-3  items-center">
@@ -298,7 +298,7 @@ const AiRewrite = () => {
             description="Use the power of AI to quickly rewrite your content"
           >
             <div className="flex flex-col gap-3 mt-4 flex-grow ">
-              <div className="gap-4 flex flex-col justify-between w-full ">
+              <div className="gap-4 flex flex-col justify-between w-full mt-2 ">
                 {/* <Label className="font-bold">Magic Options</Label> */}
                 {AiRewritePresets.map((preset, i) => (
                   <button
@@ -321,7 +321,7 @@ const AiRewrite = () => {
                         {preset.description}
                       </span>
                     </div>
-                    <Icons.chevronRight className="h-4 w-4 ml-auto " />
+                    <Icons.chevronRight className="h-4 w-4 ml-auto transition-transform duration-700 group-hover:translate-x-[5px]" />
                   </button>
                 ))}
               </div>

@@ -6,7 +6,8 @@ import {usePresentation} from "@/context/presentation-context";
 import {Label} from "@/components/ui/label";
 import {Modes, Position, Image as ImageType} from "@/config/data";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import googleFonts from "@/public/fonts/fonts.json";
+import {ScrollArea} from "@/components/ui/scroll-area";
+
 import {
   Tooltip,
   TooltipContent,
@@ -16,7 +17,7 @@ import {
 import {ColorMenu} from "./color-menu";
 import {DocumentColor} from "@/config/data";
 import {db} from "@/config/firebase";
-import {doc, getDoc, or} from "firebase/firestore";
+import {doc, getDoc, or, updateDoc} from "firebase/firestore";
 import {useAuth} from "@/context/user-auth";
 
 export const BackgroundImage = () => {
@@ -90,9 +91,13 @@ export const BackgroundImage = () => {
     ImageType | undefined
   >(undefined);
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    uploadImage(e.target.files![0]);
-  };
+  const [isLoaderImage, setIsLoaderImage] = React.useState(false);
+
+  async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setIsLoaderImage(true);
+    await uploadImage(e.target.files![0]);
+    setIsLoaderImage(false);
+  }
 
   const removeBackgroundImage = () => {
     if (slideDataRef.current && selectedSlide) {
@@ -179,6 +184,23 @@ export const BackgroundImage = () => {
     fetchImages();
   }, []);
 
+  const deleteImage = async (image: ImageType) => {
+    if (currentUser) {
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userImages = userSnap.data().userImagesLocal;
+        const updatedImages = userImages.filter(
+          (img: ImageType) => img.path !== image.path
+        );
+        setUserImages(updatedImages);
+        await updateDoc(userRef, {
+          userImagesLocal: updatedImages,
+        });
+      }
+    }
+  };
+
   return (
     <div className="w-full justify-end gap-1 items-center flex">
       {selectedSlide?.backgroundImage &&
@@ -230,60 +252,91 @@ export const BackgroundImage = () => {
         <PopoverContent
           align="end"
           side="left"
-          className="w-[350px] bg-background/90 blurBack p-4"
+          className="w-[350px] bg-background/90 blurBack p-4 pr-1"
         >
           <Label className="font-bold text-lg">Background Image</Label>
 
-          <div id="image-tab" className="flex flex-col gap-4 w-full mt-4 ">
+          <div id="image-tab" className="flex flex-col gap-4 w-full mt-3">
             {/* <h1 className="font-bold text-lg">Images</h1> */}
 
-            {userImages && userImages.length > 0 && (
+            {((userImages && userImages.length > 0) || isLoaderImage) && (
               <div className="flex flex-col gap-2">
                 <Label className="font-bold">Your Images</Label>
-
-                <div className="h-fit max-h-[250px] overflow-scroll">
+                <ScrollArea
+                  className={`pr-4 
+                  ${userImages && userImages.length > 6 ? "h-[120px]" : "h-fit"}
+                  
+                  
+                  `}
+                >
                   <div className="grid grid-cols-3 gap-2">
-                    {userImages.map((image: ImageType) => (
-                      <button
-                        key={image.title}
-                        onClick={() => {
-                          addImageToBackground(image);
-                          setSelectedImage(image);
-                        }}
-                        style={{
-                          background: selectedSlide
-                            ? selectedSlide.background
-                            : "#ffffff",
-                        }}
-                        className={` w-full overflow-hidden aspect-[16/9] bg-background rounded-sm relative border-4 border-muted 
-                        ${
-                          selectedSlide?.backgroundImage &&
-                          selectedSlide?.backgroundImage.path === image.path
-                            ? "border-primary"
-                            : "border-border hover:border-primary"
-                        }
-                        `}
-                      >
+                    {isLoaderImage && (
+                      <div className="w-full aspect-[16/9] bg-background rounded-sm relative border-4 border-muted overflow-hidden flex items-center justify-center">
+                        {/* <div className="w-full h-full bg-cover bg-muted-foreground/40 bg-center animate-pulse" /> */}
+                        <Icons.spinner className="h-6 w-6 text-primary animate-spin" />
+                      </div>
+                    )}
+                    {userImages &&
+                      userImages.length > 0 &&
+                      [...userImages].reverse().map((image: ImageType) => (
                         <div
-                          className="w-full h-full bg-cover bg-center"
+                          key={image.title}
                           style={{
-                            backgroundImage: `url(${image.path})`,
+                            background: selectedSlide
+                              ? selectedSlide.background
+                              : "#ffffff",
                           }}
-                        />
-                        {/* <div className="absolute top-0 right-0 p-1 bg-black bg-opacity-50 text-white text-xs rounded-bl-sm">
-                        <Icons.trash className="h-6 w-6" />
-                      </div> */}
-                      </button>
-                    ))}
+                          className={`w-full aspect-[16/9] bg-background rounded-sm relative border-4 border-muted group overflow-hidden
+        ${
+          selectedSlide?.backgroundImage &&
+          selectedSlide?.backgroundImage.path === image.path
+            ? "border-primary"
+            : "border-border hover:border-primary"
+        }`}
+                        >
+                          <button
+                            onClick={() => {
+                              addImageToBackground(image);
+                              setSelectedImage(image);
+                            }}
+                            className="h-full w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  overflow-hidden "
+                          >
+                            <div
+                              className="w-full h-full bg-cover bg-center"
+                              style={{
+                                backgroundImage: `url(${image.path})`,
+                              }}
+                            />
+                          </button>
+
+                          {/* Fixed-wrapper for delete-image-button */}
+
+                          <div className="absolute z-30 -top-[0px] -right-[24px] fixed-wrapper h-[24px] w-[24px] pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:fade-in-200">
+                            <button
+                              onClick={() => deleteImage(image)}
+                              id="delete-image-button"
+                              className="fixed -translate-x-1/2  p-1 bg-opacity-50 text-white text-xs bg-theme-red rounded-full"
+                              style={{
+                                marginTop: "-8px", // Adjust this as necessary
+                                marginRight: "-8px", // Adjust this as necessary
+                              }}
+                            >
+                              <Icons.close className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                   </div>
-                </div>
+                </ScrollArea>
               </div>
             )}
             {defaultImages && defaultImages.length > 0 && (
               <div className="flex flex-col gap-2">
-                <Label className="font-bold">Default Images</Label>
+                {userImages && userImages.length > 0 && (
+                  <Label className="font-bold">Default Images</Label>
+                )}
 
-                <div className="h-fit max-h-[250px] overflow-scroll">
+                <ScrollArea className=" h-[240px] pr-4">
                   <div className="grid grid-cols-3 gap-2">
                     {defaultImages.map((image: ImageType) => (
                       <button
@@ -312,18 +365,15 @@ export const BackgroundImage = () => {
                             backgroundImage: `url(${image.path})`,
                           }}
                         />
-                        {/* <div className="absolute top-0 right-0 p-1 bg-black bg-opacity-50 text-white text-xs rounded-bl-sm">
-                        <Icons.trash className="h-6 w-6" />
-                      </div> */}
                       </button>
                     ))}
                   </div>
-                </div>
+                </ScrollArea>
               </div>
             )}
             <div className="flex flex-col gap-2">
               <input
-                id="image-input"
+                id="image-input-background"
                 type="file"
                 className="hidden"
                 onInput={onFileChange}
@@ -331,11 +381,11 @@ export const BackgroundImage = () => {
               <Button
                 variant={"outline"}
                 onClick={() => {
-                  document.getElementById("image-input")?.click();
+                  document.getElementById("image-input-background")?.click();
                 }}
               >
                 <Icons.upload className="h-6 w-6 mr-2" />
-                Upload
+                Upload images
               </Button>
             </div>
           </div>

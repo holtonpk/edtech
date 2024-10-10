@@ -2,14 +2,6 @@
 import React, {useEffect} from "react";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import googleFonts from "@/public/fonts/fonts.json";
 import {
   Tooltip,
@@ -22,14 +14,7 @@ import {Check, ChevronsUpDown} from "lucide-react";
 
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {TextBoxesToUpdate} from "@/config/data";
 
@@ -45,10 +30,9 @@ export const FontSelector = () => {
   const [fonts, setFonts] = React.useState<string[]>(googleFonts.fonts);
   const [selectedFont, setSelectedFont] = React.useState<string>(fonts[0]);
 
-  const onSelectChange = (commandValue: string) => {
+  const onSelectChange = (newFont: string) => {
     if (activeEdit) {
-      applyCommand(activeEdit, "fontName", commandValue);
-      setSelectedFont(commandValue);
+      applyCommand(activeEdit, "fontName", newFont);
       const newText = document.getElementById(
         `text-box-${activeEdit}`
       )?.innerHTML;
@@ -56,7 +40,7 @@ export const FontSelector = () => {
     } else if (groupSelectedTextBoxes) {
       let textBoxesToUpdate: TextBoxesToUpdate[] = [];
       groupSelectedTextBoxes.forEach((textBoxId) => {
-        applyCommand(textBoxId, "fontName", commandValue);
+        applyCommand(textBoxId, "fontName", newFont);
         const newText = document.getElementById(
           `text-box-${textBoxId}`
         )?.innerHTML;
@@ -64,6 +48,52 @@ export const FontSelector = () => {
       });
       updateMultipleTextBoxes(textBoxesToUpdate);
     }
+  };
+
+  const documentFonts =
+    slideData?.slides.flatMap((slide) => {
+      return slide.textBoxes.flatMap((textBox) => {
+        const element = document.getElementById(
+          `mini-slide-textbox-${textBox.textBoxId}`
+        );
+        if (!element) return []; // Return an empty array to skip this iteration
+
+        const paragraph = element.querySelector("p");
+        if (!paragraph) return []; // Skip this if no paragraph is found
+
+        const fontTag = paragraph.querySelector("font");
+        const font = fontTag?.getAttribute("face") || "Default";
+
+        return [{font, usageId: textBox.textBoxId}]; // Return an array with the object
+      });
+    }) ?? []; // Ensure `documentFonts` is an empty array if `slideData` is undefined
+
+  const changeAllCommand = () => {
+    let textBoxesToUpdate: TextBoxesToUpdate[] = [];
+    documentFonts.forEach((textBox) => {
+      if (textBox.font === originalFont) {
+        applyFontToNotSelected(textBox.usageId, selectedFont);
+        const newText = document.getElementById(
+          `mini-slide-textbox-${textBox.usageId}`
+        )?.innerHTML;
+        textBoxesToUpdate.push({
+          value: {text: newText},
+          textBoxId: textBox.usageId,
+        });
+      }
+    });
+    if (textBoxesToUpdate.length === 0) return;
+    updateMultipleTextBoxes(textBoxesToUpdate);
+  };
+
+  const applyFontToNotSelected = (textBoxId: string, font: string) => {
+    const element = document.getElementById(`mini-slide-textbox-${textBoxId}`);
+    if (!element) return;
+    const paragraph = element.querySelector("p");
+    if (!paragraph) return;
+    const fontTag = paragraph.querySelector("font");
+    if (!fontTag) return;
+    fontTag.face = font;
   };
 
   const [open, setOpen] = React.useState(false);
@@ -77,7 +107,6 @@ export const FontSelector = () => {
       // get first font child of textBoxElement
       const fontNode = textBoxElement?.childNodes[0]
         .childNodes[0] as HTMLElement;
-      console.log("fontNode:", fontNode);
 
       const nodeFont = fontNode?.getAttribute("face");
 
@@ -114,8 +143,6 @@ export const FontSelector = () => {
     }
   }, [activeEdit, groupSelectedTextBoxes]);
 
-  const [value, setValue] = React.useState("");
-
   type DocumentFont = {
     font: string;
     usageId: string;
@@ -123,30 +150,29 @@ export const FontSelector = () => {
 
   const [originalFont, setOriginalFont] = React.useState<string>("");
 
-  const [clickedFont, setClickedFont] = React.useState<string | undefined>();
-
-  const documentFonts =
-    slideData?.slides.flatMap((slide) => {
-      return slide.textBoxes.flatMap((textBox) => {
-        const element = document.getElementById(
-          `mini-slide-textbox-${textBox.textBoxId}`
-        );
-        if (!element) return []; // Return an empty array to skip this iteration
-
-        const paragraph = element.querySelector("p");
-        if (!paragraph) return []; // Skip this if no paragraph is found
-
-        const fontTag = paragraph.querySelector("font");
-        const font = fontTag?.getAttribute("face") || "Default";
-
-        return [{font, usageId: textBox.textBoxId}]; // Return an array with the object
-      });
-    }) ?? []; // Ensure `documentFonts` is an empty array if `slideData` is undefined
-
   const suggestChangeAll =
-    clickedFont &&
+    selectedFont &&
+    selectedFont !== "Multiple fonts" &&
+    selectedFont !== "Default" &&
     documentFonts.some((font) => font.font === originalFont) &&
-    clickedFont !== originalFont;
+    selectedFont !== originalFont;
+
+  useEffect(() => {
+    if (suggestChangeAll) {
+      const colorTab = document.getElementById("font-container");
+      const height = colorTab?.getBoundingClientRect().height;
+      colorTab?.setAttribute("style", `height: ${height}px`);
+      colorTab?.classList.add("pb-[64px]");
+      colorTab?.classList.add("overflow-y-scroll");
+
+      colorTab?.scrollTo(0, 0);
+    } else {
+      const colorTab = document.getElementById("font-container");
+      colorTab?.setAttribute("style", `height: auto`);
+      colorTab?.classList.remove("pb-[64px]");
+      colorTab?.classList.remove("overflow-y-scroll");
+    }
+  }, [suggestChangeAll]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -170,63 +196,72 @@ export const FontSelector = () => {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PopoverContent align="start" className="w-[300px] p-0">
-        <Command value={selectedFont} onValueChange={setSelectedFont}>
-          <CommandInput
-            placeholder="Search for a font"
-            className="disableTextboxListeners disableSelector"
-          />
-          <CommandList>
-            {/* <CommandEmpty>Change font</CommandEmpty> */}
-            <CommandGroup>
-              {fonts.map((font) => (
-                <CommandItem
-                  style={{fontFamily: font}}
-                  key={font}
-                  value={font}
-                  className="text-lg"
-                  onSelect={(currentValue) => {
-                    setClickedFont(currentValue);
-                    onSelectChange(currentValue);
-                    setValue(currentValue === value ? "" : currentValue);
-                    setOpen(true);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === font ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {font}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+      <PopoverContent
+        align="start"
+        className="w-[350px] p-0 overflow-hidden bg-background/90 blurBack"
+      >
+        <button
+          onClick={() => setOpen(false)}
+          className="absolute top-3 right-3"
+        >
+          <Icons.close className="h-4 w-4 hover:text-primary" />
+        </button>
+        <h1 className="poppins-bold text-lg p-2 pb-1">Select a font</h1>
+        <div
+          id="font-container"
+          className="h-fit p-2  grid grid-cols-2 items-center w-full pt-0 space-y-1 space-x-0"
+        >
+          {fonts.map((font) => (
+            <button
+              style={{fontFamily: font, fontWeight: 500}}
+              key={font}
+              className={`text-lg  border bg-background flex items-center w-[95%] rounded-[12px] py-1 whitespace-nowrap px-2 relative transition-colors duration-300
+                 ${
+                   selectedFont === font
+                     ? "border-primary"
+                     : "hover:border-primary/60 border-border"
+                 }
+                
+                `}
+              onClick={() => {
+                setSelectedFont(font);
+                onSelectChange(font);
+                setOpen(true);
+              }}
+            >
+              <Check
+                className={cn(
+                  "absolute h-4 w-4 right-2 text-primary",
+                  selectedFont === font ? "opacity-100" : "opacity-0"
+                )}
+              />
+              {font}
+            </button>
+          ))}
+        </div>
 
         {suggestChangeAll && (
           <div className="w-full  h-[60px]  overflow-hidden absolute bottom-0 left-0 bg-background ">
             <div className="slide-top absolute top-0 border-t  bg-background rounded-b-md h-fit w-full flex items-center  py-2 px-2 justify-between">
               <Button
-              // onClick={() => {
-              //   changeAllCommand(originalColor);
-              //   setOriginalColor(color);
-              // }}
+                onClick={() => {
+                  changeAllCommand();
+                  setOriginalFont(selectedFont);
+                }}
               >
                 Change all
               </Button>
               <div className="flex items-center gap-0 w-fit max-w-full mx-auto overflow-hidden">
                 <div
                   style={{fontFamily: originalFont}}
-                  className="text-[10px] whitespace-nowrap text-ellipsis leading-[12px]"
+                  className="text-sm whitespace-nowrap text-ellipsis leading-[12px]"
                   // style={{background: originalColor}}
                 >
                   {originalFont}
                 </div>
                 <Icons.chevronRight className="h-3 w-3" />
                 <div
-                  className="text-[10px] whitespace-nowrap text-ellipsis leading-[12px]"
+                  className="text-sm whitespace-nowrap text-ellipsis leading-[12px]"
                   style={{fontFamily: selectedFont}}
 
                   // style={{background: color}}

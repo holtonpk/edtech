@@ -18,7 +18,7 @@ const TabContent = ({
   return (
     <div
       style={{width: isHovering ? "100%" : "calc(100% - 85px"}}
-      className={`  h-full z-[80]  
+      className={`  h-full z-[80] 
           ${
             isHovering
               ? ""
@@ -39,7 +39,7 @@ const TabContent = ({
           style={{width: isHovering ? "100%" : "100%"}}
           className="p-4 absolute  h-full overflow-hidden"
         >
-          <div className="flex flex-col">
+          <div className="flex flex-col h-12 ">
             <h1 className="font-bold text-xl poppins-bold">{title}</h1>
             <p className=" text-sm poppins-regular">{description}</p>
           </div>

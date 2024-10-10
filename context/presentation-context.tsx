@@ -43,6 +43,7 @@ import {
 import {app} from "@/config/firebase";
 import debounce from "lodash.debounce";
 import {set} from "zod";
+import {promises} from "dns";
 
 interface PresentationContextType {
   // states -----------------------------
@@ -110,7 +111,10 @@ interface PresentationContextType {
   setActiveSlide: React.Dispatch<React.SetStateAction<string | undefined>>;
   activeSlideRef: React.MutableRefObject<string | undefined>;
   // functions -----------------------------
-  uploadImage: (file: File) => void;
+
+  // add upload image function
+  uploadImage: (file: File) => Promise<Image>;
+
   updateData: (value: Partial<TextBoxType>, textBoxId: string) => void;
   updateImageData: (value: Partial<TextBoxType>, imageId: string) => void;
   addRecentColor: (color: string) => void;
@@ -924,6 +928,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     const image = await saveImageToFirebase(file);
     setUserImages([...(userImages || []), image]);
     saveImageToUserStorage([...(userImages || []), image]);
+    return image;
   };
 
   const saveImageToFirebase = async (
