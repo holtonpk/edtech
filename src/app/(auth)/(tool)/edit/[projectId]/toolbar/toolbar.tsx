@@ -41,7 +41,7 @@ const ToolBar = () => {
           <Icons.lightbulb className="w-6 h-6 " />
           <h1 className="font-bold poppins-bold">EDTech tool</h1>
         </div>
-        <div className="flex items-center  gap-4">
+        <div className=" items-center  gap-4 hidden md:flex">
           <Undo />
           {/* <div className="h-[30px] w-[1px] bg-black/60"></div> */}
 
@@ -64,7 +64,7 @@ const ToolBar = () => {
           {/* <div className="h-[30px] w-[1px] bg-black/60"></div>s */}
           <SaveStatus />
         </div>
-        <div className="flex items-center  gap-4  p-3 ">
+        <div className="flex items-center px-0 md:p-3 gap-4   ">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant={"outline"}>

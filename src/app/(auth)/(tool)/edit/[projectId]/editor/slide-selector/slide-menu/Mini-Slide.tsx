@@ -153,20 +153,26 @@ ${
 
 `}
           >
-            <div
-              className="absolute w-full h-full bg-cover bg-center"
-              style={
-                slide &&
-                slide.backgroundImage &&
-                slide.backgroundImage.path !== "undefined"
-                  ? {
-                      backgroundImage: `url(${slide.backgroundImage.path})`,
-                    }
-                  : {
-                      background: slide.background,
-                    }
-              }
-            />
+            {slide &&
+            slide.backgroundImage &&
+            slide.backgroundImage.path !== "undefined" ? (
+              <div
+                className="absolute w-full h-full bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${slide.backgroundImage.path})`,
+                }}
+              />
+            ) : (
+              <div
+                className="absolute w-full h-full bg-cover bg-center"
+                style={{
+                  backgroundColor: slide ? slide.background : "#ffffff",
+                  opacity: slide?.backgroundOpacity
+                    ? slide?.backgroundOpacity
+                    : 1,
+                }}
+              />
+            )}
 
             {selectorScale ? (
               <div
@@ -191,7 +197,14 @@ ${
                         className="h-fit w-full relative  whitespace-pre-wrap break-words overflow-hidden pointer-events-none text-left"
                         dangerouslySetInnerHTML={{__html: textbox.text}}
                         style={{
+                          textAlign: textbox.textAlign
+                            ? textbox.textAlign
+                            : "left",
+
                           fontSize: textbox.fontSize,
+                          opacity: textbox?.textOpacity
+                            ? textbox.textOpacity
+                            : 1,
                         }}
                       />
                     </div>

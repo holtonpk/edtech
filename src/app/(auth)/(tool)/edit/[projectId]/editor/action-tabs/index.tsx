@@ -1,4 +1,4 @@
-import React, {Children, useEffect, useRef} from "react";
+import React, {Children, useEffect, useRef, SVGProps} from "react";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
 import {Modes, Position, Image as ImageType} from "@/config/data";
@@ -8,6 +8,9 @@ import Layouts from "./components/layouts";
 import Themes from "./components/themes";
 import AiRewrite from "./components/ai-write";
 import Text from "./components/text";
+import {OverridableComponent} from "@mui/material/OverridableComponent";
+import {SvgIconTypeMap} from "@mui/material";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 
 type HoverContextType = {
   isHovering: boolean;
@@ -48,6 +51,62 @@ export const ActionTabs = () => {
     <HoverContextProvider>
       <ActionPanel />
     </HoverContextProvider>
+  );
+};
+
+type TabButtonType = {
+  name: string;
+  description: string;
+  value: string;
+  icon: OverridableComponent<SvgIconTypeMap<{}, "svg">> & {muiName: string};
+  color: string;
+  height: string;
+  HoverElement: React.ReactNode;
+  Element: React.ReactNode;
+};
+
+const MobileActionPanel = ({TabButtons}: {TabButtons: TabButtonType[]}) => {
+  return (
+    <div className="w-full bg-background h-fit  rounded-md flex items-center justify-between px-4">
+      {TabButtons.map((tab, index) => {
+        return <MobileTab tab={tab} key={index} />;
+      })}
+    </div>
+  );
+};
+
+const MobileTab = ({tab}: {tab: TabButtonType}) => {
+  const Icon = tab.icon;
+
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        <button
+          className={`flex flex-col h-16 w-16 aspect-square  items-center justify-center group  relative  rounded-md   transition-all duration-200
+          ${open && "bg-muted-foreground/5 text-primary"}
+    `}
+        >
+          <Icon
+            className={`h-6 w-6 opacity-100
+    `}
+          />
+          <span
+            className={`text-[12px] whitespace-nowrap poppins-regular
+    `}
+          >
+            {tab.name}
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        className="w-[300px] h-fit p-0 bg-background"
+      >
+        {tab.Element}
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -212,7 +271,7 @@ const ActionPanel = () => {
 
   const [isLoaderImage, setIsLoaderImage] = React.useState(false);
 
-  const TabButtons = [
+  const TabButtons: TabButtonType[] = [
     {
       name: "Themes",
       description: "Change the look and feel of your presentation",
@@ -225,6 +284,7 @@ const ActionPanel = () => {
           <Themes />
         </HoverContainer>
       ),
+      Element: <Themes />,
     },
     {
       name: "Layouts",
@@ -239,6 +299,7 @@ const ActionPanel = () => {
           <Layouts />
         </HoverContainer>
       ),
+      Element: <Layouts />,
     },
 
     {
@@ -254,6 +315,7 @@ const ActionPanel = () => {
           <Text />
         </HoverContainer>
       ),
+      Element: <Text />,
     },
     {
       name: "Images",
@@ -272,6 +334,13 @@ const ActionPanel = () => {
           />
         </HoverContainer>
       ),
+      Element: (
+        <Images
+          onFileChange={onFileChange}
+          isLoaderImage={isLoaderImage}
+          setIsLoaderImage={setIsLoaderImage}
+        />
+      ),
     },
     {
       name: "Ai Write",
@@ -286,6 +355,7 @@ const ActionPanel = () => {
           <AiRewrite />
         </HoverContainer>
       ),
+      Element: <AiRewrite />,
     },
   ];
 
@@ -301,129 +371,116 @@ const ActionPanel = () => {
   }
 
   return (
-    <div className="flex h-full justify-center relative  origin-right  ">
-      <div
-        className={`flex flex-col bg-background border px-2 rounded-md blurBack w-[70px] h-full gap-2 mr-auto items-center  py-4    relative z-[60]
+    <>
+      <div className="hidden md:block h-full">
+        <div className="flex h-full justify-center relative  origin-right  ">
+          <div
+            className={`flex flex-col bg-background border px-2 rounded-md blurBack w-[70px] h-full gap-2 mr-auto items-center  py-4    relative z-[60]
 
 `}
-      >
-        <div
-          className="relative flex flex-col w-full h-fit gap-2"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {/* {isHovering && ( */}
-          <span
-            id="hover-indicator"
-            className="absolute bg-muted-foreground/5 w-[54px] aspect-square rounded-md z-10 top-transition hidden"
-          ></span>
-          {/* )} */}
+          >
+            <div
+              className="relative flex flex-col w-full h-fit gap-2"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              {/* {isHovering && ( */}
+              <span
+                id="hover-indicator"
+                className="absolute bg-muted-foreground/5 w-[54px] aspect-square rounded-md z-10 top-transition hidden"
+              ></span>
+              {/* )} */}
 
-          {TabButtons.map((tab, index) => {
-            const Icon = tab.icon;
-            // const HoverElement = tab.HoverElement;
-            return (
-              <div
-                key={index}
-                id={tab.value + "-buttonContainer"}
-                className="relative w-full  z-20 "
-                onMouseEnter={(e) => onButtonHover(tab.value, index)}
-                // onMouseLeave={() => {
-                //   onButtonHoverOff(tab.value);
-                // }}
-              >
-                <div
-                  id={tab.value + "-hover-point"}
-                  className="absolute w-[200px] h-14 left-0  top-0 hidden"
-                ></div>
+              {TabButtons.map((tab, index) => {
+                const Icon = tab.icon;
+                // const HoverElement = tab.HoverElement;
+                return (
+                  <div
+                    key={index}
+                    id={tab.value + "-buttonContainer"}
+                    className="relative w-full  z-20 "
+                    onMouseEnter={(e) => onButtonHover(tab.value, index)}
+                    // onMouseLeave={() => {
+                    //   onButtonHoverOff(tab.value);
+                    // }}
+                  >
+                    <div
+                      id={tab.value + "-hover-point"}
+                      className="absolute w-[200px] h-14 left-0  top-0 hidden"
+                    ></div>
 
-                <button
-                  id={tab.value + "-menu-button"}
-                  onClick={() => {
-                    setMode(tab.value as Modes);
-                    setIsHovering(false);
-                    onHoverGroupOff();
-                    // onButtonHoverOff(tab.value);
-                  }}
-                  className={`flex flex-col  h-fit w-full aspect-square p-2 py-0  items-center justify-center group  relative  rounded-md   transition-all duration-200 
+                    <button
+                      id={tab.value + "-menu-button"}
+                      onClick={() => {
+                        setMode(tab.value as Modes);
+                        setIsHovering(false);
+                        onHoverGroupOff();
+                        // onButtonHoverOff(tab.value);
+                      }}
+                      className={`flex flex-col  h-fit w-full aspect-square p-2 py-0  items-center justify-center group  relative  rounded-md   transition-all duration-200 
 text-muted-foreground
 ${mode === tab.value && "bg-muted-foreground/5"}
                 `}
-                >
-                  <Icon
-                    className={`h-6 w-6 opacity-100
+                    >
+                      <Icon
+                        className={`h-6 w-6 opacity-100
  ${
    mode === tab.value || hoverValue === tab.value
      ? "text-primary"
      : "currentColor group-hover:text-primary"
  }
                 `}
-                  />
-                  <span
-                    className={`text-[12px] whitespace-nowrap poppins-regular
+                      />
+                      <span
+                        className={`text-[12px] whitespace-nowrap poppins-regular
                   ${
                     mode === tab.value || hoverValue === tab.value
                       ? "text-primary"
                       : "currentColor group-hover:text-primary"
                   }
                   `}
-                  >
-                    {tab.name}
-                  </span>
-                </button>
-                {tab.HoverElement}
-              </div>
-            );
-          })}
+                      >
+                        {tab.name}
+                      </span>
+                    </button>
+                    {tab.HoverElement}
+                  </div>
+                );
+              })}
 
-          <div
-            id="hoverContainer"
-            className={`fixed hidden top-transition left-[200px] z-[9] bg-background   w-[350px] shadow-xl fade-in-500 rounded-md  border
+              <div
+                id="hoverContainer"
+                className={`fixed hidden top-transition left-[200px] z-[9] bg-background   w-[350px] shadow-xl fade-in-500 rounded-md  border
 
             `}
-          >
-            <div className="absolute left-[5px] top-[50px]  -translate-x-full z-20">
-              <Icons.menuArrow className="h-6 w-6" />
+              >
+                <div className="absolute left-[5px] top-[50px]  -translate-x-full z-20">
+                  <Icons.menuArrow className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+            <div className="mt-auto">
+              <ProfileNav />
             </div>
           </div>
-        </div>
-        <div className="mt-auto">
-          <ProfileNav />
+
+          {mode === "aiRewrite" && <AiRewrite />}
+          {mode === "themes" && <Themes />}
+          {mode === "text" && <Text />}
+          {mode === "images" && (
+            <Images
+              onFileChange={onFileChange}
+              isLoaderImage={isLoaderImage}
+              setIsLoaderImage={setIsLoaderImage}
+            />
+          )}
+          {mode === "layout" && <Layouts />}
         </div>
       </div>
-
-      {/* <div id="hover-point" className="fixed z-[99] pointer-events-none">
-        <div className="h-[38px] w-[38px] bg-red-600 "></div>
-      </div> */}
-
-      {/* <HoverContainer id="aiRewrite">
-        <AiRewrite />
-      </HoverContainer>
-
-      
-      <HoverContainer id="text">
-        <Text />
-      </HoverContainer>
-
-      <HoverContainer id="images">
-        <Images />
-      </HoverContainer>
-      <HoverContainer id="layout">
-        <Layouts />
-      </HoverContainer> */}
-
-      {mode === "aiRewrite" && <AiRewrite />}
-      {mode === "themes" && <Themes />}
-      {mode === "text" && <Text />}
-      {mode === "images" && (
-        <Images
-          onFileChange={onFileChange}
-          isLoaderImage={isLoaderImage}
-          setIsLoaderImage={setIsLoaderImage}
-        />
-      )}
-      {mode === "layout" && <Layouts />}
-    </div>
+      <div className="md:hidden w-full ">
+        <MobileActionPanel TabButtons={TabButtons} />
+      </div>
+    </>
   );
 };
 

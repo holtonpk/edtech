@@ -78,6 +78,7 @@ import {
   CopyPlus,
   SquarePlus,
   Shrink,
+  Frown,
 } from "lucide-react";
 
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
@@ -107,6 +108,7 @@ import TitleIcon from "@mui/icons-material/Title";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 export const Icons = {
+  sad: Frown,
   logo: Lightbulb,
   exitFullScreen: Shrink,
   imagePlaceholder: Image,

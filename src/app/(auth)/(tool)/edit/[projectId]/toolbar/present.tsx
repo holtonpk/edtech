@@ -226,6 +226,10 @@ function Present() {
                         width: textbox.size.width,
                         transform: `rotate(${textbox.rotation}deg)`,
                         fontSize: `${textbox.fontSize}px`,
+                        opacity: textbox?.textOpacity ? textbox.textOpacity : 1,
+                        textAlign: textbox.textAlign
+                          ? textbox.textAlign
+                          : "left",
                       }}
                       dangerouslySetInnerHTML={{__html: textbox.text}}
                     />

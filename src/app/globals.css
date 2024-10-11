@@ -467,33 +467,46 @@ input[type="number"] {
   height: calc(var(--dynamic-vh) - 84px);
   width: calc(var(--dynamic-vw) - 16px);
 }
-
-.default-grid {
-  width: var(--dynamic-vw);
-  animation: changeGridSize 0.25s forwards;
-}
-
-@keyframes changeGridSize {
-  from {
-    grid-template-columns: calc(var(--dynamic-vw) - 1000px - 16px) 1000px;
+@media (max-width: 768px) {
+  .default-grid {
+    display: flex;
+    flex-direction: column;
   }
-  to {
-    grid-template-columns: 70px calc(var(--dynamic-vw) - 70px - 16px - 8px);
+
+  .open-menu-grid {
+    display: flex;
+    flex-direction: column;
   }
 }
 
-.open-menu-grid {
-  animation: openMenuGrid 0.25s forwards;
-}
-
-@keyframes openMenuGrid {
-  from {
-    grid-template-columns: 70px calc(var(--dynamic-vw) - 70px - 16px - 8px);
-    /* grid-template-columns: 70px 1fr; */
+@media (min-width: 768px) {
+  .default-grid {
+    width: var(--dynamic-vw);
+    animation: changeGridSize 0.25s forwards;
   }
-  to {
-    /* grid-template-columns: calc(var(--dynamic-vw) - 1000px - 16px) 1000px; */
-    grid-template-columns: 400px 1fr;
+
+  @keyframes changeGridSize {
+    from {
+      grid-template-columns: calc(var(--dynamic-vw) - 1000px - 16px) 1000px;
+    }
+    to {
+      grid-template-columns: 70px calc(var(--dynamic-vw) - 70px - 16px - 8px);
+    }
+  }
+
+  .open-menu-grid {
+    animation: openMenuGrid 0.25s forwards;
+  }
+
+  @keyframes openMenuGrid {
+    from {
+      grid-template-columns: 70px calc(var(--dynamic-vw) - 70px - 16px - 8px);
+      /* grid-template-columns: 70px 1fr; */
+    }
+    to {
+      /* grid-template-columns: calc(var(--dynamic-vw) - 1000px - 16px) 1000px; */
+      grid-template-columns: 400px 1fr;
+    }
   }
 }
 
@@ -547,6 +560,21 @@ input[type="number"] {
   animation: fadeOut 0.2s cubic-bezier(0.445, 0.05, 0.55, 0.95) forwards;
 }
 
+.fade-out-to-hidden {
+  animation: fadeOut 0.5s cubic-bezier(0.445, 0.05, 0.55, 0.95) forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+  }
+}
+
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -555,39 +583,71 @@ input[type="number"] {
     opacity: 0;
   }
 }
-
-.default-slide-grid {
-  /* max-width: 1410px; */
-  /* justify-content: space-between; */
-  animation: default-slide-grid-animate 0.25s forwards;
-}
-
-.default-slide-grid-layout {
-  /* max-width: 1410px; */
-  /* justify-content: space-between; */
-  /* animation: default-slide-grid-animate 0.25s forwards; */
-  grid-template-columns: 1fr 300px;
-}
-
-@keyframes default-slide-grid-animate {
-  from {
-    grid-template-columns: 1fr 0px;
+@media (max-width: 768px) {
+  .default-slide-grid {
+    /* animation: default-slide-grid-animate 0.25s forwards; */
+    display: flex;
+    flex-direction: column;
   }
-  to {
+
+  .default-slide-grid-layout {
+    /* grid-template-columns: 1fr 300px; */
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes default-slide-grid-animate {
+    from {
+      grid-template-columns: 1fr 0px;
+    }
+    to {
+      grid-template-columns: 1fr 300px;
+    }
+  }
+
+  .open-menu-slide-grid {
+    animation: open-menu-slide-grid-animate 0.25s forwards;
+  }
+
+  @keyframes open-menu-slide-grid-animate {
+    from {
+      grid-template-columns: 1000px 1fr;
+    }
+    to {
+      grid-template-columns: 1fr 0px;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .default-slide-grid {
+    animation: default-slide-grid-animate 0.25s forwards;
+  }
+
+  .default-slide-grid-layout {
     grid-template-columns: 1fr 300px;
   }
-}
 
-.open-menu-slide-grid {
-  animation: open-menu-slide-grid-animate 0.25s forwards;
-}
-
-@keyframes open-menu-slide-grid-animate {
-  from {
-    grid-template-columns: 1000px 1fr;
+  @keyframes default-slide-grid-animate {
+    from {
+      grid-template-columns: 1fr 0px;
+    }
+    to {
+      grid-template-columns: 1fr 300px;
+    }
   }
-  to {
-    grid-template-columns: 1fr 0px;
+
+  .open-menu-slide-grid {
+    animation: open-menu-slide-grid-animate 0.25s forwards;
+  }
+
+  @keyframes open-menu-slide-grid-animate {
+    from {
+      grid-template-columns: 1000px 1fr;
+    }
+    to {
+      grid-template-columns: 1fr 0px;
+    }
   }
 }
 

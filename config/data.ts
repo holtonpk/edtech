@@ -56,6 +56,7 @@ export interface SlideData {
 export interface Slide {
   textBoxes: TextBoxType[];
   background: string;
+  backgroundOpacity?: number;
   id: string;
   images: SlideImage[];
   title?: string;
@@ -79,6 +80,7 @@ export interface TextBoxType {
   textBoxId: string;
   fontSize: number;
   textAlign?: "left" | "center" | "right" | "justify";
+  textOpacity?: number;
 }
 
 export interface Size {

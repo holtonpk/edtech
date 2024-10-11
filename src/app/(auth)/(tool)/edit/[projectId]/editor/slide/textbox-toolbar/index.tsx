@@ -28,7 +28,7 @@ export const TextBoxToolBar = ({
   const {mode} = usePresentation()!;
 
   return (
-    <div className="h-full w-[300px]  relative z-[50]">
+    <div className="h-full w-full md:w-[300px]  relative z-[50]">
       <div
         className={`flex-grow h-full  gap-4 flex flex-col items-center p-4  bg-background   border rounded-md relative  z-[40]
            ${

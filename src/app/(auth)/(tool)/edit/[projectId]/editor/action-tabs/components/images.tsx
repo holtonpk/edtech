@@ -65,7 +65,7 @@ const Images = ({
 
   return (
     <TabContent title="Images" description="Add images to your slides">
-      <div className="flex flex-col gap-4 w-full mt-4s h-[calc(100%-48px)]">
+      <div className="flex flex-col gap-4 w-full mt-4s h-fit md:h-[calc(100%-48px)]">
         {/* <h1 className="font-bold text-lg">Images</h1> */}
 
         {userImages && userImages.length > 0 && (
@@ -74,7 +74,7 @@ const Images = ({
 
             <ScrollArea
               className={`pr-4 
-                  ${isHovering ? "h-[168px]" : "h-[400px]"} `}
+                  ${isHovering ? "h-[168px]" : "h-[168px] md:h-[400px]"} `}
             >
               <div className="grid grid-cols-3 gap-2">
                 {isLoaderImage && (

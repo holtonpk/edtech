@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect} from "react";
+import React, {useEffect, ReactElement} from "react";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context";
 import {HexColorPicker, HexColorInput} from "react-colorful";
@@ -18,12 +18,14 @@ export const ColorMenu = ({
   colorCommand,
   currentColor,
   documentColors,
-  changeAllCommand,
+  suggestChangeAll,
+  ChangeAllMenu,
 }: {
   colorCommand: (color: string) => void;
   currentColor: string;
   documentColors: DocumentColor[];
-  changeAllCommand: (color: string) => void;
+  suggestChangeAll: boolean;
+  ChangeAllMenu: ReactElement<any, any>;
 }) => {
   const {recentColors} = usePresentation()!;
 
@@ -38,13 +40,6 @@ export const ColorMenu = ({
     debounceColorCommand(color);
   }, [color]);
 
-  const [originalColor, setOriginalColor] =
-    React.useState<string>(currentColor);
-
-  useEffect(() => {
-    setOriginalColor(currentColor);
-  }, []);
-
   function removeDuplicateColors(colors: DocumentColor[]): DocumentColor[] {
     const seenColors = new Set<string>();
 
@@ -56,10 +51,6 @@ export const ColorMenu = ({
       return true; // Keep the first occurrence
     });
   }
-
-  const suggestChangeAll =
-    documentColors.map((color) => color.color).includes(originalColor) &&
-    currentColor !== originalColor;
 
   useEffect(() => {
     if (suggestChangeAll) {
@@ -94,13 +85,7 @@ export const ColorMenu = ({
                     style={{background: currentColor}}
                     className="w-full aspect-square border rounded-[12px]"
                   ></div>
-                  {/* <input
-              onChange={(e) => setColor(e.target.value)}
-                type="text"
-                value={currentColor}
-                placeholder="Enter color code"
-                className="w-full p-2 rounded-md border border-border"
-              /> */}
+
                   <HexColorInput
                     prefixed={true}
                     color={color}
@@ -238,28 +223,8 @@ export const ColorMenu = ({
         </Tabs>
       </div>
       {suggestChangeAll && (
-        <div className="w-full  h-[60px]  overflow-hidden absolute bottom-0 left-0 ">
-          <div className="slide-top absolute top-0 border-t  bg-background rounded-b-md h-fit w-full flex items-center  py-2 px-2 justify-between">
-            <Button
-              onClick={() => {
-                changeAllCommand(originalColor);
-                setOriginalColor(color);
-              }}
-            >
-              Change all
-            </Button>
-            <div className="flex items-center gap-1">
-              <div
-                className="h-6 w-6 rounded-full border"
-                style={{background: originalColor}}
-              />
-              <Icons.chevronRight className="h-5 w-5" />
-              <div
-                className="h-6 w-6 rounded-full border "
-                style={{background: color}}
-              />
-            </div>
-          </div>
+        <div className="w-full z-30 h-[60px]  overflow-hidden absolute bottom-0 left-0 ">
+          {ChangeAllMenu}
         </div>
       )}
     </>

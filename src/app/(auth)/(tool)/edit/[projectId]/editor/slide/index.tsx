@@ -107,9 +107,9 @@ const Slide = () => {
     >
       <div
         id={"slide-area"}
-        className="w-full h-full flex justify-center   overflow-hidden "
+        className="w-full  h-fit md:h-full flex justify-center   md:overflow-hidden "
       >
-        <div className="flex flex-col justify-between items-center w-full gap-2   mx-auto ">
+        <div className="flex flex-col justify-between items-center w-full gap-2 s  mx-auto ">
           {selectedSlide && (
             <SlideContainer shouldHideToolbar={shouldHideToolbar}>
               <>
@@ -138,7 +138,7 @@ const Slide = () => {
               </>
             </SlideContainer>
           )}
-          <div className="flex-grow flex items-centers justify-center w-full">
+          <div className="flex-grow flex items-centers justify-center w-full ">
             <SlideSelector shouldHideToolbar={shouldHideToolbar} />
           </div>
         </div>
@@ -448,21 +448,29 @@ const SlideContainer = ({
     const slideAreaHeightReal = slideArea.getBoundingClientRect().height;
     const slideAreaWidthReal = slideArea.getBoundingClientRect().width;
 
+    const windowWidth = window.innerWidth;
+
     let vw = window.innerWidth;
     let vh = window.innerHeight;
     let slideAreaHeight;
     let slideAreaWidth;
 
-    if (shouldHideToolbar || mode === "default") {
-      slideAreaHeight = vh - 84;
-      slideAreaWidth = vw - 402;
+    if (windowWidth > 768) {
+      if (shouldHideToolbar || mode === "default") {
+        slideAreaHeight = vh - 84;
+        slideAreaWidth = vw - 402;
+      } else {
+        slideAreaHeight = vh - 84;
+        slideAreaWidth = vw - 80;
+      }
     } else {
-      slideAreaHeight = vh - 84;
-      slideAreaWidth = vw - 80;
+      slideAreaWidth = slideAreaWidthReal;
+      slideAreaHeight = slideAreaWidth * (9 / 16);
+      setHeight(slideAreaHeight);
+      setWidth(slideAreaWidth);
+      setScale(slideAreaWidth / 1000);
+      return;
     }
-
-    console.log("slideAreaHeight", slideAreaHeightReal, slideAreaHeight);
-    console.log("slideAreaWidth", slideAreaWidthReal, slideAreaWidth);
 
     let newHeight = slideAreaHeight - 108;
     let newWidth = (slideAreaHeight - 108) * (16 / 9);
@@ -493,29 +501,36 @@ const SlideContainer = ({
   return (
     <div
       style={{
-        background:
-          selectedSlide &&
-          (!selectedSlide.backgroundImage ||
-            selectedSlide.backgroundImage.path === "undefined")
-            ? selectedSlide.background
-            : "#ffffff",
         width: width,
+
         height: height,
       }}
-      className={` p-0 items-center justify-center relative text-black flex flex-col border overflow-hidden border-foreground/10 rounded-md  z-[50] 
+      className={`bg-background p-0 items-center justify-center relative  text-black flex flex-col border overflow-hidden border-foreground/10 rounded-md  z-[50] 
         ${isSelecting ? " cursor-crosshair" : ""}
         `}
     >
       {selectedSlide &&
-        selectedSlide.backgroundImage &&
-        selectedSlide.backgroundImage.path !== "undefined" && (
-          <div
-            className="absolute w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${selectedSlide.backgroundImage.path})`,
-            }}
-          />
-        )}
+      selectedSlide.backgroundImage &&
+      selectedSlide.backgroundImage.path !== "undefined" ? (
+        <div
+          className="absolute w-full h-full bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${selectedSlide.backgroundImage.path})`,
+          }}
+        />
+      ) : (
+        <div
+          className="absolute w-full h-full bg-cover bg-center"
+          style={{
+            backgroundColor: selectedSlide
+              ? selectedSlide.background
+              : "#ffffff",
+            opacity: selectedSlide?.backgroundOpacity
+              ? selectedSlide?.backgroundOpacity
+              : 1,
+          }}
+        />
+      )}
 
       {/* <div className="absolute w-[100%] aspect-[16/9] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "></div> */}
 

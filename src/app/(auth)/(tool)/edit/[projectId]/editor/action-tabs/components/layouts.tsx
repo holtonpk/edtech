@@ -27,7 +27,7 @@ const Layouts = () => {
     <TabContent title="Layouts" description="Change the layout of your slides">
       <div
         className={`w-full  overflow-scroll 
-        ${isHovering ? "h-[425px]" : "h-full pb-10"}
+        ${isHovering ? "h-[425px]" : "h-[425px] md:h-full pb-10"}
         `}
       >
         <div className="grid grid-cols overflow-scroll gap-4 h-fit w-full mt-4 ">

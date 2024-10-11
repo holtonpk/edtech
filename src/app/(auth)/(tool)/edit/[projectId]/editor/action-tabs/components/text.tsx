@@ -86,10 +86,10 @@ const Text = () => {
 
   return (
     <TabContent title="Text" description="Add text to your slides">
-      <div className="flex flex-col gap-4 w-full mt-2 ">
+      <div className="flex flex-col gap-4 w-full mt-2  ">
         {/* <h1 className="font-bold text-lg">Text </h1> */}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <Button
             onClick={() => {
               createNewTextBox(

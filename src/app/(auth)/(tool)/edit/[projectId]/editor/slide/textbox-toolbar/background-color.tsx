@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 import {ColorMenu} from "./color-menu";
 import {DocumentColor} from "@/config/data";
+import {TextBoxesToUpdate} from "@/config/data";
 
 export const BackgroundColor = () => {
   const {slideData, selectedSlide, setSlideData, addRecentColor, slideDataRef} =
@@ -74,28 +75,47 @@ export const BackgroundColor = () => {
     color: slide.background,
   }));
 
-  const changeMultiBackgroundColors = (color: string) => {
+  const changeMultiBackgroundColors = () => {
     if (slideDataRef.current) {
       const updatedSlideData = {
         ...slideDataRef.current,
         slides: slideDataRef.current.slides.map((slide) => {
-          if (color === slide.background)
-            return {
-              ...slide,
-              background: selectedColor,
-              backgroundImage: {
-                path: "undefined",
-                title: "undefined",
-              },
-            };
-          else {
-            return slide;
-          }
+          return {
+            ...slide,
+            background: selectedColor,
+            backgroundImage: {
+              path: "undefined",
+              title: "undefined",
+            },
+          };
         }),
       };
       setSlideData(updatedSlideData);
     }
   };
+
+  const [originalColor, setOriginalColor] =
+    React.useState<string>(selectedColor);
+
+  useEffect(() => {
+    setOriginalColor(selectedColor);
+  }, [openMenu]);
+
+  const suggestChangeAll = selectedColor !== originalColor;
+
+  const ChangeAllMenu = (
+    <div className="slide-top absolute top-0 border-t  bg-background rounded-b-md h-fit w-full flex items-center  py-2 px-2 justify-between">
+      <Button
+        className="w-full"
+        onClick={() => {
+          changeMultiBackgroundColors();
+          setOriginalColor(selectedColor);
+        }}
+      >
+        Apply to all
+      </Button>
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background border rounded-md  items-center relative gap-2 overflow-hidden">
@@ -130,7 +150,8 @@ export const BackgroundColor = () => {
             colorCommand={setBackgroundCommand}
             currentColor={selectedColor}
             documentColors={documentColors as DocumentColor[]}
-            changeAllCommand={changeMultiBackgroundColors}
+            suggestChangeAll={suggestChangeAll}
+            ChangeAllMenu={ChangeAllMenu}
           />
           <button
             onClick={() => setOpenMenu(false)}
@@ -141,20 +162,106 @@ export const BackgroundColor = () => {
         </PopoverContent>
       </Popover>
       <div className="h-8 w-[2px] bg-muted absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-      <TooltipProvider>
-        <Tooltip delayDuration={500}>
-          <TooltipTrigger asChild>
-            <input
-              value={"100%"}
-              type="percent"
-              className="w-[50px] h-10  text-sm text-center  noFocus"
-            />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Background Opacity</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <OpacityInput />
     </div>
+  );
+};
+
+const OpacityInput = () => {
+  const {slideData, selectedSlide, setSlideData} = usePresentation()!;
+
+  const getOpacityOfSelected = () => {
+    // If a single text box is selected
+    return selectedSlide?.backgroundOpacity
+      ? selectedSlide?.backgroundOpacity * 100 + "%"
+      : "100%";
+    // Default return value if no selection or other cases
+  };
+
+  const [opacity, setOpacity] = React.useState(getOpacityOfSelected());
+  const opacityInputRef = React.useRef<HTMLInputElement>(null);
+
+  const opacityOnSubmit = () => {
+    if (!opacityInputRef.current) return;
+    let numberValue = parseInt(opacityInputRef.current!.value.split("%")[0]);
+    // max 100, min 0
+
+    if (isNaN(numberValue)) {
+      opacityInputRef.current!.value = opacity + "%";
+      return;
+    }
+
+    if (numberValue > 100) numberValue = 100;
+    if (numberValue < 0) numberValue = 0;
+
+    const opacityValue = numberValue / 100;
+
+    configOpacityCommand(opacityValue);
+
+    setOpacity(JSON.stringify(numberValue));
+    opacityInputRef.current!.value = numberValue + "%";
+  };
+
+  useEffect(() => {
+    setOpacity(getOpacityOfSelected());
+    opacityInputRef.current!.value = getOpacityOfSelected();
+  }, [selectedSlide]);
+
+  const configOpacityCommand = (value: number) => {
+    setOpacity(JSON.stringify(value));
+    if (slideData && selectedSlide) {
+      const updatedSlideData = {
+        ...slideData,
+        slides: slideData.slides.map((slide) => {
+          if (slide.id === selectedSlide.id) {
+            return {
+              ...slide,
+              backgroundOpacity: value,
+            };
+          }
+          return slide;
+        }),
+      };
+      setSlideData(updatedSlideData);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        if (!opacityInputRef.current) return;
+        opacityInputRef.current.blur();
+      }
+    };
+    if (!opacityInputRef.current) return;
+    opacityInputRef.current.addEventListener("keyup", handleKeyUp);
+    return () => {
+      if (!opacityInputRef.current) return;
+      opacityInputRef.current.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={500}>
+        <TooltipTrigger asChild>
+          <input
+            ref={opacityInputRef}
+            onBlur={opacityOnSubmit}
+            defaultValue={opacity}
+            onFocus={() => {
+              // selecet all text on focus
+              setTimeout(() => {
+                opacityInputRef.current?.select();
+              }, 120);
+            }}
+            className="disableTextboxListeners text-sm text-center noFocus w-[50px] h-10 hover:bg-muted"
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Background opacity</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

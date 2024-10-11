@@ -259,6 +259,7 @@ const TextBox = () => {
                     visibility: isSelected ? "hidden" : "visible",
                     transform: `rotate(${rotation}deg) `,
                     textAlign: textBox.textAlign ? textBox.textAlign : "left",
+                    opacity: textBox?.textOpacity ? textBox.textOpacity : 1,
                   }}
                   onClick={() => {
                     setActiveEdit(textBox.textBoxId);
@@ -297,6 +298,7 @@ const TextBox = () => {
                     style={{
                       fontSize,
                       textAlign: textBox.textAlign ? textBox.textAlign : "left",
+                      opacity: textBox?.textOpacity ? textBox.textOpacity : 1,
                     }}
                     contentEditable={true}
                   />

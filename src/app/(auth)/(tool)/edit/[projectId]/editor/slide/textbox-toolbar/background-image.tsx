@@ -34,42 +34,6 @@ export const BackgroundImage = () => {
     addImageToBackground,
   } = usePresentation()!;
 
-  const [selectedColor, setSelectedColor] = React.useState<string>(
-    selectedSlide?.background || "#ffffff"
-  );
-
-  useEffect(() => {
-    setSelectedColor(selectedSlide?.background || "#ffffff");
-  }, [selectedSlide]);
-
-  const textDefaultColors = [
-    "#fff",
-    "#000000",
-    "#fed7d7",
-    "#feebc8",
-    "#c6f6d5",
-    "#c3dafe",
-  ];
-
-  const setBackgroundCommand = (color: string) => {
-    if (slideData && selectedSlide) {
-      const updatedSlideData = {
-        ...slideData,
-        slides: slideData.slides.map((slide) => {
-          if (slide.id === selectedSlide.id) {
-            return {
-              ...slide,
-              background: color,
-            };
-          }
-          return slide;
-        }),
-      };
-      setSlideData(updatedSlideData);
-      addRecentColor(color);
-      setSelectedColor(color);
-    }
-  };
   const [openMenu, setOpenMenu] = React.useState(false);
 
   const {currentUser} = useAuth()!;
@@ -90,6 +54,10 @@ export const BackgroundImage = () => {
   const [selectedImage, setSelectedImage] = React.useState<
     ImageType | undefined
   >(undefined);
+
+  useEffect(() => {
+    setSelectedImage(undefined);
+  }, [openMenu]);
 
   const [isLoaderImage, setIsLoaderImage] = React.useState(false);
 
@@ -129,13 +97,7 @@ export const BackgroundImage = () => {
   }, [openMenu]);
 
   const suggestChangeAll =
-    originalImage &&
-    originalImage.path !== "undefined" &&
-    selectedImage &&
-    originalImage !== selectedImage;
-
-  console.log("selectedImage", selectedImage?.title);
-  console.log("orignialImage", originalImage?.title);
+    selectedImage && originalImage && originalImage !== selectedImage;
 
   useEffect(() => {
     if (suggestChangeAll) {
@@ -176,7 +138,6 @@ export const BackgroundImage = () => {
       const userRef = doc(db, "users", "TV8IByKFFFaupS1HV4qg6Xaw1Xc2");
       const userSnap = await getDoc(userRef);
       if (userSnap.exists()) {
-        console.log("ud", userSnap.data());
         const defaultImages = userSnap.data().userImagesLocal;
         setDefaultImages(defaultImages);
       }
@@ -202,7 +163,7 @@ export const BackgroundImage = () => {
   };
 
   return (
-    <div className="w-full justify-end gap-1 items-center flex">
+    <div className="w-full justify-end  items-center flex">
       {selectedSlide?.backgroundImage &&
         selectedSlide?.backgroundImage.path !== "undefined"! && (
           <TooltipProvider>
@@ -222,26 +183,32 @@ export const BackgroundImage = () => {
           </TooltipProvider>
         )}
       <Popover open={openMenu} onOpenChange={setOpenMenu}>
-        <PopoverTrigger className="w-fit ">
+        <PopoverTrigger className=" w-[65px]  relative h-10">
           <TooltipProvider>
             <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>
-                <button
-                  className={`w-fit  h-10 flex justify-center items-center bg-background text-[12px] font-poppins border rounded-md  px-2 py-1
+                {selectedSlide?.backgroundImage &&
+                selectedSlide.backgroundImage.path !== "undefined" ? (
+                  <button
+                    className={`w-fit absolute h-10 flex justify-center items-center bg-background text-[12px] font-poppins border rounded-md   p-1 right-0 top-0
                   ${openMenu ? "bg-muted" : "hover:bg-muted"}
                   `}
-                >
-                  {selectedSlide?.backgroundImage &&
-                  selectedSlide.backgroundImage.path !== "undefined" ? (
+                  >
                     <img
                       src={selectedSlide.backgroundImage.path}
                       alt="background"
                       className=" rounded-[12px] h-full aspect-[16/9]"
                     />
-                  ) : (
-                    "Choose an Image"
-                  )}
-                </button>
+                  </button>
+                ) : (
+                  <button
+                    className={`w-fit absolute h-10 flex justify-center items-center bg-background text-[12px] font-poppins border rounded-md  px-2 py-1 whitespace-nowrap right-0 top-0
+                  ${openMenu ? "bg-muted" : "hover:bg-muted"}
+                  `}
+                  >
+                    Choose an Image
+                  </button>
+                )}
               </TooltipTrigger>
               <TooltipContent>
                 <p>Background Image</p>

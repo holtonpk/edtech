@@ -158,6 +158,44 @@ export const TextColor = () => {
     }
   };
 
+  const [originalColor, setOriginalColor] = React.useState<string>(textColor);
+
+  useEffect(() => {
+    setOriginalColor(textColor);
+  }, [openMenu]);
+
+  const suggestChangeAll =
+    (documentColors &&
+      documentColors
+        .map((color) => color?.color && color.color)
+        .includes(originalColor) &&
+      textColor !== originalColor) ||
+    false;
+
+  const ChangeAllMenu = (
+    <div className="slide-top absolute top-0 border-t  bg-background rounded-b-md h-fit w-full flex items-center  py-2 px-2 justify-between">
+      <Button
+        onClick={() => {
+          changeMultipleTextBoxesColor(originalColor);
+          setOriginalColor(textColor);
+        }}
+      >
+        Change all
+      </Button>
+      <div className="flex items-center gap-1">
+        <div
+          className="h-6 w-6 rounded-full border"
+          style={{background: originalColor}}
+        />
+        <Icons.chevronRight className="h-5 w-5" />
+        <div
+          className="h-6 w-6 rounded-full border "
+          style={{background: textColor}}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="relative  w-fit ml-auto">
       <div className="grid grid-cols-2 text-lg  h-10 w-fit ml-auto bg-background border rounded-md  items-center relative gap-2 overflow-hidden">
@@ -193,7 +231,9 @@ export const TextColor = () => {
               colorCommand={textColorCommand}
               currentColor={textColor}
               documentColors={documentColors as DocumentColor[]}
-              changeAllCommand={changeMultipleTextBoxesColor}
+              
+              suggestChangeAll={suggestChangeAll}
+              ChangeAllMenu={ChangeAllMenu}
             />
             <button
               onClick={() => setOpenMenu(false)}
@@ -207,11 +247,7 @@ export const TextColor = () => {
         <TooltipProvider>
           <Tooltip delayDuration={500}>
             <TooltipTrigger asChild>
-              <input
-                value={"100%"}
-                type="percent"
-                className="w-[50px] h-10 text-sm text-center noFocus"
-              />
+              <OpacityInput />
             </TooltipTrigger>
             <TooltipContent>
               <p>Text Opacity</p>
@@ -219,11 +255,130 @@ export const TextColor = () => {
           </Tooltip>
         </TooltipProvider>
       </div>
-      {/* {openMenu && (
-        <div className="absolute bg-background blurBack3 border p-2 -left-4 -translate-x-full z-[60] -top-20  h-fit overflow-scroll rounded-md">
-          <ColorMenu colorCommand={textColorCommand} currentColor={textColor} />
-        </div>
-      )} */}
     </div>
+  );
+};
+
+const OpacityInput = () => {
+  const {
+    selectedTextBox,
+    updateData,
+    groupSelectedTextBoxes,
+    slideData,
+    updateMultipleTextBoxes,
+  } = usePresentation()!;
+
+  const getOpacityOfSelected = () => {
+    // If a single text box is selected
+    if (selectedTextBox?.textOpacity !== undefined) {
+      return selectedTextBox.textOpacity * 100 + "%";
+    }
+
+    // If multiple text boxes are selected
+    if (groupSelectedTextBoxes && groupSelectedTextBoxes.length > 0) {
+      const opacities = groupSelectedTextBoxes
+        .map((textBoxId) => {
+          const textBox = slideData?.slides.flatMap((slide) =>
+            slide.textBoxes.find((textBox) => textBox.textBoxId === textBoxId)
+          )[0];
+          return textBox?.textOpacity;
+        })
+        .filter((opacity) => opacity !== undefined);
+
+      // Check if all opacities are the same
+      const firstOpacity = opacities[0];
+      const allSame = opacities.every((opacity) => opacity === firstOpacity);
+
+      if (allSame && firstOpacity !== undefined) {
+        return firstOpacity * 100 + "%"; // Return the opacity if all are the same
+      } else {
+        return "Mixed"; // Return "Mixed" if opacities differ
+      }
+    }
+
+    // Default return value if no selection or other cases
+    return 100 + "%";
+  };
+
+  const [opacity, setOpacity] = React.useState(getOpacityOfSelected());
+  const opacityInputRef = React.useRef<HTMLInputElement>(null);
+
+  const opacityOnSubmit = () => {
+    if (!opacityInputRef.current) return;
+    if (opacityInputRef.current.value == "Mixed") return;
+    let numberValue = parseInt(opacityInputRef.current!.value.split("%")[0]);
+    // max 100, min 0
+
+    if (isNaN(numberValue)) {
+      opacityInputRef.current!.value = opacity + "%";
+      return;
+    }
+
+    if (numberValue > 100) numberValue = 100;
+    if (numberValue < 0) numberValue = 0;
+
+    const opacityValue = numberValue / 100;
+
+    configOpacityCommand(opacityValue);
+
+    setOpacity(JSON.stringify(numberValue));
+    opacityInputRef.current!.value = numberValue + "%";
+  };
+
+  useEffect(() => {
+    setOpacity(getOpacityOfSelected());
+    opacityInputRef.current!.value = getOpacityOfSelected();
+  }, [selectedTextBox, groupSelectedTextBoxes]);
+
+  const configOpacityCommand = (value: number) => {
+    setOpacity(JSON.stringify(value));
+    if (selectedTextBox) {
+      updateData({textOpacity: value}, selectedTextBox.textBoxId);
+    } else if (groupSelectedTextBoxes) {
+      let textBoxesToUpdate: TextBoxesToUpdate[] = [];
+      groupSelectedTextBoxes.forEach((textBoxId) => {
+        textBoxesToUpdate.push({textBoxId, value: {textOpacity: value}});
+      });
+      updateMultipleTextBoxes(textBoxesToUpdate);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        if (!opacityInputRef.current) return;
+        opacityInputRef.current.blur();
+      }
+    };
+    if (!opacityInputRef.current) return;
+    opacityInputRef.current.addEventListener("keyup", handleKeyUp);
+    return () => {
+      if (!opacityInputRef.current) return;
+      opacityInputRef.current.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={500}>
+        <TooltipTrigger asChild>
+          <input
+            ref={opacityInputRef}
+            onBlur={opacityOnSubmit}
+            defaultValue={opacity}
+            onFocus={() => {
+              // selecet all text on focus
+              setTimeout(() => {
+                opacityInputRef.current?.select();
+              }, 120);
+            }}
+            className="disableTextboxListeners text-sm text-center noFocus w-[50px] h-10 hover:bg-muted"
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Text Opacity</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

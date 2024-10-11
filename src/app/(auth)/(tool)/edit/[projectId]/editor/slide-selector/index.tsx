@@ -129,23 +129,29 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
     let slideAreaHeight;
     let slideAreaWidth;
 
-    if (shouldHideToolbar || mode === "default") {
-      slideAreaHeight = vh - 84;
-      slideAreaWidth = vw - 402;
+    const windowWidth = window.innerWidth;
+
+    if (windowWidth > 768) {
+      if (shouldHideToolbar || mode === "default") {
+        slideAreaHeight = vh - 84;
+        slideAreaWidth = vw - 402;
+      } else {
+        slideAreaHeight = vh - 84;
+        slideAreaWidth = vw - 80;
+      }
     } else {
-      slideAreaHeight = vh - 84;
-      slideAreaWidth = vw - 80;
+      slideAreaWidth = slideAreaWidthReal;
+
+      slideAreaHeight = slideAreaWidth * (9 / 16);
+      setWidth(slideAreaWidth);
+
+      return;
     }
 
-    console.log("slideAreaHeight", slideAreaHeightReal, slideAreaHeight);
-    console.log("slideAreaWidth", slideAreaWidthReal, slideAreaWidth);
-
-    let newHeight = slideAreaHeight - 108;
     let newWidth = (slideAreaHeight - 108) * (16 / 9);
 
     if (newWidth > slideAreaWidth) {
       newWidth = slideAreaWidth;
-      newHeight = slideAreaWidth * (9 / 16);
     }
 
     setWidth(newWidth);
