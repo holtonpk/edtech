@@ -9,7 +9,7 @@ const EditPage = ({params}: {params: {projectId: string}}) => {
     <PresentationProvider projectId={params.projectId}>
       <div
         id="editPage-root"
-        className="h-screen w-screen  flex flex-col overflow-hidden gap-2"
+        className="h-fit md:h-screen w-screen  flex flex-col overflow-hidden gap-2"
       >
         <Background />
         <ToolBar />
