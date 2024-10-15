@@ -36,15 +36,6 @@ export const BackgroundColor = () => {
     setSelectedColor(selectedSlide?.background || "#ffffff");
   }, [selectedSlide]);
 
-  const textDefaultColors = [
-    "#fff",
-    "#000000",
-    "#fed7d7",
-    "#feebc8",
-    "#c6f6d5",
-    "#c3dafe",
-  ];
-
   const setBackgroundCommand = (color: string) => {
     if (slideData && selectedSlide) {
       const updatedSlideData = {

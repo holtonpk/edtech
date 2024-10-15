@@ -12,27 +12,9 @@ import {
 import Present from "./present";
 import {Input} from "@/components/ui/input";
 import {usePresentation} from "@/context/presentation-context";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {Label} from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
+import Share from "./share";
 const ToolBar = () => {
   const {slideData, title, setTitle} = usePresentation()!;
-
-  const [isPublic, setIsPublic] = React.useState(false);
 
   return (
     <div className="w-full px-2 pt-2 h-[68px] relative z-30 ">
@@ -65,84 +47,7 @@ const ToolBar = () => {
           <SaveStatus />
         </div>
         <div className="flex items-center px-0 md:p-3 gap-4   ">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"outline"}>
-                <Icons.upload className="w-4 h-4 mr-3" />
-                Share
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="p-4 flex flex-col gap-2">
-              <div className="grid gap-2">
-                <Label>Collaboration Link</Label>
-                <Select
-                  value={isPublic ? "public" : "private"}
-                  onValueChange={(value) => setIsPublic(value == "public")}
-                >
-                  <SelectTrigger className="w-[300px] ">
-                    <SelectValue className="flex items-center leading-[5px]">
-                      {isPublic ? (
-                        <div className="flex items-center">
-                          <Icons.public className="w-2 h-2 mr-2" />
-                          Anyone with the link
-                        </div>
-                      ) : (
-                        <div className="flex items-center">
-                          <Icons.lock className="w-4 h-4 mr-2" />
-                          Only you can Access
-                        </div>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      value="private"
-                      className="items-center flex hover:bg-muted cursor-pointer"
-                    >
-                      <div className="flex items-center">
-                        <Icons.lock className="w-4 h-4 mr-2" />
-                        <div className="flex flex-col">
-                          <h1 className="font-bold">Only you can Access</h1>
-                          <p className="text-muted-foreground text-sm">
-                            Only you can access the presentation with this link
-                          </p>
-                        </div>
-                      </div>
-                    </SelectItem>
-                    <SelectItem
-                      value="public"
-                      className="items-center flex hover:bg-muted cursor-pointer"
-                    >
-                      <div className="flex items-center">
-                        <Icons.public className="w-4 h-4 mr-2" />
-                        <div className="flex flex-col">
-                          <h1 className="font-bold">Anyone with the link</h1>
-
-                          <p className="text-muted-foreground text-sm">
-                            Anyone with the link can access and edit the
-                            presentation
-                          </p>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button>
-                  <Icons.copy className="w-4 h-4 mr-2" />
-                  Copy Link
-                </Button>
-              </div>
-              <Button variant={"ghost"} className="justify-start">
-                <Icons.download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-              <Button variant={"ghost"} className="justify-start">
-                <Icons.googleDrive className="w-4 h-4 mr-2" />
-                Save to Google Drive
-              </Button>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
+          <Share />
           <Present />
 
           {/* <ProfileNav /> */}

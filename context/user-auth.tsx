@@ -6,8 +6,6 @@ import React, {
   createContext,
   useRef,
 } from "react";
-
-// import nookies from "nookies";
 import {
   User as FirebaseUser,
   signOut,
@@ -15,11 +13,8 @@ import {
   updateProfile,
   signInWithPopup,
 } from "firebase/auth";
-
 import {doc, setDoc, getDoc} from "firebase/firestore";
-import {db, auth, app} from "@/config/firebase";
-import {set} from "zod";
-// import {Notifications, CompletedVideo, PayoutLocation} from "@/config/data";
+import {db, auth} from "@/config/firebase";
 
 interface AuthContextType {
   currentUser: UserData | undefined;
@@ -27,11 +22,13 @@ interface AuthContextType {
   logOut: () => Promise<void>;
   showLoginModal: boolean;
   setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
+  saveFileToGoogleDrive: (
+    fileBlob: Blob,
+    fileName: string
+  ) => Promise<{success?: boolean; error?: boolean; data?: any}>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-export const emailRef = React.createRef();
 
 export function useAuth() {
   return useContext(AuthContext);
@@ -42,39 +39,22 @@ export interface UserData extends FirebaseUser {
   lastName: string;
   photoURL: string;
   presentations: string[];
+  googleToken?: string;
 }
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
   const [currentUser, setCurrentUser] = useState<UserData | undefined>(
     undefined
   );
-
-  const [unSubscribedUserId, setUnSubscribedUserId] = useState<string | null>(
-    null
-  );
-
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [rerender, setRerender] = useState(true);
-
-  // useEffect(() => {
-  //   if (!currentUser) {
-  //     if (localStorage.getItem("unSubscribedUserId"))
-  //       setUnSubscribedUserId(
-  //         localStorage.getItem("unSubscribedUserId") as string
-  //       );
-  //     else {
-  //       const uId = Math.random().toString(36).substring(2, 14);
-  //       localStorage.setItem("unSubscribedUserId", uId);
-  //       setUnSubscribedUserId(uId);
-  //     }
-  //   }
-  // }, [rerender, currentUser]);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   async function logOut() {
     try {
       await signOut(auth);
       setCurrentUser(undefined);
+      setAccessToken(null); // Reset accessToken on logout
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -82,11 +62,15 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
   async function logInWithGoogle(): Promise<{success?: any; error?: any}> {
     try {
-      const result = await signInWithPopup(
-        auth,
-        new GoogleAuthProvider().setCustomParameters({prompt: "select_account"})
-      );
+      const provider = new GoogleAuthProvider();
+      provider.addScope("https://www.googleapis.com/auth/drive.file"); // Add Google Drive scope
+
+      const result = await signInWithPopup(auth, provider);
+
       if (result.user) {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential?.accessToken; // This is the OAuth access token
+
         createUserStorage(
           result.user.uid,
           {
@@ -94,7 +78,8 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
             last: result.user?.displayName?.split(" ")[1] || "",
           },
           result.user.email || "",
-          result.user.photoURL || undefined
+          result.user.photoURL || undefined,
+          token
         );
         return {success: result};
       } else {
@@ -105,14 +90,73 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     }
   }
 
+  async function saveFileToGoogleDrive(fileBlob: Blob, fileName: string) {
+    const fileMetadata = {
+      name: fileName,
+      mimeType:
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation", // MIME type for .pptx
+    };
+
+    const form = new FormData();
+    form.append(
+      "metadata",
+      new Blob([JSON.stringify(fileMetadata)], {type: "application/json"})
+    );
+    form.append("file", fileBlob); // Append the .pptx blob file here
+
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+        {
+          method: "POST",
+          headers: new Headers({
+            Authorization: `Bearer ${currentUser?.googleToken}`,
+          }),
+          body: form,
+        }
+      );
+
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        console.error("Error saving file to Google Drive:", errorResponse);
+        return {
+          error: true,
+        };
+      }
+
+      const file = await response.json();
+
+      return {
+        success: true,
+        data: file,
+      };
+    } catch (error) {
+      console.error("Error uploading file to Google Drive:", error);
+      return {
+        error: true,
+      };
+    }
+  }
+
   const createUserStorage = async (
     uid: string,
     name: {first: string; last: string},
     email: string,
-    photoUrl?: string
+    photoUrl?: string,
+    googleToken?: string
   ) => {
     const userRef = doc(db, "users", uid);
     const userSnap = await getDoc(userRef);
+
+    if (googleToken && userSnap.exists()) {
+      await setDoc(
+        userRef,
+        {
+          googleToken: googleToken,
+        },
+        {merge: true}
+      );
+    }
 
     if (!userSnap.exists()) {
       await setDoc(userRef, {
@@ -122,13 +166,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
         photoURL: photoUrl,
         uid: uid,
         presentations: [],
-        notificationSettings: {
-          email: email,
-          new_video: false,
-          revision: false,
-          done: false,
-          notes: false,
-        },
+        googleToken: googleToken,
       });
     }
 
@@ -139,58 +177,49 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     }
   };
 
+  // New effect to get access token for already signed-in users
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      console.log("email ver ====", user?.emailVerified);
       if (user?.uid) {
-        const token = await user.getIdToken();
-        // nookies.set(undefined, "token", token, { path: "/" });
-      }
-      if (user) {
-        if (user.emailVerified !== false) {
-          const userRef = doc(db, "users", user.uid);
+        const credential = GoogleAuthProvider.credentialFromResult({
+          user,
+        } as any);
 
-          const userSnap = await getDoc(userRef);
-          const userData = userSnap.data();
-          await auth.currentUser?.getIdToken(true);
-          const decodedToken = await auth.currentUser?.getIdTokenResult();
+        // If the credential doesn't provide the access token, use getIdTokenResult
+        const tokenResult = await user.getIdTokenResult();
+        if (tokenResult.claims && tokenResult.token) {
+          const providerData = user.providerData.find(
+            (provider) => provider.providerId === "google.com"
+          );
+          if (providerData) {
+            const googleToken =
+              tokenResult.claims.firebase?.sign_in_provider === "google.com"
+                ? tokenResult.token
+                : null;
+            if (googleToken) {
+              setAccessToken(googleToken);
+            }
+          }
+        }
+
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data();
+        if (userData) {
           setCurrentUser({
             ...user,
             firstName: userData?.firstName,
             lastName: userData?.lastName,
             photoURL: userData?.photoURL,
             presentations: userData?.presentations,
+            googleToken: userData?.googleToken || undefined,
           });
         }
-      } else {
-        setRerender(true);
       }
       setLoading(false);
     });
     return unsubscribe;
   }, []);
-
-  // async function getUserData() {
-  //   const userRef = doc(db, "users", "TrxCwQISFwc6ETvPYREqpgWdseg2");
-
-  //   const userSnap = await getDoc(userRef);
-  //   const userData = userSnap.data();
-  //   setCurrentUser({
-  //     ...userData,
-  //     firstName: userData?.firstName,
-  //     lastName: userData?.lastName,
-  //     photoURL: userData?.photoURL,
-  //     presentations: userData?.presentations,
-  //   } as UserData);
-  // }
-
-  // useEffect(() => {
-  //   if (!currentUser) {
-  //     getUserData();
-  //     setRerender(false);
-  //     setLoading(false);
-  //   }
-  // }, []);
 
   const value = {
     currentUser,
@@ -198,6 +227,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     logOut,
     showLoginModal,
     setShowLoginModal,
+    saveFileToGoogleDrive,
   };
 
   return (

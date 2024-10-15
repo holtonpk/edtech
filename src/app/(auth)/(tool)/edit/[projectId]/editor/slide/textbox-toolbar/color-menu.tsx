@@ -68,6 +68,8 @@ export const ColorMenu = ({
     }
   }, [suggestChangeAll]);
 
+  console.log("documentColors", documentColors);
+
   return (
     <>
       <div className=" relative w-full ">

@@ -93,7 +93,7 @@ const CreateNew = () => {
               fontSize: 24,
             },
           ],
-          background: "white",
+          background: "#ffffff",
           id: "1",
           images: [],
         },

@@ -37,9 +37,9 @@ const ProfileNav = () => {
         <DropdownMenuContent className=" w-[100px]">
           <DropdownMenuLabel>Your Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          {/* <DropdownMenuItem>
             <Link href="/settings">Notifications</Link>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem className="hover:bg-destructive/30">
             <button onClick={logOut} className=" text-destructive">
               Logout

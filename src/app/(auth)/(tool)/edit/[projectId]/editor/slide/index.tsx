@@ -468,7 +468,7 @@ const SlideContainer = ({
       slideAreaHeight = slideAreaWidth * (9 / 16);
       setHeight(slideAreaHeight);
       setWidth(slideAreaWidth);
-      setScale(slideAreaWidth / 1000);
+      setScale(slideAreaWidth / 960);
       return;
     }
 
@@ -482,7 +482,7 @@ const SlideContainer = ({
 
     setHeight(newHeight);
     setWidth(newWidth);
-    setScale(newWidth / 1000);
+    setScale(newWidth / 960);
   };
 
   React.useEffect(() => {
@@ -535,7 +535,7 @@ const SlideContainer = ({
       {/* <div className="absolute w-[100%] aspect-[16/9] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 "></div> */}
 
       <div
-        className="w-[1000px]  absolute aspect-[16/9] "
+        className="w-[960px] h-[540px]  absolute  "
         style={{transform: `scale(${scale})`}}
       >
         <div

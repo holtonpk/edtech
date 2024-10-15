@@ -75,7 +75,7 @@ const Generate = ({
       };
 
       return {
-        background: "#fff",
+        background: "#ffffff",
         id: Math.random().toString(36).substr(2, 9),
         images: formatImages(),
         textBoxes: formatTextBoxes(slide.textBoxes),

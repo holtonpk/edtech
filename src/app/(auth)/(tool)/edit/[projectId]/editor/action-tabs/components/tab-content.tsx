@@ -8,8 +8,8 @@ const TabContent = ({
   description,
 }: {
   children: React.ReactNode;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
 }) => {
   const {setMode} = usePresentation()!;
 
@@ -19,7 +19,7 @@ const TabContent = ({
     <>
       <div
         style={{width: isHovering ? "100%" : "calc(100% - 85px"}}
-        className={`  h-full z-[80] hidden md:block
+        className={`  h-full z-[80] hidden md:block overflow-hidden
           ${
             isHovering
               ? ""
@@ -40,7 +40,7 @@ const TabContent = ({
             style={{width: isHovering ? "100%" : "100%"}}
             className="p-4 absolute  h-full overflow-hidden"
           >
-            <div className="flex flex-col h-12 ">
+            <div className="flex flex-col h-12 relative z-10">
               <h1 className="font-bold text-xl poppins-bold">{title}</h1>
               <p className=" text-sm poppins-regular">{description}</p>
             </div>
@@ -56,10 +56,12 @@ const TabContent = ({
           `}
       >
         <div className="p-4 w-full h-fit overflow-hidden">
-          <div className="flex flex-col h-12 ">
-            <h1 className="font-bold text-xl poppins-bold">{title}</h1>
-            <p className=" text-sm poppins-regular">{description}</p>
-          </div>
+          {title && description && (
+            <div className="flex flex-col h-12 ">
+              <h1 className="font-bold text-xl poppins-bold">{title}</h1>
+              <p className=" text-sm poppins-regular">{description}</p>
+            </div>
+          )}
           <div className="h-fit w-full ">{children}</div>
         </div>
       </div>

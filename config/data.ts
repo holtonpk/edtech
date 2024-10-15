@@ -152,3 +152,21 @@ export type DocumentColor = {
   color: string;
   usageId: string;
 };
+
+export type GeneratedText = {
+  text: string;
+  textBoxId: string;
+  aiResponses: {
+    text: string;
+    id: string;
+  }[];
+};
+
+export type Preset = {
+  label: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  description: string;
+  background: string;
+  buttonLabel: string;
+  prompt?: string;
+};

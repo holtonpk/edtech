@@ -55,7 +55,7 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
   const setScale = () => {
     const selectorContainer = selectorContainerRef.current;
     if (!selectorContainer) return;
-    const calculateScale = selectorContainer.clientWidth / 1000;
+    const calculateScale = selectorContainer.clientWidth / 960;
     setSelectorScale(calculateScale);
   };
   React.useEffect(() => {
@@ -176,7 +176,7 @@ ${
 
             {selectorScale ? (
               <div
-                className="w-[1000px] aspect-[16/9] absolute overflow-hidden"
+                className="w-[960px] h-[540px] absolute overflow-hidden"
                 style={{transform: `scale(${selectorScale})`}}
               >
                 {slide.textBoxes &&
@@ -205,6 +205,8 @@ ${
                           opacity: textbox?.textOpacity
                             ? textbox.textOpacity
                             : 1,
+                          lineHeight: 1.15,
+                          padding: ".05in .1in .05in .1in",
                         }}
                       />
                     </div>

@@ -251,7 +251,7 @@ const TextBox = () => {
               >
                 <div
                   ref={textBoxPlaceholderRef}
-                  className="h-fit  w-full relative whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
+                  className="h-fit  w-full  relative whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
                   dangerouslySetInnerHTML={{__html: text}}
                   id={`ui-focus-text-box-${textBox.textBoxId}`}
                   style={{
@@ -260,6 +260,8 @@ const TextBox = () => {
                     transform: `rotate(${rotation}deg) `,
                     textAlign: textBox.textAlign ? textBox.textAlign : "left",
                     opacity: textBox?.textOpacity ? textBox.textOpacity : 1,
+                    lineHeight: 1.15,
+                    padding: ".05in .1in .05in .1in",
                   }}
                   onClick={() => {
                     setActiveEdit(textBox.textBoxId);
@@ -299,6 +301,8 @@ const TextBox = () => {
                       fontSize,
                       textAlign: textBox.textAlign ? textBox.textAlign : "left",
                       opacity: textBox?.textOpacity ? textBox.textOpacity : 1,
+                      lineHeight: 1.15,
+                      padding: ".05in .1in .05in .1in",
                     }}
                     contentEditable={true}
                   />
@@ -317,38 +321,38 @@ const TextBox = () => {
           )}
         </>
       ) : (
-        <div
-          onClick={() => {
-            setActiveSlide(undefined);
-            setActiveSlide(undefined);
-            if (!selectedForAiWrite) return;
-            if (selectedForAiWrite.includes(textBox.textBoxId)) {
-              setSelectedForAiWrite(
-                (prev) => prev && prev.filter((id) => id !== textBox.textBoxId)
-              );
-            } else {
-              setSelectedForAiWrite((prev) =>
-                prev ? [...prev, textBox.textBoxId] : [textBox.textBoxId]
-              );
-            }
-          }}
-          className="absolute group cursor-pointer"
-          style={{
-            top: position.y,
-            left: position.x,
-            height: "fit-content",
-            width: size.width,
-            transform: `rotate(${rotation}deg)`,
-            fontSize: `${fontSize}px`,
-          }}
-        >
-          <div
-            className="h-fit w-full z-[50]  relative nodrag  whitespace-pre-wrap break-words overflow-hidden pointer-events-none"
-            dangerouslySetInnerHTML={{__html: text}}
-          />
-
-          <div
-            className={`absolute    top-0 left-0 h-full w-full z-[60] pointer-events-none rounded-[3px]  flex items-center justify-center 
+        <>
+          <button
+            onClick={() => {
+              setActiveSlide(undefined);
+              setActiveSlide(undefined);
+              if (!selectedForAiWrite) return;
+              if (selectedForAiWrite.includes(textBox.textBoxId)) {
+                setSelectedForAiWrite(
+                  (prev) =>
+                    prev && prev.filter((id) => id !== textBox.textBoxId)
+                );
+              } else {
+                setSelectedForAiWrite((prev) =>
+                  prev ? [...prev, textBox.textBoxId] : [textBox.textBoxId]
+                );
+              }
+            }}
+            className="absolute group cursor-pointer z-30 "
+            style={{
+              top: position.y,
+              left: position.x,
+              height: "fit-content",
+              width: size.width,
+              transform: `rotate(${rotation}deg)`,
+              fontSize: `${fontSize}px`,
+              textAlign: textBox.textAlign ? textBox.textAlign : "left",
+            }}
+          >
+            <div
+              style={{}}
+              // dangerouslySetInnerHTML={{__html: text}}
+              className={`absolute z-[60]  top-0 left-0 h-full w-full  pointer-events-none rounded-[3px]  flex items-center justify-center 
                 ${
                   selectedForAiWrite &&
                   selectedForAiWrite.includes(textBox.textBoxId)
@@ -356,16 +360,39 @@ const TextBox = () => {
                     : " group-hover:border-2 group-hover:border-primary"
                 }
                 `}
+            />
+            <div
+              id={`ai-rewrite-text-box-${textBox.textBoxId}`}
+              className="h-fit w-full z-[10]    nodrag  whitespace-pre-wrap break-words overflow-hidden pointer-events-none"
+              dangerouslySetInnerHTML={{__html: text}}
+            />
+          </button>
+          <div
+            style={{
+              top: position.y,
+              left: position.x,
+              height: "fit-content",
+              width: size.width,
+              transform: `rotate(${rotation}deg)`,
+              fontSize: `${fontSize}px`,
+            }}
+            // dangerouslySetInnerHTML={{__html: text}}
+            className={`absolute z-[60]  top-0 left-0 h-full w-full  pointer-events-none rounded-[3px]  flex items-center justify-center 
+               `}
           >
+            <div
+              className="h-fit w-full z-[0]    nodrag  whitespace-pre-wrap break-words overflow-hidden pointer-events-none opacity-0"
+              dangerouslySetInnerHTML={{__html: text}}
+            />
             {selectedForAiWrite &&
               selectedForAiWrite.includes(textBox.textBoxId) && (
-                <div className="absolute bottom-0 translate-y-full left-1/2 -translate-x-1/2 bg-primary blurBack text-[12px] whitespace-nowrap flex items-center font-bold text-background px-3 py-1  rounded-b-sm ">
+                <div className="absolute z-[99] bottom-0 translate-y-full left-1/2 -translate-x-1/2 bg-primary blurBack text-[12px] whitespace-nowrap flex items-center font-bold text-background px-3 py-1  rounded-b-sm ">
                   <Icons.check className="h-4 w-4 mr-2" />
                   Selected for AI Write
                 </div>
               )}
           </div>
-        </div>
+        </>
       )}
     </>
   );

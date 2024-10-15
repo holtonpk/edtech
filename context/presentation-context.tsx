@@ -428,7 +428,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
 
     const newSlide: Slide = {
       id: Math.random().toString(),
-      background: "#fff",
+      background: "#ffffff",
       textBoxes: [],
       images: [],
     };

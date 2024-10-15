@@ -11,6 +11,8 @@ import Text from "./components/text";
 import {OverridableComponent} from "@mui/material/OverridableComponent";
 import {SvgIconTypeMap} from "@mui/material";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {GeneratedText, Preset} from "@/config/data";
+import {AiRewritePresets} from "./components/ai-write/data";
 
 type HoverContextType = {
   isHovering: boolean;
@@ -227,24 +229,31 @@ const ActionPanel = () => {
   const onHoverGroup = () => {
     if (mode !== "default") return;
 
-    document.getElementById("hoverContainer")!.style.display = "block";
-    document.getElementById("hover-indicator")!.style.display = "block";
+    const hoverContainer = document.getElementById("hoverContainer");
+    if (hoverContainer) hoverContainer.style.display = "block";
+    const hoverIndicator = document.getElementById("hover-indicator");
+    if (hoverIndicator) hoverIndicator.style.display = "block";
   };
 
   const onHoverGroupOff = () => {
     if (mode !== "default") return;
 
     setHoverValue(null);
-    document.getElementById("hoverContainer")!.style.display = "none";
-    document.getElementById("hover-indicator")!.style.display = "none";
 
-    document.getElementById(
+    const hoverContainer = document.getElementById("hoverContainer");
+    if (hoverContainer) hoverContainer.style.display = "none";
+    const hoverIndicator = document.getElementById("hover-indicator");
+    if (hoverIndicator) hoverIndicator.style.display = "none";
+
+    const hoverPoint = document.getElementById(
       prevHoveredElement.current + "-hover-point"
-    )!.style.display = "none";
+    );
+    if (hoverPoint) hoverPoint.style.display = "none";
 
-    document.getElementById(
+    const prevHoverContainer = document.getElementById(
       prevHoveredElement.current + "-hoverContainer"
-    )!.style.display = "none";
+    );
+    if (prevHoverContainer) prevHoverContainer.style.display = "none";
 
     // document.getElementById(
     //   hoveredIndex.current + "-hoverContainer"
@@ -270,6 +279,22 @@ const ActionPanel = () => {
   };
 
   const [isLoaderImage, setIsLoaderImage] = React.useState(false);
+
+  // states for ai rewrite
+  const [aiTab, setAiTab] = React.useState<"start" | "config" | "apply">(
+    "start"
+  );
+  const [generatedData, setGeneratedData] = React.useState<GeneratedText[]>([]);
+
+  useEffect(() => {
+    if (mode !== "aiRewrite") {
+      setAiTab("start");
+    }
+  }, [mode]);
+
+  const [selectedPreset, setSelectedPreset] = React.useState<Preset>(
+    AiRewritePresets[0]
+  );
 
   const TabButtons: TabButtonType[] = [
     {
@@ -352,10 +377,26 @@ const ActionPanel = () => {
 
       HoverElement: (
         <HoverContainer id="aiRewrite">
-          <AiRewrite />
+          <AiRewrite
+            tab={aiTab}
+            setTab={setAiTab}
+            generatedData={generatedData}
+            setGeneratedData={setGeneratedData}
+            selectedPreset={selectedPreset}
+            setSelectedPreset={setSelectedPreset}
+          />
         </HoverContainer>
       ),
-      Element: <AiRewrite />,
+      Element: (
+        <AiRewrite
+          tab={aiTab}
+          setTab={setAiTab}
+          generatedData={generatedData}
+          setGeneratedData={setGeneratedData}
+          selectedPreset={selectedPreset}
+          setSelectedPreset={setSelectedPreset}
+        />
+      ),
     },
   ];
 
@@ -369,6 +410,15 @@ const ActionPanel = () => {
     await uploadImage(e.target.files![0]);
     setIsLoaderImage(false);
   }
+
+  useEffect(() => {
+    if (aiTab === "apply" || aiTab === "config") {
+      setMode("aiRewrite");
+      setIsHovering(false);
+      setIsHoveringGroup(false);
+      onHoverGroupOff();
+    }
+  }, [aiTab]);
 
   return (
     <>
@@ -464,7 +514,16 @@ ${mode === tab.value && "bg-muted-foreground/5"}
             </div>
           </div>
 
-          {mode === "aiRewrite" && <AiRewrite />}
+          {mode === "aiRewrite" && (
+            <AiRewrite
+              tab={aiTab}
+              setTab={setAiTab}
+              generatedData={generatedData}
+              setGeneratedData={setGeneratedData}
+              selectedPreset={selectedPreset}
+              setSelectedPreset={setSelectedPreset}
+            />
+          )}
           {mode === "themes" && <Themes />}
           {mode === "text" && <Text />}
           {mode === "images" && (

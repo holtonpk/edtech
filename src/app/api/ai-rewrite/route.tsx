@@ -6,13 +6,13 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-  const {uploadText, description} = await req.json();
+  const {uploadText, instructions} = await req.json();
 
   const completion = await openai.chat.completions.create({
     messages: [
       {
         role: "system",
-        content: `Respond only in the following json type: ${responseType}.Respond with 3 different versions.Text should be formatted in html. Apply the following changes :${description}. to the following text:${uploadText}`,
+        content: `Apply the following changes :(${instructions}) \n to the following text:(${uploadText}) \n Respond only in the following json type: ${responseType}. \n Respond with 3 different versions. `,
       },
     ],
     model: "gpt-4-turbo",
@@ -49,7 +49,7 @@ export async function GET() {
 }
 
 const responseType = `type Responses = {
-id:number;
+id: string;
         text: string;
     }[];`;
 

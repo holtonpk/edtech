@@ -543,6 +543,19 @@ input[type="number"] {
   }
 }
 
+.fade-in-custom {
+  animation: fadeIn 2s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .fade-in-500 {
   animation: fadeIn 0.25s forwards;
 }
@@ -851,7 +864,7 @@ input[type="number"] {
   display: -webkit-box;
   max-width: 100%;
   max-height: 55px;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -889,4 +902,21 @@ input[type="number"] {
     -webkit-transform: translateY(0px);
     transform: translateY(0px);
   }
+}
+
+.responseOption-content-box {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.responseOption-content-open .responseOption-content-box {
+  max-height: 1000px; /* Height when open */
+  -webkit-line-clamp: unset; /* Allow full content display when open */
+  transition: max-height 1s ease; /* Smooth transition */
+}
+
+.responseOption-content-closed .responseOption-content-box {
+  max-height: 150px; /* Closed state */
+  -webkit-line-clamp: 5; /* Show only 4 lines in the closed state */
+  transition: max-height 1s ease;
 }
