@@ -9,9 +9,8 @@ export default function GoogleDriveImport() {
     openPicker({
       clientId:
         "531390591850-2bjcst5pfeqfpfl6k7j22js4465r4lfq.apps.googleusercontent.com",
-      developerKey: "AIzaSyAJIjZPPgwJm6zOiO_x1iTftFwYvffOVDU",
+      developerKey: process.env.NEXT_PUBLIC_GOOGLE_DRIVE_API_KEY as string,
       viewId: "DOCS",
-      // token: token, // pass oauth token in case you already have one
       showUploadView: true,
       showUploadFolders: true,
       supportDrives: true,

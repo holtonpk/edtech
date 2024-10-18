@@ -159,6 +159,12 @@ const Config = ({
           textBoxId: textBox.textBoxId,
           aiResponses: [],
         };
+        console.log("results ===> ", {
+          uploadText: extractTextFromHTML(textBox.text),
+          instructions: selectedPreset.prompt
+            ? selectedPreset.prompt
+            : description,
+        });
         const response = await fetch("/api/ai-rewrite", {
           method: "POST",
           body: JSON.stringify({

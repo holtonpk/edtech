@@ -49,7 +49,12 @@ import {useRouter} from "next/router";
 
 const Share = () => {
   const [isPublic, setIsPublic] = React.useState(false);
-  const {saveFileToGoogleDrive} = useAuth()!;
+  const {
+    saveFileToGoogleDrive,
+    logInWithGoogle,
+    checkUserAccessScopes,
+    currentUser,
+  } = useAuth()!;
   const {slideData, title} = usePresentation()!;
 
   const [isDownloading, setIsDownloading] = React.useState(false);
@@ -162,10 +167,10 @@ const Share = () => {
     return pres;
   };
 
-  const savePPTX = async () => {
+  const downloadPPTX = async () => {
     if (!slideData) return;
     // 4. Save the Presentation
-    setIsSavingToDrive(true);
+    setIsDownloading(true);
     const pres = await createPPTX();
     if (!pres) return;
     pres.writeFile({fileName: `${title}.pptx`}).then((fileName) => {
@@ -179,31 +184,38 @@ const Share = () => {
 
   const savePPTXToDrive = async () => {
     if (!slideData) return;
-
-    // Show loading state while saving the presentation
-    setIsSavingToDrive(true);
-
-    // 1. Create the PPTX file
-    const pres = await createPPTX();
-    if (!pres) {
+    setStillNeedsPermission(false);
+    const hasScope = await checkUserAccessScopes(
+      "https://www.googleapis.com/auth/drive.file"
+    );
+    if (!hasScope) {
+      setTab("drive-permission");
       setIsSavingToDrive(false);
-      return;
+    } else {
+      setIsSavingToDrive(true);
+      // 1. Create the PPTX file
+      const pres = await createPPTX();
+      if (!pres) {
+        setIsSavingToDrive(false);
+        return;
+      }
+
+      // 2. Convert the PPTX to a Blob to prepare for upload
+      const pptxBlob = await pres.write({outputType: "blob"});
+      const res = await saveFileToGoogleDrive(
+        pptxBlob as Blob,
+        `${title}.pptx`
+      );
+      if (res?.success) {
+        console.log(res.data);
+        setDriveUrl(`https://docs.google.com/presentation/d/${res.data.id}`);
+        setShowDriveSuccess(true);
+      }
+
+      // Remove loading state once the process is complete
+      setIsDownloading(false);
+      setOpenMenu(false);
     }
-
-    // 2. Convert the PPTX to a Blob to prepare for upload
-    const pptxBlob = await pres.write({outputType: "blob"});
-
-    const res = await saveFileToGoogleDrive(pptxBlob as Blob, `${title}.pptx`);
-
-    if (res?.success) {
-      console.log(res.data);
-      setDriveUrl(`https://docs.google.com/presentation/d/${res.data.id}`);
-      setShowDriveSuccess(true);
-    }
-
-    // Remove loading state once the process is complete
-    setIsSavingToDrive(false);
-    setOpenMenu(false);
   };
 
   const openInDrive = () => {
@@ -223,6 +235,32 @@ const Share = () => {
     }, 3000);
   };
 
+  // const [hasDrivePermission, setHasDrivePermission] = React.useState(false);
+
+  const [tab, setTab] = React.useState<"default" | "drive-permission">(
+    "default"
+  );
+
+  const [isConnecting, setIsConnecting] = React.useState(false);
+
+  const updateTokenPermissions = async () => {
+    setIsConnecting(true);
+    await logInWithGoogle();
+    setIsConnecting(false);
+    const hasScope = await checkUserAccessScopes(
+      "https://www.googleapis.com/auth/drive.file"
+    );
+    if (hasScope) {
+      setStillNeedsPermission(false);
+      setTab("default");
+      savePPTXToDrive();
+    } else {
+      setStillNeedsPermission(true);
+    }
+  };
+
+  const [stillNeedsPermission, setStillNeedsPermission] = React.useState(false);
+
   return (
     <>
       <DropdownMenu open={openMenu} onOpenChange={setOpenMenu}>
@@ -232,118 +270,137 @@ const Share = () => {
             Share
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="p-4 flex flex-col gap-2 ">
-          <div className="grid gap-2">
-            <Label>Collaboration Link</Label>
-            <Select
-              value={isPublic ? "public" : "private"}
-              onValueChange={(value) => setIsPublic(value == "public")}
-            >
-              <SelectTrigger className="w-[300px] ">
-                <SelectValue className="flex items-center leading-[5px]">
-                  {isPublic ? (
-                    <div className="flex items-center">
-                      <Icons.public className="w-2 h-2 mr-2" />
-                      Anyone with the link
-                    </div>
-                  ) : (
+        {tab === "default" && (
+          <DropdownMenuContent className="p-4 flex flex-col gap-2 ">
+            <div className="grid gap-2">
+              <Label>Collaboration Link</Label>
+              <Select
+                value={isPublic ? "public" : "private"}
+                onValueChange={(value) => setIsPublic(value == "public")}
+              >
+                <SelectTrigger className="w-[300px] ">
+                  <SelectValue className="flex items-center leading-[5px]">
+                    {isPublic ? (
+                      <div className="flex items-center">
+                        <Icons.public className="w-2 h-2 mr-2" />
+                        Anyone with the link
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <Icons.lock className="w-4 h-4 mr-2" />
+                        Only you can Access
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="private"
+                    className="items-center flex hover:bg-muted cursor-pointer"
+                  >
                     <div className="flex items-center">
                       <Icons.lock className="w-4 h-4 mr-2" />
-                      Only you can Access
+                      <div className="flex flex-col">
+                        <h1 className="font-bold">Only you can Access</h1>
+                        <p className="text-muted-foreground text-sm">
+                          Only you can access the presentation with this link
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  value="private"
-                  className="items-center flex hover:bg-muted cursor-pointer"
-                >
-                  <div className="flex items-center">
-                    <Icons.lock className="w-4 h-4 mr-2" />
-                    <div className="flex flex-col">
-                      <h1 className="font-bold">Only you can Access</h1>
-                      <p className="text-muted-foreground text-sm">
-                        Only you can access the presentation with this link
-                      </p>
-                    </div>
-                  </div>
-                </SelectItem>
-                <SelectItem
-                  value="public"
-                  className="items-center flex hover:bg-muted cursor-pointer"
-                >
-                  <div className="flex items-center">
-                    <Icons.public className="w-4 h-4 mr-2" />
-                    <div className="flex flex-col">
-                      <h1 className="font-bold">Anyone with the link</h1>
+                  </SelectItem>
+                  <SelectItem
+                    value="public"
+                    className="items-center flex hover:bg-muted cursor-pointer"
+                  >
+                    <div className="flex items-center">
+                      <Icons.public className="w-4 h-4 mr-2" />
+                      <div className="flex flex-col">
+                        <h1 className="font-bold">Anyone with the link</h1>
 
-                      <p className="text-muted-foreground text-sm">
-                        Anyone with the link can access and edit the
-                        presentation
-                      </p>
+                        <p className="text-muted-foreground text-sm">
+                          Anyone with the link can access and edit the
+                          presentation
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={copyLink}>
-              {isCopied ? (
-                <>
-                  <Icons.check className="w-4 h-4 mr-2" />
-                  Copied!
-                </>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={copyLink}>
+                {isCopied ? (
+                  <>
+                    <Icons.check className="w-4 h-4 mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Icons.copy className="w-4 h-4 mr-2" />
+                    Copy Link
+                  </>
+                )}
+              </Button>
+            </div>
+            <Button
+              onClick={downloadPPTX}
+              variant={"ghost"}
+              className="justify-start"
+            >
+              {isDownloading ? (
+                <Icons.spinner className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <>
-                  <Icons.copy className="w-4 h-4 mr-2" />
-                  Copy Link
-                </>
+                <Icons.download className="w-4 h-4 mr-2" />
               )}
+              Download
             </Button>
-          </div>
-          <Button
-            onClick={savePPTX}
-            variant={"ghost"}
-            className="justify-start"
-          >
-            {isDownloading ? (
-              <Icons.spinner className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Icons.download className="w-4 h-4 mr-2" />
-            )}
-            Download
-          </Button>
-          <Button
-            onClick={savePPTXToDrive}
-            variant={"ghost"}
-            className="justify-start"
-          >
-            {isSavingToDrive ? (
-              <Icons.spinner className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Icons.googleDrive className="w-4 h-4 mr-2" />
-            )}
-            Save to Google Drive
-          </Button>
-        </DropdownMenuContent>
+            <Button
+              onClick={savePPTXToDrive}
+              variant={"ghost"}
+              className="justify-start"
+            >
+              {isSavingToDrive ? (
+                <Icons.spinner className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Icons.googleDrive className="w-4 h-4 mr-2" />
+              )}
+              Save to Google Drive
+            </Button>
+          </DropdownMenuContent>
+        )}
+        {tab === "drive-permission" && (
+          <DropdownMenuContent className=" flex flex-col gap-2 items-center p-0 w-[300px]">
+            <div className="w-full h-fit bg-muted py-2 px-1">
+              <button
+                onClick={() => setTab("default")}
+                className="flex items-center poppins-regular text-sm hover:text-primary"
+              >
+                <Icons.chevronLeft className="w-4 h-4 mr-4" />
+                back
+              </button>
+            </div>
+            <div className="flex flex-col items-center p-4 pt-2 gap-4">
+              <h1 className="text-xl font-bold text-center poppins-bold">
+                Save your presentation <br /> strait to Google Drive!
+              </h1>
+              <div className="p-8 h-fit w-fit rounded-md bg-muted">
+                <Icons.googleDrive className="w-12 h-12" />
+              </div>
+              {stillNeedsPermission && (
+                <p className="p-2 bg-theme-red/20 rounded-sm text-[12px]">
+                  You have not given enough permission to save to Google Drive.
+                  Please try connecting your account again
+                </p>
+              )}
+              <Button onClick={updateTokenPermissions} className="w-full">
+                Connect Google Drive
+                {isConnecting && (
+                  <Icons.spinner className="w-4 h-4 ml-2 animate-spin" />
+                )}
+              </Button>
+            </div>
+          </DropdownMenuContent>
+        )}
       </DropdownMenu>
 
-      {/* <AlertDialog open={showDriveSuccess} onOpenChange={setShowDriveSuccess}>
-        <AlertDialogTrigger>Open</AlertDialogTrigger>
-        <AlertDialogContent>
-          <button className="absolute top-4 right-4">
-            <Icons.close className="w-4 h-4" />
-          </button>
-          <AlertDialogHeader>
-            <AlertDialogTitle>File saved to your drive!</AlertDialogTitle>
-
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Close</AlertDialogCancel>
-
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
       <Dialog open={showDriveSuccess} onOpenChange={setShowDriveSuccess}>
         <DialogContent>
           <DialogHeader>
@@ -367,6 +424,3 @@ const Share = () => {
 };
 
 export default Share;
-
-// 1.46
-// 1.22

@@ -15,6 +15,7 @@ import {
 } from "firebase/auth";
 import {doc, setDoc, getDoc} from "firebase/firestore";
 import {db, auth} from "@/config/firebase";
+// import {google} from "googleapis";
 
 interface AuthContextType {
   currentUser: UserData | undefined;
@@ -26,6 +27,7 @@ interface AuthContextType {
     fileBlob: Blob,
     fileName: string
   ) => Promise<{success?: boolean; error?: boolean; data?: any}>;
+  checkUserAccessScopes: (scope: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -48,13 +50,12 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
   );
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const accessTokenRef = useRef<string | null>(null);
 
   async function logOut() {
     try {
       await signOut(auth);
       setCurrentUser(undefined);
-      setAccessToken(null); // Reset accessToken on logout
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -64,13 +65,13 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     try {
       const provider = new GoogleAuthProvider();
       provider.addScope("https://www.googleapis.com/auth/drive.file"); // Add Google Drive scope
-
       const result = await signInWithPopup(auth, provider);
-
       if (result.user) {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential?.accessToken; // This is the OAuth access token
-
+        if (token) {
+          accessTokenRef.current = token;
+        }
         createUserStorage(
           result.user.uid,
           {
@@ -90,6 +91,29 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     }
   }
 
+  const checkUserAccessScopes = async (scope: string) => {
+    const response = await fetch(
+      `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessTokenRef.current}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!response.ok) {
+      console.error("Error checking user access scopes:", response);
+      return false;
+    }
+    const data = await response.json();
+    const scopes = data.scope.split(" ");
+    if (scopes.includes(scope)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   async function saveFileToGoogleDrive(fileBlob: Blob, fileName: string) {
     const fileMetadata = {
       name: fileName,
@@ -103,14 +127,15 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       new Blob([JSON.stringify(fileMetadata)], {type: "application/json"})
     );
     form.append("file", fileBlob); // Append the .pptx blob file here
-
+    // const token =
+    //   "ya29.a0AcM612wlf41ImWyZbYqsTTlntsTdE2NfDa8YIR971MDZ5qnp5WXckWoxqZnOW-50HapiWnpD4tkgYwmO4yoYTslysiEOxbvgE9TaVMQmxA0dOcFnYoh2YLzlsqBu9qj-Zj0WmqJ3tnzPrdIsV3bE_dQHw1QC_n1JZnkvHpEPaCgYKAbASARESFQHGX2MiJABwkk-aJjuOJKW1aA2_8A0175";
     try {
       const response = await fetch(
         "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
         {
           method: "POST",
           headers: new Headers({
-            Authorization: `Bearer ${currentUser?.googleToken}`,
+            Authorization: `Bearer ${accessTokenRef.current}`,
           }),
           body: form,
         }
@@ -197,7 +222,6 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
                 ? tokenResult.token
                 : null;
             if (googleToken) {
-              setAccessToken(googleToken);
             }
           }
         }
@@ -214,6 +238,8 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
             presentations: userData?.presentations,
             googleToken: userData?.googleToken || undefined,
           });
+          userData?.googleToken &&
+            (accessTokenRef.current = userData?.googleToken);
         }
       }
       setLoading(false);
@@ -228,6 +254,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     showLoginModal,
     setShowLoginModal,
     saveFileToGoogleDrive,
+    checkUserAccessScopes,
   };
 
   return (

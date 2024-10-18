@@ -1,70 +1,107 @@
 "use client";
 import {Icons} from "@/components/icons";
-import React, {useEffect, useState, useRef} from "react";
+import React, {useEffect, useState, useRef, use} from "react";
+import {Start, Step1} from "./components/steps-new/1";
+import {Step2} from "./components/steps-new/2";
+import {Step3} from "./components/steps-new/3";
+import {StepConnector} from "@mui/material";
+import StepContainer from "./components/steps-new/step-container";
+import {AnimatePresence} from "framer-motion";
+import {Button} from "@/components/ui/button";
 
 const CreateSteps = () => {
+  const [step, setStep] = useState(0);
+  const [prevStep, setPrevStep] = useState(0);
+
   return (
-    <div className="h-[calc(100vh-60px)] w-screen flex flex-col items-center justify-center z-50 relative">
-      <h1 className="text-4xl font-bold">Generate a new slideshow</h1>
-      <p className="">Follow the steps below to create a slideshow</p>
-      <div className="w-[400px] border shadow-xl rounded-md h-fit overflow-hidden relative mt-4 ">
-        <input
-          type="text"
-          placeholder="Describe your project"
-          className="h-12 w-full pr-10 pl-4 noFocus relative text-sm"
-        />
-        <button className="absolute top-1/2 right-4 -translate-y-1/2 bg-primary rounded-full flex items-center justify-center">
-          <Icons.chevronRight className="h-6 w-6 text-muted" />
-        </button>
-      </div>
-      <div className="mt-10 max-w-[800px] w-[80%] grid grid-cols-3 gap-10 h-[120px] ">
-        <PresetCard displayedText="Create a detailed presentation for my 8th grade history class about the American Civil War" />
-        <PresetCard displayedText="I want a fun slide show to teach my 5th grade students about reptiles" />
-        <PresetCard displayedText="Create a presentation to help teach the uploaded text book pages" />
+    <div className="h-[calc(100vh-60px)] flex  items-center justify-center gap-10 z-40 relative">
+      <Start
+        step={step}
+        setStep={setStep}
+        prevStep={prevStep}
+        setPrevStep={setPrevStep}
+      />
+      <div className="h-fit w-fit absolute flex flex-col gap-8 ">
+        <div className="flex flex-row   gap-1 ">
+          <StepContainer
+            step={step}
+            setStep={setStep}
+            stepNumber={1}
+            title="Describe"
+          />
+          <StepContainer
+            step={step}
+            setStep={setStep}
+            stepNumber={2}
+            title="Upload "
+          />
+          <StepContainer
+            step={step}
+            setStep={setStep}
+            stepNumber={3}
+            title="Format"
+          />
+          <StepContainer
+            step={step}
+            setStep={setStep}
+            stepNumber={4}
+            title="Generate"
+          />
+        </div>
+        <div className="w-full h-[350px] ">
+          <AnimatePresence>
+            {step === 1 && (
+              <Step1
+                step={step}
+                setStep={setStep}
+                prevStep={prevStep}
+                setPrevStep={setPrevStep}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {step === 2 && (
+              <Step2
+                step={step}
+                setStep={setStep}
+                prevStep={prevStep}
+                setPrevStep={setPrevStep}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {step === 3 && (
+              <Step3
+                step={step}
+                setStep={setStep}
+                prevStep={prevStep}
+                setPrevStep={setPrevStep}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+
+        {step > 0 && (
+          <div className="flex justify-between items-center w-full ">
+            <Button
+              onClick={() => setStep(step - 1)}
+              variant={"ghost"}
+              className="flex items-center "
+            >
+              <Icons.chevronLeft className="w-6 h-6" />
+              Prev step
+            </Button>
+            <Button
+              onClick={() => setStep(step + 1)}
+              className="flex items-center "
+            >
+              Next step <Icons.chevronRight className="w-6 h-6" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default CreateSteps;
-
-const PresetCard = ({displayedText}: {displayedText: string}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [height, setHeight] = useState<string>("64px");
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isOpen && contentRef.current) {
-      // When opened, get the full height of the content
-      setHeight(`${contentRef.current.scrollHeight + 12}px`);
-    } else {
-      // When closed, set it to the initial height (collapsed state)
-      setHeight("64px");
-    }
-  }, [isOpen]);
-
-  return (
-    <button
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-      className={`w-full flex gap-2 items-start rounded-lg p-2 bg-background/70 transition-all duration-500 overflow-hidden
-        ${isOpen ? "shadow-lg" : ""}
-        `}
-      style={{height}} // Dynamically change the button's height
-    >
-      <Icons.sparkles
-        style={{height: "16px", width: "16px"}}
-        className="mt-[4px] text-primary"
-      />
-
-      <div
-        ref={contentRef}
-        className={`text-left ${
-          isOpen ? "h-fit" : "presentCard-content-closed"
-        }`}
-      >
-        {displayedText}
-      </div>
-    </button>
-  );
-};
