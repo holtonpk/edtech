@@ -174,13 +174,13 @@ const UploadManager = () =>
           type: getFileType(file),
         }));
 
-        setFiles((prevFiles) => {
+        setFiles((prevFiles: any) => {
           const updatedFiles = [...(prevFiles || []), ...newFiles];
           return updatedFiles;
         });
 
         for (const fileLocal of newFiles) {
-          await uploadFile(fileLocal);
+          await uploadFile(fileLocal as FileLocal);
         }
       } catch (error) {
         console.error("Error processing the files ", error);
