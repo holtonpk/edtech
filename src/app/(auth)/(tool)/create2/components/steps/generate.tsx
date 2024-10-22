@@ -117,17 +117,17 @@ const Generate = ({
 
     const formattedSlideData = formatSlides(unformattedResponse);
 
-    const PresentationData = {
-      title: "Test Presentation",
-      slideData: {slides: formattedSlideData},
-      recentColors: [],
-      id: Math.random().toString(),
-      createdAt: serverTimestamp(),
-    };
+    // const PresentationData:FullSlideData = {
+    //   title: "Test Presentation",
+    //   slideData: {slides: formattedSlideData},
+    //   recentColors: [],
+    //   id: Math.random().toString(),
+    //   createdAt: serverTimestamp(),
+    // };
 
-    const projectId = await saveToFirebase(PresentationData as FullSlideData);
+    // const projectId = await saveToFirebase(PresentationData as FullSlideData);
 
-    router.push(`/edit/${projectId}`);
+    // router.push(`/edit/${projectId}`);
 
     setIsGenerating(false);
   };
