@@ -23,7 +23,7 @@ const ToolBar = () => {
           <div className="bg-primary/20 rounded-[6px] p-1 aspect-square h-fit w-fit flex items-center justify-center">
             <Icons.wand className="w-5 h-5 text-primary" />
           </div>
-          <h1 className="font-bold flex items-center gap-[2px] text-2xl poppins-bold">
+          <h1 className="font-bold flex items-center gap-[2px] text-xl poppins-bold">
             Frizzle
             <span className="text-primary">.ai</span>
           </h1>

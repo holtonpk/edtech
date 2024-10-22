@@ -66,7 +66,7 @@ export function DashSidebar() {
             <Icons.wand className="w-5 h-5 text-primary" />
           </div>
 
-          <h1 className="font-bold flex items-center text-black gap-[2px] text-2xl poppins-bold group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0 opacity-100 transition-opacity duration-300">
+          <h1 className="font-bold flex items-center text-black gap-[2px] text-xl poppins-bold group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0 opacity-100 transition-opacity duration-300">
             Frizzle
             <span className="text-primary">.ai</span>
           </h1>
