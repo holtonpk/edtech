@@ -1,3 +1,5 @@
+import {Timestamp, FieldValue} from "firebase/firestore";
+
 export type Modes =
   | "themes"
   | "layout"
@@ -42,6 +44,8 @@ export interface TextBoxesToUpdate {
 }
 
 export interface FullSlideData {
+  id: string;
+  createdAt: Timestamp | FieldValue;
   slideData: {slides: Slide[]};
   recentColors: string[];
   title: string;
@@ -114,6 +118,7 @@ export type UploadType = {
 };
 
 export type FileLocal = {
+  id: string;
   file: File;
   uploadProgress: number;
   path: string;

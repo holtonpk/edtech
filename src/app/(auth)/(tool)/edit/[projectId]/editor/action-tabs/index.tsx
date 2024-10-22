@@ -303,7 +303,7 @@ const ActionPanel = () => {
       value: "themes",
       icon: Icons.theme,
       color: "hsla(0 100% 50 / 1)",
-      height: "380",
+      height: "450",
       HoverElement: (
         <HoverContainer id="themes">
           <Themes />

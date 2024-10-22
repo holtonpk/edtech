@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Just+Another+Hand&family=Swanky+and+Moo+Moo&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -18,6 +19,13 @@
       opacity: 1;
     }
   }
+}
+
+.hand-font {
+  font-family: "Caveat", cursive;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
 }
 
 .poppins-thin {
@@ -180,6 +188,15 @@
       --green: 138 40% 48%;
       --blue: 212 90% 58%;
       --purple: 259 82% 67%;
+
+      --sidebar-background: 0 0% 98%;
+      --sidebar-foreground: 240 5.3% 26.1%;
+      --sidebar-primary: 240 5.9% 10%;
+      --sidebar-primary-foreground: 0 0% 98%;
+      --sidebar-accent: 240 4.8% 95.9%;
+      --sidebar-accent-foreground: 240 5.9% 10%;
+      --sidebar-border: 220 13% 91%;
+      --sidebar-ring: 217.2 91.2% 59.8%;
     }
 
     .dark {
@@ -209,7 +226,36 @@
       --chart-5: ;
 
       --background-url: url("/_static/grid.svg");
+
+      --sidebar-background: 240 5.9% 10%;
+      --sidebar-foreground: 240 4.8% 95.9%;
+      --sidebar-primary: 224.3 76.3% 48%;
+      --sidebar-primary-foreground: 0 0% 100%;
+      --sidebar-accent: 240 3.7% 15.9%;
+      --sidebar-accent-foreground: 240 4.8% 95.9%;
+      --sidebar-border: 240 3.7% 15.9%;
+      --sidebar-ring: 217.2 91.2% 59.8%;
     }
+  }
+  :root {
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -508,6 +554,23 @@ input[type="number"] {
       grid-template-columns: 400px 1fr;
     }
   }
+}
+
+.upload-manager-grad-top {
+  /* global 94%+ browsers support */
+  background: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 1) 99%
+  );
+}
+.upload-manager-grad-bottom {
+  /* global 94%+ browsers support */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 1) 99%
+  );
 }
 
 .upload-row-edge-grad-right {
@@ -919,4 +982,74 @@ input[type="number"] {
   max-height: 150px; /* Closed state */
   -webkit-line-clamp: 5; /* Show only 4 lines in the closed state */
   transition: max-height 1s ease;
+}
+
+.flex-animate {
+  transition: flex-grow 1000ms linear;
+}
+
+svg .loading-animation {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translatex(-50%);
+}
+
+svg g .loading-animation {
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+#a {
+  animation: clockwise 8s linear infinite;
+}
+
+#b {
+  animation: clockwise 10s linear infinite;
+}
+
+#d {
+  animation: clockwise 12s linear infinite;
+}
+
+#f {
+  animation: clockwise 9s linear infinite;
+}
+
+#c {
+  animation: anticlockwise 9s linear infinite;
+}
+
+#e {
+  animation: anticlockwise 11s linear infinite;
+}
+
+/* for 0 to 360deg rotation */
+@keyframes clockwise {
+  from {
+    transform: rotatez(0deg);
+  }
+
+  to {
+    transform: rotatez(360deg);
+  }
+}
+
+/* for 0 to -360deg rotation */
+@keyframes anticlockwise {
+  from {
+    transform: rotatez(0deg);
+  }
+
+  to {
+    transform: rotatez(-360deg);
+  }
+}
+
+/* for smart-phone */
+@media only screen and (max-width: 600px) {
+  svg {
+    width: fit-content;
+    margin: 10px;
+  }
 }

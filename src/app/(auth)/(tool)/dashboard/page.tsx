@@ -19,20 +19,57 @@ import {
   Position,
   Size,
 } from "@/config/data";
-import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
+
 import {db} from "@/config/firebase";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import ProfileNav from "@/src/app/(auth)/(tool)/components/profile-nav";
 import {useAuth} from "@/context/user-auth";
+import {createNewBlankPresentation} from "@/lib/utils";
+import Background from "@/components/background";
+import {UserPresentations} from "@/src/app/(auth)/(tool)/dashboard/user-presentations";
+import {FeaturedPresentations} from "@/src/app/(auth)/(tool)/dashboard/featured-pres";
+import {useSidebar} from "@/components/ui/sidebar";
 
 const Dashboard = () => {
+  const {open} = useSidebar();
+
+  const {currentUser} = useAuth()!;
+
   return (
-    <div className="h-screen w-screen flex flex-col ">
-      <NavBar />
-      <div className="flex flex-col container py-4">
-        {/* <Banner /> */}
+    <div
+      className={` flex flex-col transition-[width] ease-linear p-8 pt-4  gap-4
+    ${open ? "w-[calc(100vw-13rem)]" : "w-[calc(100vw-3rem)]"}
+    
+    `}
+    >
+      <div className="flex w-full justify-between items-center">
+        <h1 className="text-3xl poppins-bold">
+          Welcome back, {currentUser?.firstName}
+        </h1>
+        <div className="flex w-fit gap-4 text-primary">
+          <a>About</a>
+          <a>Learn</a>
+          <a>Share</a>
+        </div>
+      </div>
+      <div className="w-full flex gap-8  ">
         <CreateNew />
+        <button className="w-fit border rounded-md flex gap-2 p-2 items-center text-left">
+          <div className="bg-primary/20 rounded-sm p-2 aspect-square w-fit h-fit flex items-center justify-center">
+            <Icons.wand className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex flex-col ">
+            <h1 className="text-lg font-bold">Create from upload</h1>
+            <p className="text-sm text-gray-500 whitespace-nowrap">
+              Create a new presentation from an uploaded file
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-8 w-full  relative z-30">
+        <FeaturedPresentations />
         <UserPresentations />
       </div>
     </div>
@@ -43,26 +80,23 @@ export default Dashboard;
 
 const NavBar = () => {
   return (
-    <div className="h-fit py-2 w-full bg-background border-b flex items-center justify-between px-10">
-      <div className="flex gap-1 items-center">
-        <Icons.lightbulb className="w-6 h-6 text-primary" />
-        <h1 className="font-bold">EDTech tool</h1>
+    <div className="h-[60px] w-full   flex items-center justify-between px-10 relative z-50">
+      <div className="flex gap-2 items-center">
+        <div className="bg-primary/20 rounded-[6px] p-1 aspect-square h-fit w-fit flex items-center justify-center">
+          <Icons.wand className="w-5 h-5 text-primary" />
+        </div>
+        <h1 className="font-bold flex items-center gap-[2px] text-xl poppins-bold">
+          Frizzle
+          <span className="text-primary">ai</span>
+        </h1>
       </div>
       <ProfileNav />
     </div>
   );
 };
 
-const Banner = () => {
-  return (
-    <div className="bg-background text-primary border p-4 flex flex-col items-center justify-center rounded-md shadow-lg">
-      <h1 className="text-2xl font-bold">Created for Teachers by Teachers</h1>
-      <p>
-        Create beautiful interactive presentations for your students in minutes.
-        Start creating now
-      </p>
-    </div>
-  );
+const CreateNewFromUpload = () => {
+  return <Button>Turn uploaded into presentation</Button>;
 };
 
 const CreateNew = () => {
@@ -71,215 +105,29 @@ const CreateNew = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const blankPresentation: FullSlideData = {
-    slideData: {
-      slides: [
-        {
-          textBoxes: [
-            {
-              textBoxId: "0.5025385440330408",
-              fontSize: 40,
-              rotation: 0,
-              size: {width: 600},
-              position: {x: 20, y: 20},
-              text: '<p><b><font color="#939393">New presentation</font></b></p>',
-            },
-            {
-              size: {width: 600},
-              position: {x: 20, y: 100},
-              text: '<p><font color="#939393">Add subheading here</font></p>',
-              rotation: 0,
-              textBoxId: "0.6930778945417186",
-              fontSize: 24,
-            },
-          ],
-          background: "#ffffff",
-          id: "1",
-          images: [],
-        },
-      ],
-    },
-    recentColors: [],
-    title: "Untitled presentation",
-  };
-
-  const saveToFirebase = async () => {
-    const docRef = await addDoc(
-      collection(db, "presentations"),
-      blankPresentation
-    );
-    const presentationId = docRef.id;
-
-    // update user storage with the new presentation
-    if (!currentUser) return;
-    const userRef = doc(db, "users", currentUser?.uid);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-      const userData = userSnap.data();
-      const updatedPresentations = [...userData.presentations, presentationId];
-      await setDoc(userRef, {...userData, presentations: updatedPresentations});
-    }
-
-    return presentationId;
-  };
-
   const createNew = async () => {
+    if (!currentUser) return;
     setIsLoading(true);
-    const projectId = await saveToFirebase();
-
+    const projectId = await createNewBlankPresentation(currentUser);
     router.push(`/edit/${projectId}`);
     setIsLoading(false);
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 w-full justify-center p-10">
-      <Button
-        onClick={createNew}
-        disabled={isLoading}
-        className=" p-4 flex rounded-full font-bold items-center justify-center"
-      >
-        {isLoading ? (
-          <Icons.spinner className="animate-spin w-6 h-6 mr-2" />
-        ) : (
-          <Icons.add className="w-6 h-6 " />
-        )}
-        Mohamed click here to make a new blank presentation
-      </Button>
-    </div>
-  );
-};
-
-const UserPresentations = () => {
-  const {currentUser} = useAuth()!;
-
-  console.log(currentUser);
-
-  return (
-    <div className="container ">
-      <h1 className="font-bold text-2xl ">Recent Projects</h1>
-      <div className="grid grid-cols-3 gap-4 mt-2">
-        {currentUser?.presentations.map((presentation) => (
-          <PresentationCard presId={presentation} key={presentation} />
-        ))}
+    <button
+      onClick={createNew}
+      disabled={isLoading}
+      className="w-fit border rounded-md hover:border-primary flex gap-2 p-2 items-center text-left "
+    >
+      <div className="bg-primary/20 rounded-sm p-2 aspect-square w-fit h-fit flex items-center justify-center">
+        <Icons.add className="w-5 h-5 text-primary" />
       </div>
-    </div>
-  );
-};
-
-const PresentationCard = ({presId}: {presId: string}) => {
-  const [title, setTitle] = useState<string | undefined>(undefined);
-
-  const [slide, setSlide] = useState<Slide | undefined>(undefined);
-
-  const dataIsFetched = useRef(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const docRef = doc(db, "presentations", presId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setSlide(docSnap.data().slideData.slides[0]);
-        setTitle(docSnap.data().title);
-      } else {
-        // doc.data() will be undefined in this case
-        console.log("No such document!");
-      }
-    };
-
-    if (!dataIsFetched.current) {
-      fetchData();
-      dataIsFetched.current = true;
-    }
-  }, [presId]);
-
-  const selectorContainerRef = React.useRef<HTMLDivElement>(null);
-
-  const [thumbScale, setThumbScale] = useState<number | undefined>(undefined);
-
-  const setScale = () => {
-    const selectorContainer = selectorContainerRef.current;
-    if (!selectorContainer) return;
-    const calculateScale = selectorContainer.clientWidth / 1000;
-    setThumbScale(calculateScale);
-  };
-  React.useEffect(() => {
-    window.addEventListener("resize", setScale);
-    return () => {
-      window.removeEventListener("resize", setScale);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    setScale();
-  }, [slide]);
-
-  const router = useRouter();
-
-  return (
-    <div className="flex flex-col gap-2">
-      {slide && (
-        <div
-          ref={selectorContainerRef}
-          style={{
-            background: slide.background,
-          }}
-          onClick={() => {
-            router.push(`/edit/${presId}`);
-          }}
-          className={`rounded-lg w-full relative aspect-[16/9]  p-6 flex items-center justify-center bg-white text-black  transition-colors duration-300 cursor-pointer border hover:border-primary
-
-`}
-        >
-          {thumbScale ? (
-            <div
-              className="w-[1000px]   aspect-[16/9] absolute overflow-hidden"
-              style={{transform: `scale(${thumbScale})`}}
-            >
-              {slide.textBoxes &&
-                slide.textBoxes.map((textbox: TextBoxType, index: number) => (
-                  <div
-                    key={index}
-                    className=" p-2 absolute pointer-events-none"
-                    style={{
-                      top: textbox.position.y,
-                      left: textbox.position.x,
-                      height: "fit-content",
-                      width: textbox.size.width,
-                      transform: `rotate(${textbox.rotation}deg)`,
-                      fontSize: `${textbox.fontSize}px`,
-                    }}
-                    dangerouslySetInnerHTML={{__html: textbox.text}}
-                  />
-                ))}
-              {slide.images &&
-                slide.images.map((image, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      top: image.position.y,
-                      left: image.position.x,
-                      width: image.size.width,
-                      transform: `rotate(${image.rotation}deg)`,
-                    }}
-                    className="p-2 h-fit w-fit absolute origin-center pointer-events-none"
-                  >
-                    <img
-                      src={image.image.path}
-                      alt={image.image.title}
-                      className="origin-center p-2 pointer-events-none h-full w-full"
-                    />
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <>no scale</>
-          )}
-        </div>
-      )}
-      <div className="flex flex-col">
-        <h1 className="font-bold ">{title}</h1>
-        <h2 className="font-bold text-sm text-muted-foreground">2 days ago</h2>
+      <div className="flex flex-col ">
+        <h1 className="text-lg font-bold">New blank presentation</h1>
+        <p className="text-sm text-gray-500 whitespace-nowrap">
+          Create a new presentation from an uploaded file
+        </p>
       </div>
-    </div>
+    </button>
   );
 };

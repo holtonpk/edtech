@@ -246,4 +246,138 @@ export const Icons = {
       ></path>
     </svg>
   ),
+  files: (props: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+      fill="none"
+      viewBox="0 0 1286 613"
+    >
+      <path
+        fill="url(#paint0_linear_18_37)"
+        stroke="#E6E7EB"
+        d="M356.549 101.189l.011.006 74.021 41.302 63.39 359.504c3.693 20.94-10.289 40.908-31.229 44.601l-330.03 58.193c-20.94 3.692-40.908-10.29-44.6-31.23L7.265 115.058c-3.693-20.94 10.29-40.908 31.23-44.6l204.981-36.144 113.073 66.875z"
+      ></path>
+      <path
+        stroke="#49AB67"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeOpacity="0.7"
+        strokeWidth="28"
+        d="M132.946 185.077l254.749 106.527-202.951 187.231-51.798-293.758z"
+      ></path>
+      <path
+        fill="#74C48C"
+        fillOpacity="0.2"
+        d="M242.903 33.907l188.13 108.269-125.535 22.135c-21.212 3.741-41.439-10.423-45.18-31.635l-17.415-98.768z"
+      ></path>
+      <path
+        fill="url(#paint1_linear_18_37)"
+        stroke="#E6E7EB"
+        d="M1205.41 150.075v.009l55.43 64.128-63.39 359.504c-3.69 20.94-23.66 34.922-44.6 31.23l-330.026-58.193c-20.94-3.692-34.922-23.661-31.229-44.601l80.847-458.506c3.692-20.94 23.66-34.922 44.6-31.23L1122.02 48.56l83.39 101.515z"
+      ></path>
+      <path
+        stroke="#66A9FF"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="28"
+        d="M1130.9 209.857l-172.976-30.5c-13.647-2.406-26.661 6.706-29.067 20.353l-30.5 172.974c-2.406 13.647 6.706 26.661 20.353 29.067l172.97 30.5c13.65 2.406 26.66-6.706 29.07-20.353l30.5-172.974c2.41-13.647-6.71-26.661-20.35-29.067z"
+      ></path>
+      <path
+        stroke="#66A9FF"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="28"
+        d="M989.916 286.913c13.644 2.406 26.664-6.706 29.064-20.353 2.41-13.648-6.7-26.662-20.35-29.068-13.647-2.406-26.661 6.706-29.067 20.353-2.407 13.648 6.706 26.662 20.353 29.068zM1129.47 362.477l-31.41-44.852a25.095 25.095 0 00-16.19-10.315 25.096 25.096 0 00-18.75 4.154L931.066 403.93"
+      ></path>
+      <path
+        fill="#66A9FF"
+        fillOpacity="0.2"
+        d="M1121.62 47.981l139.76 166.084-125.54-22.135c-21.21-3.74-35.37-23.968-31.63-45.18l17.41-98.769z"
+      ></path>
+      <g filter="url(#filter0_d_18_37)">
+        <path
+          fill="url(#paint2_linear_18_37)"
+          d="M435.615 48.684c0-21.54 17.461-39 39-39h208.329l99.882 85.613 65.909 53.679v365.287c0 21.54-17.46 39.001-39 39.001h-335.12c-21.539 0-39-17.461-39-39V48.684z"
+        ></path>
+        <path
+          fill="#AB89F4"
+          fillOpacity="0.2"
+          d="M682.265 9.684l166.471 139.292H721.265c-21.539 0-39-17.461-39-39V9.684z"
+        ></path>
+        <path
+          stroke="#9166F0"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeOpacity="0.7"
+          strokeWidth="28"
+          d="M500.845 281.474h283.341M500.845 375.921h283.341M500.845 187.027h283.341"
+        ></path>
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_18_37"
+          width="461.722"
+          height="592.18"
+          x="411.315"
+          y="0.384"
+          colorInterpolationFilters="sRGB"
+          filterUnits="userSpaceOnUse"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix"></feFlood>
+          <feColorMatrix
+            in="SourceAlpha"
+            result="hardAlpha"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          ></feColorMatrix>
+          <feOffset dy="15"></feOffset>
+          <feGaussianBlur stdDeviation="12.15"></feGaussianBlur>
+          <feComposite in2="hardAlpha" operator="out"></feComposite>
+          <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"></feColorMatrix>
+          <feBlend
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_18_37"
+          ></feBlend>
+          <feBlend
+            in="SourceGraphic"
+            in2="effect1_dropShadow_18_37"
+            result="shape"
+          ></feBlend>
+        </filter>
+        <linearGradient
+          id="paint0_linear_18_37"
+          x1="295.572"
+          x2="204.72"
+          y1="563.477"
+          y2="48.23"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#C7FFD8"></stop>
+          <stop offset="1" stopColor="#E9FFF0"></stop>
+        </linearGradient>
+        <linearGradient
+          id="paint1_linear_18_37"
+          x1="989.994"
+          x2="1080.85"
+          y1="563.628"
+          y2="48.381"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#B8D5FC"></stop>
+          <stop offset="1" stopColor="#F2F8FF"></stop>
+        </linearGradient>
+        <linearGradient
+          id="paint2_linear_18_37"
+          x1="642.175"
+          x2="642.175"
+          y1="540.354"
+          y2="17.158"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#E1D3FF"></stop>
+          <stop offset="1" stopColor="#F2ECFE"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
 };

@@ -13,7 +13,7 @@ const Themes = () => {
       title="Themes"
       description="Change the look and feel of your presentation"
     >
-      <div className="grid grid-cols-2 overflow-scroll gap-4 h-fit w-full">
+      <div className="grid grid-cols-2 overflow-scroll gap-4 h-fit w-full  mt-6">
         <div className="w-full bg-background rounded-lg  aspect-[16/9] border-4 hover:border-primary/70"></div>
         <div className="w-full bg-background rounded-lg  aspect-[16/9] border-4 hover:border-primary/70"></div>
         <div className="w-full bg-background rounded-lg  aspect-[16/9] border-4 hover:border-primary/70"></div>

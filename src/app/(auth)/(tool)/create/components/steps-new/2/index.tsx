@@ -12,6 +12,7 @@ import {Icons} from "@/components/icons";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 import {Document, pdfjs} from "react-pdf";
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+import GoogleDriveImport from "./google-drive-import";
 import {
   FILE_SIZE,
   FileLocal,
@@ -474,8 +475,8 @@ const UploadManager = () =>
         onDrop={onDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`overflow-hidden h-fit border-2  border-primary/40 rounded-md border-dashed p-8
-        ${isDragging ? " border-primary  " : " hover:border-primary "}
+        className={`overflow-hidden h-fit  border  rounded-md  p-8 bg-background/70 blurBack shadow-xl
+        ${isDragging ? " border-primary  " : ""}
         
         `}
       >
@@ -483,7 +484,7 @@ const UploadManager = () =>
         {(!files || files.length === 0) && (
           <>
             <div
-              className={` h-fit shadow-lg w-full border bg-background rounded-[1rem]  items-center flex flex-col gap-2 mb-2 group
+              className={` h-fit  w-full    items-center flex flex-col gap-2 mb-2 group
             
           `}
             >
@@ -502,25 +503,27 @@ const UploadManager = () =>
                 onClick={() => {
                   document.getElementById("file-input")?.click();
                 }}
-                className="w-full p-4 rounded-[1rem] hover:border-primary items-center flex flex-col gap-2 mb-2"
+                className="w-full  items-center flex flex-col gap-2 group"
               >
-                <Icons.upload className="w-10 h-10 text-primary" />
-                <span className="text-xl font-bold"> Import a file</span>
+                <Icons.files className="w-[150px] text-primary" />
+                {/* <div className="h-[80px]"></div> */}
+                <span className="text-xl font-bold">
+                  Drag & drop files to upload
+                </span>
                 <p className="text-muted-foreground">
-                  <span className="underline group-hover:text-primary font-bold">
-                    Click to upload
-                  </span>{" "}
-                  or drag and drop <br />
                   Supported format: .pdf .docs .mp4 .mp3 .png .jpg
                 </p>
+                <div className="w-fit p-2 px-4 rounded-sm border bg-primary text-white  hover:bg-primary/90  ">
+                  Select files
+                </div>
               </button>
             </div>
-            {/* <div className="flex items-center text-center my-4">
+            <div className="flex items-center text-center my-4">
               <div className="flex-1 border-t border-gray-300"></div>
               <span className="px-4 text-gray-600 font-bold">or</span>
               <div className="flex-1 border-t border-gray-300"></div>
             </div>
-            <GoogleDriveImport /> */}
+            <GoogleDriveImport />
           </>
         )}
         {/* Conditional rendering for the progress bar */}

@@ -1,6 +1,18 @@
 import {type ClassValue, clsx} from "clsx";
 import {twMerge} from "tailwind-merge";
-import {Slide, TextBoxType, SlideImage} from "@/config/data";
+import {FullSlideData, Slide, TextBoxType, SlideImage} from "@/config/data";
+import {Timestamp} from "firebase/firestore";
+import {UserData} from "@/context/user-auth";
+import {
+  collection,
+  addDoc,
+  setDoc,
+  getDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
+
+import {db} from "@/config/firebase";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -145,3 +157,87 @@ export function hexToRgba(hex: string, opacity: number): string {
   // Return the rgba value
   return `rgba(${r}, ${g}, ${b}, ${validOpacity})`;
 }
+
+export const formatTimeDifference = (timestamp: Timestamp): string => {
+  const now = new Date();
+  const timestampDate = timestamp.toDate();
+  const diffMs = now.getTime() - timestampDate.getTime();
+  const diffSec = Math.round(diffMs / 1000);
+  const diffMin = Math.round(diffSec / 60);
+  const diffHrs = Math.round(diffMin / 60);
+  const diffDays = Math.round(diffHrs / 24);
+  const diffWeeks = Math.round(diffDays / 7);
+
+  if (diffSec < 60) {
+    return "just now";
+  } else if (diffMin < 60) {
+    return `${diffMin} min ago`;
+  } else if (diffHrs < 24) {
+    return `${diffHrs} hr${diffHrs === 1 ? "" : "s"} ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+  } else {
+    return `${diffWeeks} week${diffWeeks === 1 ? "" : "s"} ago`;
+  }
+};
+
+export const createNewBlankPresentation = async (currentUser: UserData) => {
+  const blankPresentation: FullSlideData = {
+    slideData: {
+      slides: [
+        {
+          textBoxes: [
+            {
+              textBoxId: "0.5025385440330408",
+              fontSize: 40,
+              rotation: 0,
+              size: {width: 600},
+              position: {x: 20, y: 20},
+              text: '<p><b><font color="#000000">New presentation</font></b></p>',
+              boxType: "heading",
+            },
+            {
+              size: {width: 600},
+              position: {x: 20, y: 100},
+              text: '<p><font color="#000000">Add subheading here</font></p>',
+              rotation: 0,
+              textBoxId: "0.6930778945417186",
+              fontSize: 24,
+              boxType: "body",
+            },
+          ],
+          background: "#ffffff",
+          id: "1",
+          images: [],
+        },
+      ],
+    },
+    recentColors: [],
+    title: "Untitled presentation",
+    id: Math.random().toString(),
+    createdAt: serverTimestamp(),
+  };
+
+  const saveToFirebase = async () => {
+    const docRef = await addDoc(
+      collection(db, "presentations"),
+      blankPresentation
+    );
+    const presentationId = docRef.id;
+
+    // update user storage with the new presentation
+    if (!currentUser) return;
+    const userRef = doc(db, "users", currentUser?.uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      const updatedPresentations = [...userData.presentations, presentationId];
+      await setDoc(userRef, {...userData, presentations: updatedPresentations});
+    }
+
+    return presentationId;
+  };
+
+  const projectId = await saveToFirebase();
+  return projectId;
+};

@@ -58,7 +58,7 @@ const Editor = () => {
       >
         <Background />
         <div className="p-6 rounded-lg h-fit w-fit bg-primary/20">
-          <Icons.logo className="h-20 w-20 text-theme-blue" />
+          <Icons.wand className="h-20 w-20 text-theme-blue" />
         </div>
         {/* <Icons.spinner className="animate-spin h-10 w-10 text-theme-blue" /> */}
         <Progress

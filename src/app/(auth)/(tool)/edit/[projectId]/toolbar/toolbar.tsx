@@ -19,9 +19,14 @@ const ToolBar = () => {
   return (
     <div className="w-full px-2 pt-2 h-[68px] relative z-30 ">
       <div className="h-[60px] w-full py-2 flex items-center justify-between px-4 border rounded-md bg-background relative z-[40]">
-        <div className="flex gap-1 items-center ">
-          <Icons.lightbulb className="w-6 h-6 " />
-          <h1 className="font-bold poppins-bold">EDTech tool</h1>
+        <div className="flex gap-2 items-center">
+          <div className="bg-primary/20 rounded-[6px] p-1 aspect-square h-fit w-fit flex items-center justify-center">
+            <Icons.wand className="w-5 h-5 text-primary" />
+          </div>
+          <h1 className="font-bold flex items-center gap-[2px] text-2xl poppins-bold">
+            Frizzle
+            <span className="text-primary">.ai</span>
+          </h1>
         </div>
         <div className=" items-center  gap-4 hidden md:flex">
           <Undo />

@@ -69,8 +69,6 @@ export const PresentationProvider = ({children}: Props) => {
   // const [slideData, setSlideData] = useState<SlideData | undefined>(DummyData);
   const [slideData, setSlideData] = useState<SlideData | undefined>(undefined);
 
-  console.log("upload text === ", uploadText);
-
   const router = useRouter();
   // functions -----------------------------
   async function GenerateAiPresentation(): Promise<UnformattedResponse> {
@@ -138,6 +136,7 @@ export const PresentationProvider = ({children}: Props) => {
         path: downloadURL,
         type: file.type as UploadType["type"],
         file,
+        id: Math.random().toString(36).substr(2, 9),
       };
 
       // setUploadData(upload as UploadType);

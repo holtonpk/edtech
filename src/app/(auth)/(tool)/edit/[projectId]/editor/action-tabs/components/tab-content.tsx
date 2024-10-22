@@ -19,7 +19,7 @@ const TabContent = ({
     <>
       <div
         style={{width: isHovering ? "100%" : "calc(100% - 85px"}}
-        className={`  h-full z-[80] hidden md:block overflow-hidden
+        className={`  h-full z-[80] hidden md:block overflow-hidden 
           ${
             isHovering
               ? ""
