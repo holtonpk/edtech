@@ -8,7 +8,14 @@ import StepContainer from "./step-container";
 import NavigationButtons from "../navigation-buttons";
 import {FullSlideData, UnformattedResponse} from "@/config/data";
 import {useRouter} from "next/navigation";
-import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
+import {
+  collection,
+  serverTimestamp,
+  addDoc,
+  setDoc,
+  getDoc,
+  doc,
+} from "firebase/firestore";
 import {db, app} from "@/config/firebase";
 import {useAuth} from "@/context/user-auth";
 
@@ -114,6 +121,8 @@ const Generate = ({
       title: "Test Presentation",
       slideData: {slides: formattedSlideData},
       recentColors: [],
+      id: Math.random().toString(),
+      createdAt: serverTimestamp(),
     };
 
     const projectId = await saveToFirebase(PresentationData as FullSlideData);
