@@ -7,6 +7,7 @@ import Images from "./components/images";
 import Layouts from "./components/layouts";
 import Themes from "./components/themes";
 import AiRewrite from "./components/ai-write";
+import Shapes from "./components/shapes";
 import Text from "./components/text";
 import {OverridableComponent} from "@mui/material/OverridableComponent";
 import {SvgIconTypeMap} from "@mui/material";
@@ -343,6 +344,21 @@ const ActionPanel = () => {
       Element: <Text />,
     },
     {
+      name: "Shapes",
+      description: "Add shapes to your slides",
+      value: "shapes",
+      icon: Icons.shapes,
+      color: "hsla(21 92% 47% / 1)",
+      height: "500",
+
+      HoverElement: (
+        <HoverContainer id="shapes">
+          <Shapes />
+        </HoverContainer>
+      ),
+      Element: <Shapes />,
+    },
+    {
       name: "Images",
       description: "Add images to your slides",
       value: "images",
@@ -513,6 +529,8 @@ ${mode === tab.value && "bg-muted-foreground/5"}
               <ProfileNav />
             </div>
           </div>
+
+          {mode === "shapes" && <Shapes />}
 
           {mode === "aiRewrite" && (
             <AiRewrite

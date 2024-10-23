@@ -15,17 +15,32 @@ import {Italicize} from "./italicize";
 import {BackgroundColor} from "./background-color";
 import {FontSize} from "./font-size";
 import {TextColor} from "./text-color";
-
+import {BorderSize} from "./shape-border-size";
+import {ShapeColor} from "./shape-color";
+import {ShapeBorderColor} from "./shape-border-color";
 import {usePresentation} from "@/context/presentation-context";
 import {ColorMenu} from "./color-menu";
 import {BackgroundImage} from "./background-image";
+import Slide from "..";
 
 export const TextBoxToolBar = ({
   shouldHideToolbar,
 }: {
   shouldHideToolbar: boolean;
 }) => {
-  const {mode} = usePresentation()!;
+  const {mode, activeEdit, selectedSlide} = usePresentation()!;
+
+  const textIsSelected = selectedSlide?.textBoxes?.some(
+    (textBox) => textBox.textBoxId === activeEdit
+  );
+  const imageIsSelected = selectedSlide?.images?.some(
+    (image) => image.imageId === activeEdit
+  );
+  const shapeIsSelected = selectedSlide?.shapes?.some(
+    (shape) => shape.shapeId === activeEdit
+  );
+
+  const isBackground = activeEdit === "background";
 
   return (
     <div className="h-full w-full md:w-[300px]  relative z-[50]">
@@ -41,7 +56,7 @@ export const TextBoxToolBar = ({
           `}
       >
         <>
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
             <Label className="font-bold poppins-bold text-lg w-full">
               Edit
             </Label>
@@ -49,34 +64,68 @@ export const TextBoxToolBar = ({
               Make changes to you presentation by selecting a text box or an
               image
             </p>
-          </div>
-          <ToolbarRow label="Font">
-            <FontSelector />
-          </ToolbarRow>
-          <ToolbarRow label="Size">
-            <FontSize />
-          </ToolbarRow>
-          <ToolbarRow label="Text Color">
-            <TextColor />
-          </ToolbarRow>
-          <div className="grid grid-cols-4 w-full gap-2">
-            <Bold />
-            <Italicize />
-            <Underline />
-            <Strikethrough />
-          </div>
-          <ToolbarRow label="Align">
-            <TextAlign2 />
-          </ToolbarRow>
-          <ToolbarRow label="List">
-            <List2 />
-          </ToolbarRow>
-          <ToolbarRow label="Background">
-            <BackgroundColor />
-          </ToolbarRow>
-          <ToolbarRow label="Bg Image">
-            <BackgroundImage />
-          </ToolbarRow>
+          </div> */}
+          {textIsSelected && (
+            <>
+              <div className="flex gap-3 flex-col w-full">
+                <h1 className="w-full poppins-bold">Text</h1>
+                <div className="w-full h-[2px] bg-muted"></div>
+              </div>
+              <ToolbarRow label="Font">
+                <FontSelector />
+              </ToolbarRow>
+              <ToolbarRow label="Size">
+                <FontSize />
+              </ToolbarRow>
+              <ToolbarRow label="Text Color">
+                <TextColor />
+              </ToolbarRow>
+              <div className="grid grid-cols-4 w-full gap-2">
+                <Bold />
+                <Italicize />
+                <Underline />
+                <Strikethrough />
+              </div>
+              <ToolbarRow label="Align">
+                <TextAlign2 />
+              </ToolbarRow>
+              <ToolbarRow label="List">
+                <List2 />
+              </ToolbarRow>
+            </>
+          )}
+          {shapeIsSelected && (
+            <>
+              <div className="flex gap-3 flex-col w-full">
+                <h1 className="w-full poppins-bold">Shape</h1>
+                <div className="w-full h-[2px] bg-muted"></div>
+              </div>
+
+              <ToolbarRow label="Fill Color">
+                <ShapeColor />
+              </ToolbarRow>
+              <ToolbarRow label="Border Color">
+                <ShapeBorderColor />
+              </ToolbarRow>
+              <ToolbarRow label="Border size">
+                <BorderSize />
+              </ToolbarRow>
+            </>
+          )}
+          {isBackground && (
+            <>
+              <div className="flex gap-3 flex-col w-full">
+                <h1 className="w-full poppins-bold">Background</h1>
+                <div className="w-full h-[2px] bg-muted"></div>
+              </div>
+              <ToolbarRow label="Color">
+                <BackgroundColor />
+              </ToolbarRow>
+              <ToolbarRow label="Image">
+                <BackgroundImage />
+              </ToolbarRow>
+            </>
+          )}
         </>
       </div>
     </div>

@@ -1,44 +1,44 @@
-import React, {useEffect, useRef, useState} from "react";
-import {SlideImage} from "@/config/data";
-import {useImage} from "@/context/image-context";
+"use client";
+import React, {useEffect} from "react";
+import {useShape} from "@/context/shape-context";
 import {usePresentation} from "@/context/presentation-context";
-import {ResizableImage} from "./resizable-image";
+import {ShapeComponentsArray} from "@/config/shapes";
 import Draggable from "react-draggable";
-import ImageActions from "./image-actions";
+import ShapeActions from "./shape-actions";
 import RotationDisplay from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-actions/rotation-display";
+import {ResizableShape} from "./resizable-shape";
 
-const Image = () => {
+const Shape = () => {
   const {
-    imageState,
+    shapeState,
     size,
     position,
     setPosition,
-    imageRef,
+    shapeRef,
     rotation,
     activeDrag,
     setActiveDrag,
     setIsSelected,
     isSelected,
-    image,
-    deleteImage,
+    shape,
+    deleteShape,
     isRotating,
     activeTransform,
     setActiveTransform,
-  } = useImage()!;
+    setSize,
+    setRotation,
+    setIsRotating,
+  } = useShape()!;
 
   const {
+    mode,
     setActiveEdit,
     activeEdit,
-    activeDragGlobal,
-    setActiveDragGlobal,
-    updateImageData,
-    copySelected,
-    cutSelected,
-    mode,
-    groupSelectedImages,
-    selectedTextBox,
-    selectedImage,
     setActiveSlide,
+    groupSelectedShapes,
+    activeDragGlobal,
+    updateShapeData,
+    setActiveDragGlobal,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -56,10 +56,13 @@ const Image = () => {
     };
   }, [setActiveDrag]);
 
+  const [isCenteredX, setIsCenteredX] = React.useState<boolean>(false);
+  const [isCenteredY, setIsCenteredY] = React.useState<boolean>(false);
+
   const handleDrag = (e: any, ui: any) => {
     setActiveDrag(true);
     setActiveTransform(true);
-    if (activeEdit !== imageState.imageId) {
+    if (activeEdit !== shapeState.shapeId) {
       setActiveEdit(undefined);
     }
 
@@ -106,7 +109,7 @@ const Image = () => {
     const containerHeight =
       document.getElementById("slide-container")?.clientHeight || 0;
 
-    const boxHeight = imageRef.current?.clientHeight || 0;
+    const boxHeight = shapeRef.current?.clientHeight || 0;
 
     const halfY = boxHeight / 2;
     const centerY = y + halfY;
@@ -124,83 +127,27 @@ const Image = () => {
     }
   };
 
-  // useEffect(() => {
-  //   // listen for delete key
-  //   const handleKeyDown = (e: KeyboardEvent) => {
-  //     // if textBoxRef is being edited, don't delete the text box. determine this by checking if the carrot is visible
-  //     const selection = window.getSelection();
-  //     if (selection?.focusNode?.nodeName !== "#text") {
-  //       if (e.key === "Backspace" && isSelected) {
-  //         deleteImage();
-  //       }
-  //     }
-  //   };
-
-  //   document.addEventListener("keydown", handleKeyDown);
-
-  //   return () => {
-  //     document.removeEventListener("keydown", handleKeyDown);
-  //   };
-  // }, [isSelected, deleteImage, copySelected, cutSelected]);
-
-  const [isCenteredX, setIsCenteredX] = React.useState<boolean>(false);
-  const [isCenteredY, setIsCenteredY] = React.useState<boolean>(false);
-
-  const textBoxPlaceholderRef = useRef<HTMLDivElement>(null);
-
-  const isGroupSelected = groupSelectedImages
-    ? groupSelectedImages?.includes(image.imageId)
+  const isGroupSelected = groupSelectedShapes
+    ? groupSelectedShapes?.includes(shape.shapeId)
     : false;
 
   useEffect(() => {
-    // listen for delete key
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // if textBoxRef is being edited, don't delete the text box. determine this by checking if the carrot is visible
-      const selection = window.getSelection();
-
-      const disableTextboxListeners =
-        e.target instanceof Element
-          ? e.target.classList.contains("disableTextboxListeners")
-          : false;
-
-      if (disableTextboxListeners) return;
-
-      if (selection?.focusNode?.nodeName !== "#text") {
-        if (selectedImage) {
-          if (e.key === "Backspace" && isSelected) {
-            deleteImage();
-          }
-          if ((e.metaKey || e.ctrlKey) && e.key === "c") {
-            console.log("copySelected ==========");
-            copySelected();
-          }
-          if ((e.metaKey || e.ctrlKey) && e.key === "x") {
-            cutSelected();
-          }
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isSelected, deleteImage, copySelected, cutSelected, selectedImage]);
-
-  useEffect(() => {
     if (!activeTransform) {
-      updateImageData(
+      updateShapeData(
         {
           position: {x: position.x, y: position.y},
-          size: {width: size.width},
+          size: {width: size.width, height: size.height},
           rotation: rotation,
         },
-        image.imageId
+        shape.shapeId
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTransform]);
+
+  const ShapeElement = ShapeComponentsArray.find(
+    (shapeComponent) => shapeComponent.name === shapeState.shapeName
+  );
 
   return (
     <>
@@ -211,16 +158,17 @@ const Image = () => {
           onDrag={handleDrag}
           position={position}
           onStop={() => {
-            setActiveEdit(imageState.imageId);
+            setActiveEdit(shapeState.shapeId);
             setActiveTransform(false);
           }}
         >
           <div
-            id={`ui-image-${imageState.imageId}`}
+            id={`ui-shape-${shapeState.shapeId}`}
             className=" absolute z-30 origin-center pointer-events-none group "
             style={{
               width: size.width,
-              height: "fit-content",
+              height: size.height,
+
               cursor:
                 mode === "aiRewrite"
                   ? "default"
@@ -232,28 +180,26 @@ const Image = () => {
             <div
               onClick={() => {
                 if (mode !== "aiRewrite") {
-                  setActiveEdit(imageState.imageId);
+                  setActiveEdit(shapeState.shapeId);
                   setIsSelected(true);
                   setActiveSlide(undefined);
                 }
               }}
-              className="pointer-events-auto p-2 "
+              style={{
+                transform: `rotate(${rotation}deg)`,
+                visibility: isSelected ? "hidden" : "visible",
+              }}
+              className="pointer-events-auto p-2 w-full h-full"
             >
-              <img
-                src={image.image.path}
-                alt="slide"
-                className="pointer-events-none "
-                style={{
-                  // position: "absolute",
-                  top: image.position.y,
-                  left: image.position.x,
-                  width: image.size.width,
-                  transform: `rotate(${image.rotation}deg)`,
-                  visibility: isSelected ? "hidden" : "visible",
-                }}
-              />
+              {ShapeElement && (
+                <ShapeElement.component
+                  fillColor={shapeState.fillColor}
+                  strokeColor={shapeState.strokeColor}
+                  strokeWidth={shapeState.strokeWidth}
+                />
+              )}
             </div>
-            <ImageActions />
+            <ShapeActions />
             {!isGroupSelected && (
               <div
                 id="drag-area"
@@ -262,7 +208,9 @@ const Image = () => {
             )}
             {!isSelected && !activeDragGlobal && mode !== "aiRewrite" && (
               <div
-                style={{transform: `rotate(${rotation}deg`}}
+                style={{
+                  transform: `rotate(${rotation}deg `,
+                }}
                 className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block`}
               />
             )}
@@ -271,18 +219,15 @@ const Image = () => {
         </Draggable>
 
         {(isSelected || isGroupSelected) && (
-          <ResizableImage disabled={isGroupSelected}>
-            <img
-              onClick={() => {
-                setActiveEdit(imageState.imageId);
-                setIsSelected(true);
-              }}
-              ref={imageRef}
-              src={image.image.path}
-              alt={image.image.title}
-              className="selectDisable "
-            />
-          </ResizableImage>
+          <ResizableShape disabled={isGroupSelected}>
+            {ShapeElement && (
+              <ShapeElement.component
+                fillColor={shapeState.fillColor}
+                strokeColor={shapeState.strokeColor}
+                strokeWidth={shapeState.strokeWidth}
+              />
+            )}
+          </ResizableShape>
         )}
       </div>
 
@@ -296,4 +241,4 @@ const Image = () => {
   );
 };
 
-export default Image;
+export default Shape;

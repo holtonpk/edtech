@@ -6,12 +6,14 @@ import {pdfjs} from "react-pdf";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 import TextBoxCreate from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-creator";
-import {SlideImage, TextBoxType} from "@/config/data";
+import {SlideImage, TextBoxType, SlideShape} from "@/config/data";
 import {TextBoxProvider} from "@/context/textbox-context";
 import {ImageProvider} from "@/context/image-context";
+import {ShapeProvider} from "@/context/shape-context";
 import {TextBoxToolBar} from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox-toolbar";
 import Image from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/image";
 import TextBox from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox";
+import Shape from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/shape";
 import {Icons} from "@/components/icons";
 import GroupSelection from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/multi-select";
 
@@ -134,6 +136,16 @@ const Slide = () => {
                     </ImageProvider>
                   ))}
 
+                {selectedSlide.shapes &&
+                  selectedSlide.shapes.map((shape: SlideShape) => (
+                    <ShapeProvider
+                      key={selectedSlide.id + shape.shapeId}
+                      shape={shape}
+                    >
+                      <Shape />
+                    </ShapeProvider>
+                  ))}
+
                 {isGroupSelected && <GroupSelection />}
               </>
             </SlideContainer>
@@ -193,7 +205,7 @@ const SlideContainer = ({
 
         if (timeDiff < 200) {
           // It's considered a click, execute your logic
-          setActiveEdit(undefined);
+          setActiveEdit("background");
           setGroupSelectedTextBoxes(undefined);
           setActiveGroupSelectedTextBoxes(undefined);
           setGroupSelectedImages(undefined);
@@ -502,25 +514,29 @@ const SlideContainer = ({
     <div
       style={{
         width: width,
-
         height: height,
       }}
-      className={`bg-background p-0 items-center justify-center relative  text-black flex flex-col border overflow-hidden border-foreground/10 rounded-md  z-[50] 
+      className={`bg-background p-0 items-center justify-center relative  text-black flex flex-col border overflow-hidden  rounded-md  z-[50] 
         ${isSelecting ? " cursor-crosshair" : ""}
+        ${
+          activeEdit === "background"
+            ? "border-primary border-2"
+            : "border-foreground/10"
+        }
         `}
     >
       {selectedSlide &&
       selectedSlide.backgroundImage &&
       selectedSlide.backgroundImage.path !== "undefined" ? (
         <div
-          className="absolute w-full h-full bg-cover bg-center"
+          className="absolute w-full h-full bg-cover bg-center pointer-events-none"
           style={{
             backgroundImage: `url(${selectedSlide.backgroundImage.path})`,
           }}
         />
       ) : (
         <div
-          className="absolute w-full h-full bg-cover bg-center"
+          className="absolute w-full h-full bg-cover bg-center pointer-events-none"
           style={{
             backgroundColor: selectedSlide
               ? selectedSlide.background

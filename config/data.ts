@@ -1,6 +1,8 @@
 import {Timestamp, FieldValue} from "firebase/firestore";
+import {ShapeComponentsArray} from "@/config/shapes";
 
 export type Modes =
+  | "shapes"
   | "themes"
   | "layout"
   | "aiRewrite"
@@ -65,7 +67,27 @@ export interface Slide {
   images: SlideImage[];
   title?: string;
   backgroundImage?: Image;
+  shapes: SlideShape[];
 }
+
+export interface SlideShape {
+  fillColor: string;
+  strokeColor: string;
+  strokeWidth: number;
+  size: {
+    height: number;
+    width: number;
+  };
+  position: {
+    x: number;
+    y: number;
+  };
+  shapeId: string;
+  rotation: number;
+  shapeName: ShapeName;
+}
+
+export type ShapeName = (typeof ShapeComponentsArray)[number]["name"];
 
 export interface SlideImage {
   imageId: string;
