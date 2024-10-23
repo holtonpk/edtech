@@ -209,6 +209,7 @@ export const createNewBlankPresentation = async (currentUser: UserData) => {
           background: "#ffffff",
           id: "1",
           images: [],
+          shapes: [],
         },
       ],
     },
