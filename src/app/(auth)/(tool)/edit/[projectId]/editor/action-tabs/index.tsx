@@ -347,7 +347,7 @@ const ActionPanel = () => {
       name: "Shapes",
       description: "Add shapes to your slides",
       value: "shapes",
-      icon: Icons.shapes,
+      icon: Icons.shapes as any,
       color: "hsla(21 92% 47% / 1)",
       height: "500",
 
