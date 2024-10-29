@@ -4,6 +4,7 @@ import {ActionMenu} from "../../action-menu";
 import Delete from "./delete";
 import Move from "./move";
 import Rotate from "./rotate";
+import Options from "./options";
 
 const ShapeActions = () => {
   const {
@@ -26,6 +27,7 @@ const ShapeActions = () => {
           <Delete />
           <Rotate />
           <Move />
+          <Options />
         </ActionMenu>
       )}
     </>

@@ -39,6 +39,7 @@ const Image = () => {
     selectedTextBox,
     selectedImage,
     setActiveSlide,
+    slideData,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -202,9 +203,18 @@ const Image = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTransform]);
 
+  const zIndex =
+    slideData &&
+    slideData.slides.find(
+      (slide) =>
+        slide.layerMap && slide.layerMap.find((id) => id === image.imageId)
+    )
+      ? 10
+      : 0;
+
   return (
     <>
-      <div className={`relative ${isSelected ? "z-10" : "z-0"}`}>
+      <div style={{zIndex: zIndex}} className={`relative `}>
         <Draggable
           cancel=".nodrag"
           disabled={mode === "aiRewrite"}

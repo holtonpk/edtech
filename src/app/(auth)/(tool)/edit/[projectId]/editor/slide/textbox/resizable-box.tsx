@@ -3,13 +3,16 @@ import ScaleHandle from "./scale-handle";
 import React, {useState, useLayoutEffect, useRef, useEffect} from "react";
 import {useTextBox} from "@/context/textbox-context";
 import {usePresentation} from "@/context/presentation-context";
-
+import TextboxActions from "./textbox-actions";
+import Draggable from "react-draggable";
 export const ResizableBox = ({
   children,
   disabled,
+  handleDrag,
 }: {
   children: React.ReactNode;
   disabled: boolean;
+  handleDrag: (e: any, ui: any) => void;
 }) => {
   const {
     size,
@@ -25,9 +28,18 @@ export const ResizableBox = ({
     textBoxId,
     textBoxText,
     textBoxRef,
+    textBoxState,
+    textBox,
+    setActiveTransform,
   } = useTextBox()!;
 
-  const {updateData} = usePresentation()!;
+  const {
+    setActiveSlide,
+    setActiveEdit,
+    setActiveGroupSelectedTextBoxes,
+    setGroupSelectedTextBoxes,
+    activeGroupSelectedTextBoxes,
+  } = usePresentation()!;
 
   const resizeHandles = ["e", "w"];
   const scaleHandles = ["se"];
@@ -122,56 +134,99 @@ export const ResizableBox = ({
     string | undefined
   >(undefined);
 
+  const [activeTextEdit, setActiveTextEdit] = useState<boolean>(false);
+
+  useEffect(() => {
+    // focus on the text in the textbox when activeTextEdit is true
+    if (activeTextEdit) {
+      const element = document.getElementById(
+        `text-box-${textBoxState.textBoxId}`
+      );
+      if (element) {
+        const selection = window.getSelection();
+        if (selection) {
+          const range = document.createRange();
+
+          range.selectNodeContents(element);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    }
+    // document.getElementById(`text-box-${textBoxState.textBoxId}`)?.focus();
+  }, [activeTextEdit]);
+
   return (
-    <div
-      ref={handleRef}
-      className="nodrag origin-center  absolute z-10"
-      style={{
-        width: size.width,
-        height: "fit-content",
-        left: position.x,
-        top: position.y,
-        transform: `rotate(${rotation}deg)`,
+    <Draggable
+      cancel=".nodrag2"
+      onDrag={handleDrag}
+      position={position}
+      onStop={() => {
+        setActiveSlide(undefined);
+        setActiveEdit(textBox.textBoxId);
+        setActiveTransform(false);
+        setActiveGroupSelectedTextBoxes(undefined);
+        setGroupSelectedTextBoxes(undefined);
       }}
     >
       <div
-        className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px]`}
-      />
+        ref={handleRef}
+        className=" origin-center  absolute z-10"
+        style={{
+          width: size.width,
+          height: "fit-content",
 
-      {!disabled && (
-        <>
-          {resizeHandles.map((handleAxis) => (
-            <ResizableHandle
-              key={handleAxis}
-              handleAxis={handleAxis}
-              innerRef={handleRef}
-              hidden={
-                activeDrag ||
-                isRotating ||
-                (activeTransform && activeResizeHandle !== handleAxis)
-              }
-              onResize={handleResize}
-              activeHandle={activeResizeHandle}
-              setActiveHandle={setActiveResizeHandle}
-            />
-          ))}
+          transform: `rotate(${rotation}deg)`,
+        }}
+      >
+        <div
+          className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px]`}
+        />
 
-          {scaleHandles.map((handleAxis) => (
-            <ScaleHandle
-              key={handleAxis}
-              handleAxis={handleAxis}
-              hidden={
-                activeDrag ||
-                (activeTransform && activeScaleHandle !== handleAxis)
-              }
-              controlScale={controlScale}
-              activeHandle={activeScaleHandle}
-              setActiveHandle={setActiveScaleHandle}
-            />
-          ))}
-        </>
-      )}
-      <div className="z-10 relative">{children}</div>
-    </div>
+        {!disabled && (
+          <>
+            {resizeHandles.map((handleAxis) => (
+              <ResizableHandle
+                key={handleAxis}
+                handleAxis={handleAxis}
+                innerRef={handleRef}
+                hidden={
+                  activeDrag ||
+                  isRotating ||
+                  (activeTransform && activeResizeHandle !== handleAxis)
+                }
+                onResize={handleResize}
+                activeHandle={activeResizeHandle}
+                setActiveHandle={setActiveResizeHandle}
+              />
+            ))}
+
+            {scaleHandles.map((handleAxis) => (
+              <ScaleHandle
+                key={handleAxis}
+                handleAxis={handleAxis}
+                hidden={
+                  activeDrag ||
+                  (activeTransform && activeScaleHandle !== handleAxis)
+                }
+                controlScale={controlScale}
+                activeHandle={activeScaleHandle}
+                setActiveHandle={setActiveScaleHandle}
+              />
+            ))}
+          </>
+        )}
+        <div
+          onClick={() => {
+            setActiveTextEdit(true);
+          }}
+          style={{opacity: activeTextEdit ? 1 : 0}}
+          className={`z-10 relative nodrag2  `}
+        >
+          {children}
+        </div>
+        <TextboxActions />
+      </div>
+    </Draggable>
   );
 };

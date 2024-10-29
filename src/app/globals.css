@@ -161,6 +161,8 @@
       /* --primary: 0 100% 50%; */
 
       --primary: 214 100% 55%;
+      /* --primary: 274 30% 55%; */
+      /* --primary: 198 84% 76%; */
       --primary-foreground: 210 20% 98%;
       --secondary: 220 14.3% 95.9%;
       --secondary-foreground: 220.9 39.3% 11%;
@@ -1052,4 +1054,36 @@ svg g .loading-animation {
     width: fit-content;
     margin: 10px;
   }
+}
+
+.slide-box-border {
+  position: absolute;
+
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+
+  --border-size: 2px;
+  clip-path: polygon(
+    evenodd,
+    0 0,
+    /* top - left */ 100% 0,
+    /* top - right */ 100% 100%,
+    /* bottom - right */ 0% 100%,
+    /* bottom - left */ 0 0,
+    /* and top - left again */ /* do the same with inner rect */
+      var(--border-size) var(--border-size),
+    calc(100% - var(--border-size)) var(--border-size),
+    calc(100% - var(--border-size)) calc(100% - var(--border-size)),
+    var(--border-size) calc(100% - var(--border-size)),
+    var(--border-size) var(--border-size)
+  );
+  border-radius: 3px;
+  overflow: hidden;
+  /*
+    the border-color can now be set through the background property
+    which means we could even have corner-gradients borders
+  */
+  background: hsl(var(--primary));
 }

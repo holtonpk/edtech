@@ -95,7 +95,7 @@ export const Start = ({
                 exit={{opacity: 0}}
                 className="flex flex-col absolute -left-10 -translate-x-full top-[20%] -translate-y-1/2 gap-1"
               >
-                <h1 className=" text-center text-primary hand-font text-xl">
+                <h1 className=" text-center text-primary hand-font text-2xl">
                   Get started by <br />
                   uploading a resource
                 </h1>
@@ -103,6 +103,18 @@ export const Start = ({
               </motion.div>
             </motion.div>
           </div>
+          {/* <motion.div
+            animate={{opacity: 1}}
+            initial={{opacity: 0}}
+            transition={{duration: 0.5, delay: 1}}
+            exit={{opacity: 0}}
+            className="flex absolute left-[80%] -translate-x-1/2 bottom-[120px] "
+          >
+            <h1 className=" text-center text-primary poppins-bold text-2xl">
+              Learn why teachers love Frizzle AI
+            </h1>
+            <Arrow2 className="absolute h-[90px] rotate-[80deg] fill-primary ml-20 scale-x-[1] left-[20%] -translate-x-1/2 -bottom-4 translate-y-full" />
+          </motion.div> */}
         </motion.div>
       )}
     </AnimatePresence>

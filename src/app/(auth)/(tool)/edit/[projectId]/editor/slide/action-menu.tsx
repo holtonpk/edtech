@@ -14,7 +14,7 @@ export const ActionMenu = ({
       style={{
         transform: `rotate(${rotation}deg)`,
       }}
-      className={`flex h-full  w-full gap-2 absolute top-0  z-30 origin-center pointer-events-auto 
+      className={`flex h-full  w-full gap-2 absolute top-0  z-30 origin-center pointer-events-none 
              ${
                placeAtBottom
                  ? "-bottom-2 translate-y-full "
@@ -23,7 +23,7 @@ export const ActionMenu = ({
             `}
     >
       <div
-        className={`flex  left-1/2  absolute -translate-x-1/2 h-fit w-fit bg-background/80 blurBack border  shadow-lg  p-1 rounded-md items-center 
+        className={`flex  left-1/2 pointer-events-auto  absolute -translate-x-1/2 h-fit w-fit bg-background/80 blurBack border  shadow-lg  p-1 rounded-md items-center 
           ${
             placeAtBottom
               ? "-bottom-2 translate-y-full"

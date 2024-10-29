@@ -47,6 +47,7 @@ const TextBox = () => {
     setSelectedForAiWrite,
     setActiveSlide,
     activeSlide,
+    selectedSlide,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -222,96 +223,97 @@ const TextBox = () => {
     updateData({text: textBoxText.current}, textBox.textBoxId);
   };
 
+  const zIndex =
+    selectedSlide &&
+    selectedSlide.layerMap &&
+    selectedSlide.layerMap.indexOf(textBox.textBoxId);
+
   return (
     <>
       {mode !== "aiRewrite" ? (
         <>
-          <div className={` relative ${isSelected ? "z-20" : "z-10"}`}>
-            <Draggable
-              cancel=".nodrag"
-              // disabled={mode === "aiRewrite"}
-              onDrag={handleDrag}
-              position={position}
-              onStop={() => {
-                setActiveSlide(undefined);
-                setActiveEdit(textBox.textBoxId);
-                setActiveTransform(false);
-                setActiveGroupSelectedTextBoxes(undefined);
-                setGroupSelectedTextBoxes(undefined);
+          <Draggable
+            cancel=".nodrag"
+            onDrag={handleDrag}
+            position={position}
+            onStop={() => {
+              setActiveSlide(undefined);
+              setActiveEdit(textBox.textBoxId);
+              setActiveTransform(false);
+              setActiveGroupSelectedTextBoxes(undefined);
+              setGroupSelectedTextBoxes(undefined);
+            }}
+          >
+            <div
+              id={`ui-text-box-${textBox.textBoxId}`}
+              className=" absolute z-10 origin-center pointer-events-none group select-none "
+              style={{
+                width: size.width,
+                height: "fit-content",
+                cursor: activeDrag ? "move" : "pointer",
+                zIndex: zIndex,
               }}
             >
               <div
-                id={`ui-text-box-${textBox.textBoxId}`}
-                className=" absolute z-10 origin-center pointer-events-none group select-none "
+                ref={textBoxPlaceholderRef}
+                className="h-fit  w-full  relative whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
+                dangerouslySetInnerHTML={{__html: text}}
+                id={`ui-focus-text-box-${textBox.textBoxId}`}
                 style={{
-                  width: size.width,
-                  height: "fit-content",
-                  cursor: activeDrag ? "move" : "pointer",
+                  fontSize,
+                  // visibility: isSelected ? "hidden" : "visible",
+                  transform: `rotate(${rotation}deg) `,
+                  textAlign: textBox.textAlign ? textBox.textAlign : "left",
+                  opacity: textBox?.textOpacity ? textBox.textOpacity : 1,
+                  lineHeight: 1.15,
+                  padding: ".05in .1in .05in .1in",
                 }}
-              >
+                onClick={() => {
+                  setActiveEdit(textBox.textBoxId);
+                  setActiveSlide(undefined);
+                  setIsSelected(true);
+                  setActiveGroupSelectedTextBoxes(undefined);
+                }}
+              />
+              {!isSelected && !activeDragGlobal && (
                 <div
-                  ref={textBoxPlaceholderRef}
-                  className="h-fit  w-full  relative whitespace-pre-wrap break-words overflow-hidden pointer-events-auto "
+                  className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block 
+
+                  `}
+                  style={{
+                    transform: `rotate(${rotation}deg) `,
+                  }}
+                />
+              )}
+
+              {isRotating && <RotationDisplay rotation={rotation} />}
+            </div>
+          </Draggable>
+
+          {(isSelected || isGroupSelected) && (
+            <>
+              <ResizableBox disabled={isGroupSelected} handleDrag={handleDrag}>
+                <div
+                  onBlur={onBlur}
+                  onInput={updateTextBoxText}
+                  ref={textBoxRef}
+                  className="h-fit w-full z-[50] relative nodrag whitespace-pre-wrap break-words overflow-hidden "
+                  id={`text-box-${textBox.textBoxId}`}
                   dangerouslySetInnerHTML={{__html: text}}
-                  id={`ui-focus-text-box-${textBox.textBoxId}`}
+                  contentEditable={true}
                   style={{
                     fontSize,
-                    visibility: isSelected ? "hidden" : "visible",
-                    transform: `rotate(${rotation}deg) `,
                     textAlign: textBox.textAlign ? textBox.textAlign : "left",
                     opacity: textBox?.textOpacity ? textBox.textOpacity : 1,
                     lineHeight: 1.15,
                     padding: ".05in .1in .05in .1in",
                   }}
-                  onClick={() => {
-                    setActiveEdit(textBox.textBoxId);
-
-                    setActiveSlide(undefined);
-                    setIsSelected(true);
-                    setActiveGroupSelectedTextBoxes(undefined);
-                  }}
                 />
-                {!isSelected && !activeDragGlobal && (
-                  <div
-                    className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block 
+              </ResizableBox>
+            </>
+          )}
 
-                  `}
-                    style={{
-                      transform: `rotate(${rotation}deg) `,
-                    }}
-                  />
-                )}
-                <TextboxActions />
-
-                {isRotating && <RotationDisplay rotation={rotation} />}
-              </div>
-            </Draggable>
-
-            {(isSelected || isGroupSelected) && (
-              <>
-                <ResizableBox disabled={isGroupSelected}>
-                  <div
-                    onBlur={onBlur}
-                    onInput={updateTextBoxText}
-                    ref={textBoxRef}
-                    className="h-fit w-full z-[50] relative nodrag whitespace-pre-wrap break-words overflow-hidden "
-                    id={`text-box-${textBox.textBoxId}`}
-                    dangerouslySetInnerHTML={{__html: text}}
-                    style={{
-                      fontSize,
-                      textAlign: textBox.textAlign ? textBox.textAlign : "left",
-                      opacity: textBox?.textOpacity ? textBox.textOpacity : 1,
-                      lineHeight: 1.15,
-                      padding: ".05in .1in .05in .1in",
-                    }}
-                    contentEditable={true}
-                  />
-                </ResizableBox>
-              </>
-            )}
-
-            {}
-          </div>
+          {}
 
           {activeDrag && isCenteredX && (
             <div className="h-full border-dashed border border-primary absolute pointer-events-none left-1/2 -translate-x-1/2"></div>

@@ -139,6 +139,9 @@ interface PresentationContextType {
   addImageToSlide: (image: Image, position?: Position, size?: Size) => void;
   updateMultipleTextBoxes: (textBoxesToUpdate: TextBoxesToUpdate[]) => void;
   addImageToBackground: (image: Image) => void;
+  bringToFront: (id: string) => void;
+  sendToBack: (id: string) => void;
+  addIdToLayerMap: (id: string) => void;
 }
 
 const PresentationContext = createContext<PresentationContextType | null>(null);
@@ -1147,9 +1150,77 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     setGroupSelectedImages(undefined);
   };
 
-  useEffect(() => {
-    console.log("groupSelect &&&&&&", activeGroupSelectedTextBoxes);
-  }, [activeGroupSelectedTextBoxes]);
+  const [layerMap, setLayerMap] = useState<string[]>([]);
+
+  const bringToFront = (id: string) => {
+    if (!slideDataRef.current || !selectedSlide) return;
+
+    const newSlideData = slideDataRef.current?.slides.map((slide) => {
+      if (slide.id === selectedSlide?.id) {
+        const layerMap = slide.layerMap;
+        if (!layerMap) return slide;
+
+        console.log("oldlayerMap", id, layerMap);
+        //  move the id in layermap to the last index
+        const index = layerMap.indexOf(id);
+        layerMap.splice(index, 1);
+        layerMap.push(id);
+
+        console.log("newLayerMap", layerMap);
+        return {
+          ...slide,
+          layerMap: layerMap,
+        };
+      }
+      return slide;
+    });
+
+    console.log("newSlideData", newSlideData);
+
+    setSlideData({...slideDataRef.current, slides: newSlideData as Slide[]});
+  };
+
+  const sendToBack = (id: string) => {
+    if (!slideDataRef.current || !selectedSlide) return;
+
+    const newSlideData = slideDataRef.current?.slides.map((slide) => {
+      if (slide.id === selectedSlide?.id) {
+        const layerMap = slide.layerMap;
+        if (!layerMap) return slide;
+
+        //  move the id in layermap to the first index
+        const index = layerMap.indexOf(id);
+        layerMap.splice(index, 1);
+        layerMap.unshift(id);
+
+        return {
+          ...slide,
+          layerMap: layerMap,
+        };
+      }
+      return slide;
+    });
+
+    setSlideData({...slideDataRef.current, slides: newSlideData as Slide[]});
+  };
+
+  const addIdToLayerMap = (id: string) => {
+    if (!slideDataRef.current || !selectedSlide) return;
+    const newSlideData = slideDataRef.current?.slides.map((slide) => {
+      if (slide.id === selectedSlide?.id) {
+        const layerMap = slide.layerMap;
+        if (!layerMap) return slide;
+        layerMap.push(id);
+        return {
+          ...slide,
+          layerMap: layerMap,
+        };
+      }
+      return slide;
+    });
+
+    setSlideData({...slideDataRef.current, slides: newSlideData as Slide[]});
+  };
 
   const values = {
     // states -----------------------------
@@ -1227,6 +1298,9 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     activeGroupSelectedShapes,
     setActiveGroupSelectedShapes,
     addImageToBackground,
+    bringToFront,
+    sendToBack,
+    addIdToLayerMap,
   };
 
   return (

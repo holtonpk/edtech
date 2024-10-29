@@ -189,14 +189,14 @@ const SlideSelector = ({shouldHideToolbar}: {shouldHideToolbar: boolean}) => {
         id="slide-container"
         viewPortRef={slideContainer}
         style={{width: width}}
-        className="h-full  max-h-full  overflow-scroll pb-2 "
+        className="h-full max-h-full  overflow-scroll pb-2 "
       >
         <div className="flex pr-16  flex-row w-fit  h-full justify-start items-start gap-4 z-20  relative ">
           <SlideMenu container={slideContainer} />
         </div>
         <ScrollBar
           orientation="horizontal"
-          className=" absolute z-30 bottom-0 "
+          className=" absolute z-30 bottom-0"
         />
       </ScrollArea>
       {isScrolled && (

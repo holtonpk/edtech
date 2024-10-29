@@ -39,6 +39,7 @@ const Shape = () => {
     activeDragGlobal,
     updateShapeData,
     setActiveDragGlobal,
+    selectedSlide,
   } = usePresentation()!;
 
   useEffect(() => {
@@ -149,77 +150,56 @@ const Shape = () => {
     (shapeComponent) => shapeComponent.name === shapeState.shapeName
   );
 
+  const zIndex =
+    selectedSlide &&
+    selectedSlide.layerMap &&
+    selectedSlide.layerMap.indexOf(shapeState.shapeId);
+
+  console.log("Shape", shapeState.shapeId, zIndex);
+
   return (
     <>
-      <div className={`relative ${isSelected ? "z-10" : "z-0"}`}>
-        <Draggable
-          cancel=".nodrag"
-          disabled={mode === "aiRewrite"}
-          onDrag={handleDrag}
-          position={position}
-          onStop={() => {
-            setActiveEdit(shapeState.shapeId);
-            setActiveTransform(false);
+      <Draggable
+        cancel=".nodrag"
+        disabled={mode === "aiRewrite"}
+        onDrag={handleDrag}
+        position={position}
+        onStop={() => {
+          setActiveEdit(shapeState.shapeId);
+          setActiveTransform(false);
+        }}
+      >
+        <div
+          id={`ui-shape-${shapeState.shapeId}`}
+          className=" absolute  origin-center pointer-events-none group "
+          style={{
+            width: size.width,
+            height: size.height,
+            zIndex: zIndex,
+
+            cursor:
+              mode === "aiRewrite"
+                ? "default"
+                : activeDrag
+                ? "move"
+                : "pointer",
           }}
         >
           <div
-            id={`ui-shape-${shapeState.shapeId}`}
-            className=" absolute z-30 origin-center pointer-events-none group "
-            style={{
-              width: size.width,
-              height: size.height,
-
-              cursor:
-                mode === "aiRewrite"
-                  ? "default"
-                  : activeDrag
-                  ? "move"
-                  : "pointer",
+            onClick={() => {
+              if (mode !== "aiRewrite") {
+                setActiveEdit(shapeState.shapeId);
+                setIsSelected(true);
+                setActiveSlide(undefined);
+              }
             }}
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              // visibility: isSelected ? "hidden" : "visible",
+              zIndex: zIndex,
+            }}
+            className="pointer-events-auto  w-full h-full "
           >
-            <div
-              onClick={() => {
-                if (mode !== "aiRewrite") {
-                  setActiveEdit(shapeState.shapeId);
-                  setIsSelected(true);
-                  setActiveSlide(undefined);
-                }
-              }}
-              style={{
-                transform: `rotate(${rotation}deg)`,
-                visibility: isSelected ? "hidden" : "visible",
-              }}
-              className="pointer-events-auto p-2 w-full h-full"
-            >
-              {ShapeElement && (
-                <ShapeElement.component
-                  fillColor={shapeState.fillColor}
-                  strokeColor={shapeState.strokeColor}
-                  strokeWidth={shapeState.strokeWidth}
-                />
-              )}
-            </div>
-            <ShapeActions />
-            {!isGroupSelected && (
-              <div
-                id="drag-area"
-                className="w-full h-full absolute top-0  z-20"
-              ></div>
-            )}
-            {!isSelected && !activeDragGlobal && mode !== "aiRewrite" && (
-              <div
-                style={{
-                  transform: `rotate(${rotation}deg `,
-                }}
-                className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block`}
-              />
-            )}
-            {isRotating && <RotationDisplay rotation={rotation} />}
-          </div>
-        </Draggable>
-
-        {(isSelected || isGroupSelected) && (
-          <ResizableShape disabled={isGroupSelected}>
             {ShapeElement && (
               <ShapeElement.component
                 fillColor={shapeState.fillColor}
@@ -227,9 +207,37 @@ const Shape = () => {
                 strokeWidth={shapeState.strokeWidth}
               />
             )}
-          </ResizableShape>
-        )}
-      </div>
+          </div>
+
+          {!isGroupSelected && (
+            <div
+              id="drag-area"
+              className="w-full h-full absolute top-0  z-20"
+            ></div>
+          )}
+          {!isSelected && !activeDragGlobal && mode !== "aiRewrite" && (
+            <div
+              style={{
+                transform: `rotate(${rotation}deg `,
+              }}
+              className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px] hidden group-hover:block`}
+            />
+          )}
+          {isRotating && <RotationDisplay rotation={rotation} />}
+        </div>
+      </Draggable>
+
+      {(isSelected || isGroupSelected) && (
+        <ResizableShape disabled={isGroupSelected} handleDrag={handleDrag}>
+          {ShapeElement && (
+            <ShapeElement.component
+              fillColor={shapeState.fillColor}
+              strokeColor={shapeState.strokeColor}
+              strokeWidth={shapeState.strokeWidth}
+            />
+          )}
+        </ResizableShape>
+      )}
 
       {activeDrag && isCenteredX && (
         <div className="h-full border-dashed border border-primary absolute pointer-events-none left-1/2 -translate-x-1/2"></div>

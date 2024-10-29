@@ -32,6 +32,7 @@ interface SlideContextType {
   setActiveTransform: React.Dispatch<React.SetStateAction<boolean>>;
   textBoxId: string;
   deleteTextBox: () => void;
+  duplicateTextBox: () => void;
 }
 
 const TextBoxContext = createContext<SlideContextType | null>(null);
@@ -155,6 +156,36 @@ export const TextBoxProvider = ({children, textBox}: Props) => {
     }
   }, [activeEdit]);
 
+  const duplicateTextBox = () => {
+    if (!selectedSlide || !slideData) return;
+    const newTextBoxId = Math.random().toString(36).substr(2, 9);
+    const newSlideData = slideData.slides.map((slide) => {
+      if (slide.id === selectedSlide.id) {
+        return {
+          ...slide,
+          textBoxes: [
+            ...slide.textBoxes,
+            {
+              ...textBoxState,
+              textBoxId: newTextBoxId,
+              position: {
+                x: textBoxState.position.x + 20,
+                y: textBoxState.position.y + 20,
+              },
+            },
+          ],
+        };
+      }
+      return slide;
+    });
+    setSlideData({...slideData, slides: newSlideData});
+    setHistory([{...slideData, slides: newSlideData}, ...history]);
+
+    setTimeout(() => {
+      setActiveEdit(newTextBoxId);
+    }, 100);
+  };
+
   const values = {
     textBoxState,
     setTextBoxState,
@@ -183,6 +214,7 @@ export const TextBoxProvider = ({children, textBox}: Props) => {
     activeTransform,
     setActiveTransform,
     textBoxId,
+    duplicateTextBox,
   };
 
   return (

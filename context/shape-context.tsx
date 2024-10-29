@@ -30,6 +30,7 @@ interface ShapeContextType {
   setSize: React.Dispatch<React.SetStateAction<Size>>;
   setRotation: React.Dispatch<React.SetStateAction<number>>;
   setIsRotating: React.Dispatch<React.SetStateAction<boolean>>;
+  duplicateShape: () => void;
 }
 
 const ShapeContext = createContext<ShapeContextType | null>(null);
@@ -138,6 +139,39 @@ export const ShapeProvider = ({children, shape}: Props) => {
     }
   }, [activeEdit]);
 
+  const duplicateShape = () => {
+    if (!selectedSlide || !slideData) return;
+
+    const newShapeId = Math.random().toString(36).substring(7);
+
+    const newSlideData = slideData.slides.map((slide) => {
+      if (slide.id === selectedSlide?.id) {
+        const newShapes = slide.shapes.map((shape) => {
+          if (shape.shapeId === shapeState.shapeId) {
+            return {
+              ...shape,
+              shapeId: newShapeId,
+              position: {
+                x: shape.position.x + 20,
+                y: shape.position.y + 20,
+              },
+            };
+          }
+          return shape;
+        });
+        return {...slide, shapes: [...slide.shapes, ...newShapes]};
+      }
+      return slide;
+    });
+
+    setSlideData({...slideData, slides: newSlideData});
+    setHistory([{...slideData, slides: newSlideData}, ...history]);
+
+    setTimeout(() => {
+      setActiveEdit(newShapeId);
+    }, 200);
+  };
+
   const values = {
     shapeState,
     size,
@@ -157,6 +191,7 @@ export const ShapeProvider = ({children, shape}: Props) => {
     setSize,
     setRotation,
     setIsRotating,
+    duplicateShape,
   };
 
   return (

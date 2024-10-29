@@ -5,13 +5,17 @@ import {usePresentation} from "@/context/presentation-context";
 import ResizableHandle from "./resizable-handle";
 import ScaleHandle from "./scale-handle";
 import {useShape} from "@/context/shape-context";
+import ShapeActions from "./shape-actions";
+import Draggable from "react-draggable";
 
 export const ResizableShape = ({
   children,
   disabled,
+  handleDrag,
 }: {
   children: React.ReactNode;
   disabled: boolean;
+  handleDrag: (e: any, ui: any) => void;
 }) => {
   const {
     size,
@@ -21,11 +25,12 @@ export const ResizableShape = ({
     rotation,
     activeDrag,
     activeTransform,
-    isRotating,
+    setActiveTransform,
+    shapeState,
   } = useShape()!;
 
   const resizeHandles = ["e", "w", "n", "s"];
-  const scaleHandles = ["se"];
+  const scaleHandles = ["se", "sw", "ne", "nw"];
 
   const handleRef = React.useRef<HTMLDivElement>(null);
 
@@ -46,6 +51,60 @@ export const ResizableShape = ({
         default:
           break;
       }
+      switch (handleAxis) {
+        case "sw":
+          const scale = (size.width - deltaX) / size.width;
+
+          setPosition({
+            x: position.x + deltaX,
+            y: position.y,
+          });
+          setSize({
+            width: size.width - Math.round(deltaX),
+            height: size.height * scale,
+          });
+          break;
+
+        default:
+          break;
+      }
+
+      switch (handleAxis) {
+        case "ne":
+          const scale = (size.width + deltaX) / size.width;
+
+          setPosition({
+            x: position.x,
+            y: position.y + (size.height - size.height * scale),
+          });
+          setSize({
+            width: size.width + Math.round(deltaX),
+            height: size.height * scale,
+          });
+          break;
+
+        default:
+          break;
+      }
+
+      switch (handleAxis) {
+        case "nw":
+          const scale = (size.width - deltaX) / size.width;
+
+          setPosition({
+            x: position.x + deltaX,
+            y: position.y + (size.height - size.height * scale),
+          });
+          setSize({
+            width: size.width - Math.round(deltaX),
+            height: size.height * scale,
+          });
+          break;
+
+        default:
+          break;
+      }
+
       isScaling.current = false;
     },
     [size, setSize, position, setPosition]
@@ -104,53 +163,66 @@ export const ResizableShape = ({
     string | undefined
   >(undefined);
 
+  const {mode, setActiveEdit} = usePresentation()!;
+
   return (
-    <div
-      ref={handleRef}
-      className=" origin-center absolute z-10 p-2  "
-      style={{
-        width: size.width,
-        height: size.height,
-        left: position.x,
-        top: position.y,
-        transform: `rotate(${rotation}deg)`,
+    <Draggable
+      cancel=".nodrag"
+      disabled={mode === "aiRewrite"}
+      onDrag={handleDrag}
+      position={position}
+      onStop={() => {
+        setActiveEdit(shapeState.shapeId);
+        setActiveTransform(false);
       }}
     >
       <div
-        className={`absolute border-2 border-primary top-0 left-0 h-full w-full z-20 pointer-events-none rounded-[3px]`}
-      />
-      {!disabled && (
-        <>
-          {scaleHandles.map((handleAxis) => (
-            <ScaleHandle
-              key={handleAxis}
-              handleAxis={handleAxis}
-              hidden={
-                activeDrag ||
-                (activeTransform && activeScaleHandle !== handleAxis)
-              }
-              controlScale={controlScale}
-              activeHandle={activeScaleHandle}
-              setActiveHandle={setActiveScaleHandle}
-            />
-          ))}
-          {resizeHandles.map((handleAxis) => (
-            <ResizableHandle
-              key={handleAxis}
-              handleAxis={handleAxis}
-              innerRef={handleRef}
-              hidden={
-                activeDrag ||
-                (activeTransform && activeResizeHandle !== handleAxis)
-              }
-              onResize={controlResize}
-              activeHandle={activeResizeHandle}
-              setActiveHandle={setActiveResizeHandle}
-            />
-          ))}
-        </>
-      )}
-      <div className="z-0 h-full w-full">{children}</div>
-    </div>
+        ref={handleRef}
+        className=" origin-center absolute  z-20   "
+        style={{
+          transform: `rotate(${rotation}deg)`,
+        }}
+      >
+        <div
+          className="pointer-events-none "
+          style={{width: size.width, height: size.height}}
+        ></div>
+
+        <div className="slide-box-border " />
+        {!disabled && (
+          <>
+            {scaleHandles.map((handleAxis) => (
+              <ScaleHandle
+                key={handleAxis}
+                handleAxis={handleAxis}
+                hidden={
+                  activeDrag ||
+                  (activeTransform && activeScaleHandle !== handleAxis)
+                }
+                controlScale={controlScale}
+                activeHandle={activeScaleHandle}
+                setActiveHandle={setActiveScaleHandle}
+              />
+            ))}
+            {resizeHandles.map((handleAxis) => (
+              <ResizableHandle
+                key={handleAxis}
+                handleAxis={handleAxis}
+                innerRef={handleRef}
+                hidden={
+                  activeDrag ||
+                  (activeTransform && activeResizeHandle !== handleAxis)
+                }
+                onResize={controlResize}
+                activeHandle={activeResizeHandle}
+                setActiveHandle={setActiveResizeHandle}
+              />
+            ))}
+          </>
+        )}
+        {/* <div className="z-0 h-full w-full  ">{children}</div> */}
+        <ShapeActions />
+      </div>
+    </Draggable>
   );
 };

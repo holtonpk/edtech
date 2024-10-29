@@ -4,14 +4,17 @@ interface ShapeProps {
   fillColor: string;
   strokeColor: string;
   strokeWidth: number;
+  className?: string;
 }
 
 export const Square: React.FC<ShapeProps> = ({
   fillColor,
   strokeColor,
   strokeWidth,
+  className,
 }) => (
   <svg
+    className={className}
     preserveAspectRatio="none"
     width="100%"
     height="100%"

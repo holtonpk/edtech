@@ -90,9 +90,9 @@ const ScaleHandle = ({
 function getHandleClass(handleAxis: string): string {
   switch (handleAxis) {
     case "nw":
-      return "top-0 left-0 -translate-x-1/2 -translate-y-1/2 h-4 w-4 ";
+      return "top-0 left-0 -translate-x-1/2 -translate-y-1/2 h-4 w-4 cursor-nw-resize";
     case "ne":
-      return "top-0 right-0 translate-x-1/2 -translate-y-1/2 h-4 w-4 ";
+      return "top-0 right-0 translate-x-1/2 -translate-y-1/2 h-4 w-4 cursor-ne-resize";
     case "sw":
       return "bottom-0 left-0 -translate-x-1/2 translate-y-1/2 h-4 w-4 cursor-sw-resize";
     case "se":

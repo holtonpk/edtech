@@ -80,6 +80,10 @@ import {
   Shrink,
   Frown,
   Shapes,
+  Layers2,
+  SendToBack,
+  BringToFront,
+  Clock,
 } from "lucide-react";
 
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
@@ -109,9 +113,12 @@ import TitleIcon from "@mui/icons-material/Title";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 export const Icons = {
+  clock: Clock,
+  sendToBack: SendToBack,
+  bringToFront: BringToFront,
+  layer: Layers2,
   shapes: Shapes,
   sad: Frown,
-  logo: Lightbulb,
   exitFullScreen: Shrink,
   imagePlaceholder: Image,
   addPage: SquarePlus,
@@ -380,6 +387,99 @@ export const Icons = {
           <stop offset="1" stopColor="#F2ECFE"></stop>
         </linearGradient>
       </defs>
+    </svg>
+  ),
+  logo: (props: LucideProps) => (
+    // <svg
+    //   xmlns="http://www.w3.org/2000/svg"
+    //   {...props}
+    //   fill="none"
+    //   viewBox="0 0 699 700"
+    // >
+    //   <path fill="#8FD7F5" d="M0 291.5H699V407.5H0z"></path>
+    //   <path
+    //     fill="#8FD7F5"
+    //     d="M291.5 699H990.5V815H291.5z"
+    //     transform="rotate(-90 291.5 699)"
+    //   ></path>
+    //   <path
+    //     fill="#8FD7F5"
+    //     d="M347.738 269.238H641.73V385.238H347.738z"
+    //     transform="rotate(-45 347.738 269.238)"
+    //   ></path>
+    //   <path
+    //     fill="#8FD7F5"
+    //     d="M143.378 61.354H842.3779999999999V177.35399999999998H143.378z"
+    //     transform="rotate(45 143.378 61.354)"
+    //   ></path>
+    //   <path
+    //     fill="#926CAF"
+    //     d="M0 617.612H383.41V733.14H0z"
+    //     transform="rotate(-45 0 617.612)"
+    //   ></path>
+    //   <path
+    //     fill="#fff"
+    //     d="M271 347.186H379.451V462.714H271z"
+    //     transform="rotate(-45 271 347.186)"
+    //   ></path>
+    // </svg>
+    // <svg
+    //   xmlns="http://www.w3.org/2000/svg"
+    //   {...props}
+    //   fill="none"
+    //   viewBox="0 0 699 700"
+    // >
+    //   <path fill="#926CAF" d="M0 291.5H699V407.5H0z"></path>
+    //   <path
+    //     fill="#926CAF"
+    //     d="M291.5 699H990.5V815H291.5z"
+    //     transform="rotate(-90 291.5 699)"
+    //   ></path>
+    //   <path
+    //     fill="#926CAF"
+    //     d="M347.738 269.238H641.73V385.238H347.738z"
+    //     transform="rotate(-45 347.738 269.238)"
+    //   ></path>
+    //   <path
+    //     fill="#926CAF"
+    //     d="M143.378 61.354H842.3779999999999V177.35399999999998H143.378z"
+    //     transform="rotate(45 143.378 61.354)"
+    //   ></path>
+    //   <path
+    //     fill="#348DF4"
+    //     d="M0 617.612H383.41V733.14H0z"
+    //     transform="rotate(-45 0 617.612)"
+    //   ></path>
+    //   <path
+    //     fill="#fff"
+    //     d="M271 347.186H379.451V462.714H271z"
+    //     transform="rotate(-45 271 347.186)"
+    //   ></path>
+    // </svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+      fill="none"
+      viewBox="0 0 493 494"
+    >
+      <path fill="#91C3FB" d="M0 205.593h493v81.814H0z"></path>
+      <path fill="#91C3FB" d="M205.593 493V0h81.814v493z"></path>
+      <path
+        fill="#91C3FB"
+        d="m245.257 189.892 146.62-146.62 57.85 57.852-146.619 146.62z"
+      ></path>
+      <path
+        fill="#91C3FB"
+        d="m101.124 43.273 348.603 348.603-57.85 57.852L43.271 101.124z"
+      ></path>
+      <path
+        fill="#348DF4"
+        d="m0 435.597 191.214-191.214L248.829 302 57.616 493.213z"
+      ></path>
+      <path
+        fill="#fff"
+        d="m191.134 244.868 54.086-54.086 57.616 57.616-54.086 54.086z"
+      ></path>
     </svg>
   ),
 };

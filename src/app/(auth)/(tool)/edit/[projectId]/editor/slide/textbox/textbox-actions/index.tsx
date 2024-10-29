@@ -7,6 +7,7 @@ import {useTextBox} from "@/context/textbox-context";
 import ActionButton from "./action-button";
 import {ActionMenu} from "../../action-menu";
 import AiRewriteButton from "./ai-rewrite";
+import Options from "./options";
 
 const TextboxActions = () => {
   const {
@@ -31,6 +32,7 @@ const TextboxActions = () => {
           <Delete />
           <Rotate />
           <Move />
+          <Options />
           {/* <AiRewriteButton /> */}
         </ActionMenu>
       )}

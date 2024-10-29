@@ -68,6 +68,7 @@ export interface Slide {
   title?: string;
   backgroundImage?: Image;
   shapes: SlideShape[];
+  layerMap?: string[];
 }
 
 export interface SlideShape {

@@ -24,8 +24,14 @@ const Shapes = () => {
     width: 100,
   }); // Default size
 
-  const {slideData, setSlideData, selectedSlide, slideDataRef, setActiveEdit} =
-    usePresentation()!;
+  const {
+    slideData,
+    setSlideData,
+    selectedSlide,
+    slideDataRef,
+    setActiveEdit,
+    addIdToLayerMap,
+  } = usePresentation()!;
 
   const createNewShape = (shapeName: string) => {
     if (slideDataRef.current && selectedSlide) {
@@ -57,6 +63,7 @@ const Shapes = () => {
       setSlideData(updatedSlideData);
       setTimeout(() => {
         setActiveEdit(shapeId);
+        addIdToLayerMap(shapeId);
       }, 5);
     }
   };

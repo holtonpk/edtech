@@ -6,7 +6,12 @@ import {pdfjs} from "react-pdf";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 import TextBoxCreate from "@/src/app/(auth)/(tool)/edit/[projectId]/editor/slide/textbox/textbox-creator";
-import {SlideImage, TextBoxType, SlideShape} from "@/config/data";
+import {
+  Slide as SlideType,
+  SlideImage,
+  TextBoxType,
+  SlideShape,
+} from "@/config/data";
 import {TextBoxProvider} from "@/context/textbox-context";
 import {ImageProvider} from "@/context/image-context";
 import {ShapeProvider} from "@/context/shape-context";
@@ -26,6 +31,8 @@ const Slide = () => {
     activeGroupSelectedImages,
     activeSlide,
     setActiveSlide,
+    slideData,
+    slideDataRef,
   } = usePresentation()!;
 
   const [shouldHideToolbar, setShouldHideToolbar] = React.useState(false);
@@ -93,6 +100,30 @@ const Slide = () => {
     (activeGroupSelectedTextBoxes &&
       activeGroupSelectedTextBoxes?.length > 0) ||
     (activeGroupSelectedImages && activeGroupSelectedImages?.length > 0);
+
+  useEffect(() => {
+    if (!selectedSlide?.layerMap && slideDataRef.current) {
+      // if no layerMap is present, create a new one
+      const layerMap = [
+        ...(selectedSlide?.textBoxes?.map((textBox) => textBox.textBoxId) ||
+          []),
+        ...(selectedSlide?.images?.map((image) => image.imageId) || []),
+        ...(selectedSlide?.shapes?.map((shape) => shape.shapeId) || []),
+      ];
+
+      const updatedSlide = {...selectedSlide, layerMap};
+      const newSlideData = slideDataRef.current.slides.map((s) => {
+        if (s.id === selectedSlide?.id) {
+          return updatedSlide;
+        }
+        return s;
+      });
+      setSlideData({
+        ...slideDataRef.current,
+        slides: newSlideData as SlideType[],
+      });
+    }
+  }, []);
 
   return (
     <div
