@@ -14,13 +14,14 @@ import ProfileNav from "@/src/app/(auth)/(tool)/components/profile-nav";
 import ToolBar from "./toolbar/toolbar";
 import {auth} from "@canva/user";
 
-export const Presentation = () => {
+const Presentation = ({params}: {params: {projectId: string}}) => {
   const SlideId = "DkKdB59cscUg0RSZJOJx";
   return (
     <div className="h-fit md:h-screen w-screen  flex flex-col overflow-hidden gap-2">
       <Background />
       {/* <NavBar /> */}
       <div className="h-screen w-screen overflow-hidden">
+        s
         <PresentationProvider projectId={SlideId}>
           <ToolBar />
           <div className=" h-full grid grid-flow-col p-4 max-w-[1800px]  mx-auto rounded-md overflow-hidden  max-w-screen gap-4  ">

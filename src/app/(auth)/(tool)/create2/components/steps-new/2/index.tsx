@@ -7,7 +7,6 @@ import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
 import {Toaster} from "@/components/ui/toaster";
 import {useToast} from "@/components/ui/use-toast";
-import {usePresentation} from "@/context/presentation-create-context";
 import {Icons} from "@/components/icons";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 import {Document, pdfjs} from "react-pdf";
