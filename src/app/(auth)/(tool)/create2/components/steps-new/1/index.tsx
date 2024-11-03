@@ -10,7 +10,7 @@ import {usePresentationCreate} from "@/context/presentation-create-context";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 import {Document, pdfjs} from "react-pdf";
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-import GoogleDriveImport from "@/src/app/(auth)/(tool)/create2/components/steps/upload/google-drive-import";
+import GoogleDriveImport from "./google-drive-import";
 import {useRouter} from "next/router";
 import {
   FILE_SIZE,
@@ -69,9 +69,7 @@ export const Step1 = ({
       {showUploadText && (
         <div className="fixed top-1/2 left-1/2 p-2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] overflow-scroll border rounded-md z-50 bg-background">
           {uploadText &&
-            uploadText.map((text, index) => (
-              <div key={index}>{uploadText}</div>
-            ))}
+            uploadText.map((text, index) => <div>{uploadText}</div>)}
         </div>
       )}
     </>

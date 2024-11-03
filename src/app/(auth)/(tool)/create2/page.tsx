@@ -6,7 +6,6 @@ import CreateSteps from "./create-steps";
 import Background from "./components/background";
 import ToolBar from "../edit/[projectId]/toolbar/toolbar";
 import ProfileNav from "@/src/app/(auth)/(tool)/components/profile-nav";
-import Upload from "./components/steps/upload";
 import {Icons} from "@/components/icons";
 import {Demo} from "./demo";
 import {Testimonials} from "./testimonials";
