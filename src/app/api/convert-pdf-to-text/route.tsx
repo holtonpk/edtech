@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 59; // 5 minutes
 
 // import credintials from "./moltar-bc665-0fdafd009593.json";
 export async function POST(req: Request) {
