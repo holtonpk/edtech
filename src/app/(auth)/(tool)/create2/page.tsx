@@ -1,7 +1,7 @@
 "use client";
 
 import React, {useState} from "react";
-import {CreatePresentationForm} from "./components/create-presentation";
+
 import CreateSteps from "./create-steps";
 import Background from "./components/background";
 import ToolBar from "../edit/[projectId]/toolbar/toolbar";
