@@ -1,26 +1,48 @@
+// pages/canva-redirect.js
 "use client";
 import {useEffect} from "react";
+import {useRouter} from "next/router";
 
 const CanvaRedirect = () => {
+  const router = useRouter();
+
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-    const error = urlParams.get("error");
+    const {code, error} = router.query;
 
     if (error) {
-      window.opener.postMessage({error}, "*");
-      window.close();
-      return;
+      console.error("Authorization Error:", error);
+      // Handle the error as needed, maybe redirect to the main page with an error message
     }
 
     if (code) {
-      // Send the authorization code back to the opener (main window)
-      window.opener.postMessage({code}, "*");
-      window.close(); // Close the popup after sending the code
-    }
-  }, []);
+      // Store the code verifier from session storage
+      const codeVerifier = sessionStorage.getItem("code_verifier");
 
-  return <div>Loading...</div>; // Show a loading state while processing
+      // Exchange the code for an access token
+      const exchangeCodeForToken = async () => {
+        const response = await fetch(
+          `/api/canva-auth?code=${code}&code_verifier=${codeVerifier}`,
+          {
+            method: "GET",
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Store the access token in localStorage or state for API requests
+          localStorage.setItem("canva_access_token", data.access_token);
+          router.push("/"); // Redirect to home or wherever you want
+        } else {
+          console.error("Error exchanging code for token:", data.error);
+        }
+      };
+
+      exchangeCodeForToken();
+    }
+  }, [router]);
+
+  return <div>Loading...</div>; // Show loading while processing
 };
 
 export default CanvaRedirect;

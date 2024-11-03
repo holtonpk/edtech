@@ -88,7 +88,7 @@ const Presentation = ({params}: {params: {projectId: string}}) => {
 export default Presentation;
 
 // const SaveToCanva = () => {
-
+//   const clientId = "OC-AZLz4cnziII1";
 //   const redirectUri = "https://edtech-lac.vercel.app/canva-redirect"; // Update this to your redirect page
 //   const [error, setError] = useState(null);
 
@@ -146,6 +146,7 @@ export default Presentation;
 
 //       // Open the authorization URL in a popup window
 //       const popup = window.open(authUrl, "Canva Auth", "width=600,height=700");
+//       if (!popup) return;
 
 //       // Polling to check if the popup has been closed
 //       const timer = setInterval(() => {
@@ -156,36 +157,37 @@ export default Presentation;
 //       }, 1000);
 
 //       // Listen for messages from the popup
-//       window.addEventListener("message", async (event) => {
-//         console.log("event", event);
-//         if (event.origin !== window.location.origin) return; // Validate origin
 
-//         const {code} = event.data;
-//         console.log("code", code);
-//         if (code) {
-//           // Exchange the authorization code for an access token
-//           try {
-//             const response = await fetch(`/api/canva-auth?code=${code}`, {
-//               method: "GET",
-//             });
+//       // window.addEventListener("message", async (event) => {
+//       //   console.log("event", event);
+//       //   if (event.origin !== window.location.origin) return; // Validate origin
 
-//             const data = await response.json();
+//       //   const {code} = event.data;
+//       //   console.log("code", code);
+//       //   if (code) {
+//       //     // Exchange the authorization code for an access token
+//       //     try {
+//       //       const response = await fetch(`/api/canva-auth?code=${code}`, {
+//       //         method: "GET",
+//       //       });
 
-//             if (response.ok) {
-//               // Store access token in localStorage or state for API requests
-//               localStorage.setItem("canva_access_token", data.access_token);
-//               popup.close(); // Close the popup after successful authorization
-//             } else {
-//               throw new Error(data.error || "Failed to get access token.");
-//             }
-//           } catch (err) {
-//             console.error("Error exchanging code for token:", err);
-//             setError("Failed to complete Canva authorization.");
-//           } finally {
-//             clearInterval(timer);
-//           }
-//         }
-//       });
+//       //       const data = await response.json();
+
+//       //       if (response.ok) {
+//       //         // Store access token in localStorage or state for API requests
+//       //         localStorage.setItem("canva_access_token", data.access_token);
+//       //         popup.close(); // Close the popup after successful authorizations
+//       //       } else {
+//       //         throw new Error(data.error || "Failed to get access token.");
+//       //       }
+//       //     } catch (err) {
+//       //       console.error("Error exchanging code for token:", err);
+//       //       setError("Failed to complete Canva authorization.");
+//       //     } finally {
+//       //       clearInterval(timer);
+//       //     }
+//       //   }
+//       // });
 //     } catch (err) {
 //       console.error("Error generating PKCE challenge:", err);
 //       setError("Failed to initiate Canva authorization.");
