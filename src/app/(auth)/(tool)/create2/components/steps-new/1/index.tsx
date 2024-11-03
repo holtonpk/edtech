@@ -69,7 +69,9 @@ export const Step1 = ({
       {showUploadText && (
         <div className="fixed top-1/2 left-1/2 p-2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] overflow-scroll border rounded-md z-50 bg-background">
           {uploadText &&
-            uploadText.map((text, index) => <div>{uploadText}</div>)}
+            uploadText.map((text, index) => (
+              <div key={index}>{uploadText}</div>
+            ))}
         </div>
       )}
     </>
