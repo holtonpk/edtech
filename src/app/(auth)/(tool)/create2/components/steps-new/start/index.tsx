@@ -2,148 +2,37 @@
 import {Icons} from "@/components/icons";
 import React, {useEffect, useState, useRef} from "react";
 import {motion, AnimatePresence} from "framer-motion";
-import StepContainer from "../step-container";
-import {Button} from "@/components/ui/button";
-import {Label} from "@/components/ui/label";
 import {useToast} from "@/components/ui/use-toast";
-import {usePresentation} from "@/context/presentation-create-context";
-import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
-import {Document, pdfjs} from "react-pdf";
+import {usePresentationCreate} from "@/context/presentation-create-context";
 import GoogleDriveImport from "../1/google-drive-import";
-pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 import {LucideProps} from "lucide-react";
-import {
-  FILE_SIZE,
-  FileLocal,
-  MAX_FILE_SIZE_MB,
-  UploadType,
-} from "@/config/data";
-
-import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog";
-
+import {Button} from "@/components/ui/button";
 export const Start = ({
   step,
   setStep,
   prevStep,
   setPrevStep,
-
-  inputFiles,
-  setInputFiles,
 }: {
   step: number;
   setStep: React.Dispatch<React.SetStateAction<number>>;
   prevStep: number;
   setPrevStep: React.Dispatch<React.SetStateAction<number>>;
-
-  inputFiles: FileList | null;
-  setInputFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
 }) => {
-  //   const [isActive, setIsGenerating] = useState(false);
+  const {inputFiles, setInputFiles, processFiles} = usePresentationCreate()!;
 
   useEffect(() => {
-    setPrevStep(0);
-  }, []);
+    if (step === 0) setPrevStep(0);
+  }, [step]);
 
   const isActive = step === 0;
 
-  return (
-    <AnimatePresence>
-      {isActive && (
-        <motion.div
-          animate={{opacity: 1}}
-          initial={{opacity: 1}}
-          transition={{duration: 0.3}}
-          exit={{opacity: 0, transform: "translateY(200px)"}}
-          className={`flex flex-col items-center pt-10 z-50 relative h-[calc(100vh-60px)] 
-  w-screen
-      `}
-        >
-          <div className="h-fit relative w-full flex items-center  flex-col gap-8">
-            <motion.div
-              animate={{opacity: 1}}
-              initial={{opacity: 0}}
-              transition={{duration: 0.5, delay: 0.2}}
-              exit={{opacity: 0}}
-              className="flex flex-col items-center  h-[15s0px] top-0 gap-4"
-            >
-              <h1 className="text-5xl font-bold poppins-bold text-center">
-                Turn anything <br /> into a presentation
-              </h1>
-              <p className="poppins-regular text-center">
-                The power of AI at your fingertips <br />
-                create engaging presentations in minutes
-              </p>
-            </motion.div>
-            <motion.div
-              animate={{opacity: 1, transform: "translateY(0px)"}}
-              initial={{opacity: 0, transform: "translateY(200px)"}}
-              transition={{duration: 0.5, delay: 0.5}}
-              exit={{opacity: 0, transform: "translateY(200px)"}}
-              className="h-fit w-fit relative "
-            >
-              <UploadManagerStart
-                step={step}
-                setStep={setStep}
-                inputFiles={inputFiles}
-                setInputFiles={setInputFiles}
-              />
-
-              <motion.div
-                animate={{opacity: 1}}
-                initial={{opacity: 0}}
-                transition={{duration: 0.5, delay: 1}}
-                exit={{opacity: 0}}
-                className="flex flex-col absolute -left-10 -translate-x-full top-[20%] -translate-y-1/2 gap-1"
-              >
-                <h1 className=" text-center text-primary hand-font text-2xl">
-                  Get started by <br />
-                  uploading a resource
-                </h1>
-                <Arrow1 className=" h-[90px] rotate-[10deg] fill-primary ml-20 -scale-x-[1]" />
-              </motion.div>
-            </motion.div>
-          </div>
-          {/* <motion.div
-            animate={{opacity: 1}}
-            initial={{opacity: 0}}
-            transition={{duration: 0.5, delay: 1}}
-            exit={{opacity: 0}}
-            className="flex absolute left-[80%] -translate-x-1/2 bottom-[120px] "
-          >
-            <h1 className=" text-center text-primary poppins-bold text-2xl">
-              Learn why teachers love Frizzle AI
-            </h1>
-            <Arrow2 className="absolute h-[90px] rotate-[80deg] fill-primary ml-20 scale-x-[1] left-[20%] -translate-x-1/2 -bottom-4 translate-y-full" />
-          </motion.div> */}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-const UploadManagerStart = ({
-  step,
-  setStep,
-
-  inputFiles,
-  setInputFiles,
-}: {
-  step: number;
-  setStep: React.Dispatch<React.SetStateAction<number>>;
-
-  inputFiles: FileList | null;
-  setInputFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
-}) => {
-  //toast initiation
-  const {toast} = useToast();
-
-  // state for drag and drop
   const [isDragging, setIsDragging] = useState(false);
 
   const onDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
     setInputFiles(event.dataTransfer.files);
+    setStep(1);
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -157,33 +46,117 @@ const UploadManagerStart = ({
   };
 
   return (
+    <AnimatePresence>
+      {isActive && (
+        <motion.div
+          animate={{opacity: 1}}
+          initial={{opacity: 1}}
+          transition={{duration: 0.3}}
+          exit={{opacity: 0, transform: "translateY(200px)"}}
+          onDrop={onDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={`flex flex-col items-center pt-10 z-50 relative h-[calc(100vh-60px)] 
+  w-full
+      `}
+        >
+          <div className="h-fit relative w-full flex items-center  flex-col gap-8">
+            <motion.div
+              animate={{opacity: 1}}
+              initial={{opacity: 0}}
+              transition={{duration: 0.5, delay: 0.2}}
+              exit={{opacity: 0}}
+              className="flex flex-col items-center  h-[150px] top-0 gap-4"
+            >
+              <h1 className="text-5xl font-bold poppins-bold text-center leading-[60px]">
+                Turn <i>anything</i> into a <br /> class presentation with AI
+              </h1>
+              <p className="poppins-regular text-center text-lg">
+                Don&apos;t start from scratch. Start from a <i>PDF</i>,{" "}
+                <i>Youtube Link</i>, <i>Image</i> etc.
+              </p>
+            </motion.div>
+            <motion.div
+              animate={{opacity: 1, transform: "translateY(0px)"}}
+              initial={{opacity: 0, transform: "translateY(200px)"}}
+              transition={{duration: 0.5, delay: 0.5}}
+              exit={{opacity: 0, transform: "translateY(200px)"}}
+              className="h-fit w-fit relative "
+            >
+              <UploadManagerStart
+                setStep={setStep}
+                isDragging={isDragging}
+                setIsDragging={setIsDragging}
+              />
+
+              <motion.div
+                animate={{opacity: 1}}
+                initial={{opacity: 0}}
+                transition={{duration: 0.5, delay: 1}}
+                exit={{opacity: 0}}
+                className="flex flex-col absolute -left-10 -translate-x-full top-[30%] -translate-y-1/2 gap-1"
+              >
+                <h1 className=" text-center text-primary hand-font text-2xl">
+                  Get started by <br />
+                  uploading a resource
+                </h1>
+                <Arrow1 className=" h-[90px] rotate-[0deg] fill-primary ml-20 -scale-x-[1]" />
+              </motion.div>
+            </motion.div>
+          </div>
+          <motion.div
+            animate={{opacity: 1}}
+            initial={{opacity: 0}}
+            transition={{duration: 0.5, delay: 1}}
+            exit={{opacity: 0}}
+            className="flex absolute left-[80%] -translate-x-1/2 bottom-[120px] "
+          >
+            <h1 className=" text-center text-primary hand-font  text-2xl">
+              Learn why teachers love Frizzle AI
+            </h1>
+            <Arrow2 className="absolute h-[90px] rotate-[80deg] fill-primary ml-20 scale-x-[1] left-[20%] -translate-x-1/2 -bottom-4 translate-y-full" />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const UploadManagerStart = ({
+  setStep,
+  isDragging,
+  setIsDragging,
+}: {
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+  isDragging: boolean;
+  setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  //toast initiation
+  const {toast} = useToast();
+
+  // state for drag and drop
+
+  return (
     <div
-      onDrop={onDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
       className={` h-fit flex gap-4 items-centers justify-center flex-col w-fit 
-            ${isDragging ? " border-primary  " : ""}
+          
             
             `}
     >
-      <FileUploadStart
-        setStep={setStep}
-        inputFiles={inputFiles}
-        setInputFiles={setInputFiles}
-      />
+      <FileUploadStart setStep={setStep} isDragging={isDragging} />
     </div>
   );
 };
 
 const FileUploadStart = ({
   setStep,
-  inputFiles,
-  setInputFiles,
+  isDragging,
 }: {
   setStep: React.Dispatch<React.SetStateAction<number>>;
-  inputFiles: FileList | null;
-  setInputFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
+  isDragging: boolean;
 }) => {
+  const {inputFiles, setInputFiles} = usePresentationCreate()!;
+
   const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const target = event.target as HTMLInputElement;
     const fileList = target.files;
@@ -193,7 +166,13 @@ const FileUploadStart = ({
 
   return (
     <div
-      className={`overflow-hidden h-fit  border  rounded-md  p-8 bg-background/70 blurBack shadow-xl`}
+      className={`overflow-hidden h-fit border rounded-md p-8 bg-background/70 blurBack shadow-xl
+          ${
+            isDragging
+              ? " border-primary border-dashed  "
+              : " border-border border-solid"
+          }
+        `}
     >
       <div
         className={` h-fit  w-full    items-center flex flex-col gap-2 mb-2 group
@@ -213,19 +192,24 @@ const FileUploadStart = ({
 
         <button
           onClick={() => {
-            // document.getElementById("file-input")?.click();
-            setStep(1);
+            document.getElementById("file-input")?.click();
+            // setStep(1);
           }}
           className="w-full  items-center flex flex-col gap-2 group"
         >
           <Icons.files className="w-[150px] text-primary" />
           {/* <div className="h-[80px]"></div> */}
-          <span className="text-xl font-bold">Drag & drop files to upload</span>
+          <span className="text-2xl font-bold">
+            Drag & drop files to upload
+          </span>
           <p className="text-muted-foreground">
-            Supported format: .pdf .docs .mp4 .mp3 .png .jpg
+            Supported formats: .pdf .docs .mp4 .mp3 .png .jpg
           </p>
-          <div className="w-full p-2 px-4 rounded-sm border bg-primary text-white  hover:bg-primary/90  ">
-            Select files
+          <div className="grid grid-cols-2 gap-4 items-center mt-2">
+            <div className="w-full p-2 px-4 h-fit rounded-[12px] border bg-primary text-white text-[12px] poppins-regular hover:bg-primary/90  ">
+              Select files
+            </div>
+            <GoogleDriveImport />
           </div>
         </button>
       </div>
@@ -234,8 +218,85 @@ const FileUploadStart = ({
         <span className="px-4 text-gray-600 font-bold">or</span>
         <div className="flex-1 border-t border-gray-300"></div>
       </div>
-      <GoogleDriveImport />
+      <YoutubeInput setStep={setStep} />
     </div>
+  );
+};
+
+const YoutubeInput = ({
+  setStep,
+}: {
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [url, setUrl] = useState<string | undefined>(undefined);
+
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const {setFiles, filesRef, files, addNewUploadsText} =
+    usePresentationCreate()!;
+
+  const handleSubmit = async () => {
+    if (!url) return;
+    setIsLoading(true);
+
+    const res = await fetch("/api/scrape-youtube", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        url,
+      }),
+    });
+
+    const data = await res.json();
+
+    const newFile = {
+      id: Math.random().toString(),
+      uploadProgress: 100,
+      path: url,
+      title: data.title as string,
+      type: "youtube" as "youtube",
+    };
+    setFiles([...(files || []), newFile]);
+    filesRef.current = [...(files || []), newFile];
+    setStep(1);
+    addNewUploadsText(data.text);
+    setIsLoading(false);
+  };
+
+  return (
+    <>
+      {error && (
+        <div className=" text-theme-red poppins-regular text-sm mb-2">
+          Invalid link must be a youtube link
+        </div>
+      )}
+      <div className="w-full border rounded-md flex relative gap-1 p-2 items-center px-4 mb-4">
+        <Icons.Youtube className="w-8 h-8 text-primary " />
+        <input
+          onChange={(e) => setUrl(e.target.value)}
+          value={url}
+          type="text"
+          placeholder="enter youtube link here..."
+          className="w-full px-4 rounded-md border-none bg-transparent noFocus"
+        />
+        {url && (
+          <button
+            onClick={handleSubmit}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary rounded-full flex items-center justify-center p-1"
+          >
+            {isLoading ? (
+              <Icons.spinner className="text-white h-4 w-4 animate-spin" />
+            ) : (
+              <Icons.chevronRight className="text-white h-4 w-4" />
+            )}
+          </button>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -285,3 +346,46 @@ const Arrow2 = ({...props}: LucideProps) => {
     </svg>
   );
 };
+
+// const dummyFiles = [
+//   {
+//     file: new File([""], "test.pdf", {type: "application/pdf"}),
+//     uploadProgress: 100,
+//     path: "asdfa",
+//     title: "1test.pdf",
+//     type: "pdf" as FileLocal["type"],
+//     id: "1",
+//   },
+//   {
+//     file: new File([""], "test.pdf", {type: "application/pdf"}),
+//     uploadProgress: 100,
+//     path: "adfadsf",
+//     title: "2test.pdf",
+//     type: "jpg" as FileLocal["type"],
+//     id: "2",
+//   },
+//   {
+//     file: new File([""], "test.pdf", {type: "application/pdf"}),
+//     uploadProgress: 100,
+//     path: "fadasd",
+//     title: "3test.pdf",
+//     type: "mp4" as FileLocal["type"],
+//     id: "3",
+//   },
+//   {
+//     file: new File([""], "test.pdf", {type: "application/pdf"}),
+//     uploadProgress: 100,
+//     path: "hgdfgfhd",
+//     title: "4test.pdf",
+//     type: "pdf" as FileLocal["type"],
+//     id: "4",
+//   },
+//   {
+//     file: new File([""], "test.pdf", {type: "application/pdf"}),
+//     uploadProgress: 100,
+//     path: "wrwreetw",
+//     title: "5test.pdf",
+//     type: "pdf" as FileLocal["type"],
+//     id: "5",
+//   },
+// ];

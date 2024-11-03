@@ -1,6 +1,7 @@
-import React from "react";
+"use client";
+
+import React, {useState} from "react";
 import {CreatePresentationForm} from "./components/create-presentation";
-import {PresentationProvider} from "@/context/presentation-create-context";
 import CreateSteps from "./create-steps";
 import Background from "./components/background";
 import ToolBar from "../edit/[projectId]/toolbar/toolbar";
@@ -11,19 +12,27 @@ import {Demo} from "./demo";
 import {Testimonials} from "./testimonials";
 
 const CreatePage = () => {
+  const [step, setStep] = useState(1);
+  const [prevStep, setPrevStep] = useState(0);
+
   return (
     <div className="h-fit">
       <Background />
       <div className="h-screen w-screen">
-        <PresentationProvider>
-          <NavBar />
-          <CreateSteps />
-          {/* <Upload /> */}
-          {/* <CreatePresentationForm /> */}
-        </PresentationProvider>
+        <NavBar />
+        <CreateSteps
+          step={step}
+          setStep={setStep}
+          prevStep={prevStep}
+          setPrevStep={setPrevStep}
+        />
       </div>
-      <Testimonials />
-      <Demo />
+      {step < 1 && (
+        <>
+          <Testimonials />
+          <Demo />
+        </>
+      )}
       <Footer />
     </div>
   );

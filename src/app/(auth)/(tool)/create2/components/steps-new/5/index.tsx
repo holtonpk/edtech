@@ -4,6 +4,14 @@ import React, {useEffect, useState, useRef} from "react";
 import {motion, AnimatePresence} from "framer-motion";
 import StepContainer from "../step-container";
 import {Slider} from "@/components/ui/slider";
+import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
+import {Slide, TextBoxType} from "@/config/data";
+import {db} from "@/config/firebase";
+import {useRouter} from "next/navigation";
+import {Button} from "@/components/ui/button";
+import SlideSelector from "./slide-selector";
+import {PresentationProvider} from "@/context/presentation-context-basic";
+
 export const Step5 = ({
   step,
   setStep,
@@ -19,564 +27,215 @@ export const Step5 = ({
     setPrevStep(5);
   }, []);
 
+  const SlideId = "DkKdB59cscUg0RSZJOJx";
   return (
-    <motion.div
-      exit={{opacity: 0, transform: "translateX(200px)"}}
-      animate={{opacity: 1, transform: "translateX(0px)"}}
-      initial={{opacity: 0, transform: "translateX(200px)"}}
-      transition={{duration: 0.3}}
-      className=" h-[450px] absolute rounded-md overflow-hidden w-full flex items-center justify-center "
-    >
-      <div className="ai">
-        <svg
-          className="loading-animation"
-          xmlns="http://www.w3.org/2000/svg"
-          width="391"
-          height="391"
-          viewBox="0 0 391 391"
-          fill="none"
-        >
-          <g className=".loading-animation" id="ai">
-            <g
-              className=".loading-animation"
-              id="main"
-              filter="url(#filter0_i)"
-            >
-              <ellipse
-                cx="195"
-                cy="195.878"
-                rx="137"
-                ry="130"
-                className="fill-background"
-              />
-            </g>
-            <g className=".loading-animation" id="g" filter="url(#filter1_i)">
-              <path
-                d="M258.925 321.952C217.208 345.095 172.592 342.312 125.078 313.602C77.5637 284.893 55.7755 241.764 59.7134 184.217C63.6513 126.669 92.3392 89.9343 145.777 74.0127C199.215 58.0912 240.138 64.8972 288.549 94.4308C336.959 123.964 352.887 163.482 336.333 212.984C319.778 262.486 300.643 298.809 258.925 321.952Z"
-                fill="white"
-                fill-opacity="0.01"
-              />
-            </g>
-            <g className=".loading-animation" id="f" filter="url(#filter2_i)">
-              <path
-                d="M326.448 156.236C346.632 212.15 332.809 259.232 284.98 291.481C237.151 323.731 192.504 332.917 149.039 323.041C105.574 313.164 89.3852 282.81 62.4734 237.98C35.5616 193.149 44.0955 149.683 88.0752 113.583C132.055 77.4825 162.066 60.7542 216.109 63.398C270.151 66.0419 306.264 100.321 326.448 156.236Z"
-                fill="white"
-                fill-opacity="0.01"
-              />
-            </g>
-            <g className=".loading-animation" id="e" filter="url(#filter3_i)">
-              <path
-                d="M308.736 272.285C277.494 310.837 241.385 331.695 202.457 330.853C163.529 330.012 131.724 311.363 90.3165 273.652C48.909 235.941 42.6591 180.041 78.2399 130.975C113.821 81.9087 148.433 66.384 203.478 59.8779C267.756 59.878 301.626 79.7019 321.834 139.983C342.042 200.265 339.977 233.733 308.736 272.285Z"
-                fill="white"
-                fill-opacity="0.01"
-              />
-            </g>
-            <g className=".loading-animation" id="d" filter="url(#filter4_i)">
-              <path
-                d="M310.393 271.778C277.096 320.326 237.637 341.218 192.017 334.454C146.397 327.691 108.445 303.417 78.163 261.632C47.8806 219.848 47.2907 176.786 76.3933 132.447C105.496 88.1073 144.037 62.6309 192.017 56.0176C239.997 49.4042 280.045 71.5739 312.163 122.527C344.281 173.48 343.691 223.23 310.393 271.778Z"
-                fill="white"
-                fill-opacity="0.01"
-              />
-            </g>
-            <g className=".loading-animation" id="c" filter="url(#filter5_i)">
-              <path
-                d="M307.832 268.624C269.508 314.707 224.746 336.931 177.547 333.296C130.347 329.662 95.4519 306.621 72.8607 264.173C50.2695 221.725 51.3869 179.861 70.2129 130.581C89.0389 81.3006 124.741 56.7332 177.319 56.8786C229.898 57.0239 268.542 71.6641 305.253 120.799C341.964 169.934 346.157 222.542 307.832 268.624Z"
-                fill="white"
-                fill-opacity="0.01"
-              />
-            </g>
-            <g className=".loading-animation" id="b" filter="url(#filter6_i)">
-              <path
-                d="M331.624 168.687C347.668 221.613 330.95 272.44 279.471 301.168C227.991 329.896 187.577 329.032 145.905 318.035C105.707 305.685 76.9748 280.125 58.6244 235.997C45.9255 192.116 49.6617 164.211 87.3237 111.256C124.986 58.3013 191.752 38.1339 243.897 64.3134C296.041 90.4928 315.581 115.761 331.624 168.687Z"
-                fill="white"
-                fill-opacity="0.01"
-              />
-            </g>
-            <g className=".loading-animation" id="a" filter="url(#filter7_i)">
-              <path
-                d="M326.506 247.112C315.692 300.334 286.086 320.463 219.776 328.226C162.35 330.151 125.891 317.84 89.3915 279.281C52.8915 240.723 45.0065 196.243 65.7364 145.84C86.4663 95.437 130.158 67.4141 184.915 60.2048C239.672 52.9955 281.677 69.9023 310.931 110.925C340.185 151.948 337.32 193.89 326.506 247.112Z"
-                fill="white"
-                fill-opacity="0.01"
-              />
-            </g>
-          </g>
-          <defs>
-            <filter
-              id="filter0_i"
-              x="58"
-              y="65.8779"
-              width="274"
-              height="260"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feMorphology
-                radius="21"
-                operator="erode"
-                in="SourceAlpha"
-                result="effect1_innerShadow"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="11" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-            <filter
-              id="filter1_i"
-              x="2.5"
-              y="2.87793"
-              width="386.053"
-              height="385.637"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="10" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0.418229 0 0 0 0 0.448185 0 0 0 0 0.9125 0 0 0 0.77 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-            <filter
-              id="filter2_i"
-              x="2"
-              y="1.93799"
-              width="385.898"
-              height="386.199"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="10" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0.418229 0 0 0 0 0.448185 0 0 0 0 0.9125 0 0 0 0.77 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-            <filter
-              id="filter3_i"
-              x="55"
-              y="59.8779"
-              width="280"
-              height="271"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="10" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0.418229 0 0 0 0 0.448185 0 0 0 0 0.9125 0 0 0 0.77 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-            <filter
-              id="filter4_i"
-              x="55"
-              y="54.8779"
-              width="280.817"
-              height="280.817"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="10" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0.418229 0 0 0 0 0.448185 0 0 0 0 0.9125 0 0 0 0.77 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-            <filter
-              id="filter5_i"
-              x="56"
-              y="56.8779"
-              width="278.738"
-              height="276.802"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="10" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0.418229 0 0 0 0 0.448185 0 0 0 0 0.9125 0 0 0 0.77 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-            <filter
-              id="filter6_i"
-              x="0"
-              y="0"
-              width="390.838"
-              height="390.84"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="10" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0.418229 0 0 0 0 0.448185 0 0 0 0 0.9125 0 0 0 0.77 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-            <filter
-              id="filter7_i"
-              x="35"
-              y="39.8555"
-              width="320.27"
-              height="311.235"
-              filterUnits="userSpaceOnUse"
-              color-interpolation-filters="sRGB"
-            >
-              <feFlood flood-opacity="0" result="BackgroundImageFix" />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="BackgroundImageFix"
-                result="shape"
-              />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset />
-              <feGaussianBlur stdDeviation="10" />
-              <feComposite
-                in2="hardAlpha"
-                operator="arithmetic"
-                k2="-1"
-                k3="1"
-              />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0.418229 0 0 0 0 0.448185 0 0 0 0 0.9125 0 0 0 0.77 0"
-              />
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
+    <motion.div className=" h-full flex flex-col items-center p-4 rounded-md  w-full gap-4  ">
+      <PresentationProvider projectId={SlideId}>
+        {/* <div className="gap-4 grid grid-cols-2 h-fit   w-[600px]">
+          <Button
+            variant={"outline"}
+            className="bg-primary text-white w-full hover:bg-primary/90 hover:text-white"
+          >
+            <Icons.play className="h-3 w-3 mr-3" />
+            Present
+          </Button>
+          <Button variant={"outline"} className="w-full">
+            <Icons.upload className="w-4 h-4 mr-3" />
+            Share
+          </Button>
+        </div> */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant={"outline"}
+            className="rounded-full aspect-square h-fit w-fit p-2"
+          >
+            <Icons.chevronLeft className="w-6 h-6" />
+          </Button>
+          <PresentationCard presId={SlideId} />
+          <Button
+            variant={"outline"}
+            className="rounded-full aspect-square h-fit w-fit p-2"
+          >
+            <Icons.chevronRight className="w-6 h-6" />
+          </Button>
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-4 flex-col p-2 h-fit bg-background/50 blurBack rounded-md shadow-lg border w-[600px] ">
+            {/* <div className="grid gap-1">
+          <h1 className=" poppins-bold text-xl ">Open in </h1>
+              <p>Open your presentation in your favorite app to edit</p>
+            </div> */}
+            <div className="grid grid-cols-3 gap-4">
+              <button className="w-full flex p-2 border rounded-md py-2 h-fit text-sm whitespace-nowrap poppins-bold gap-2 items-center bg-background hover:border-primary/20 group">
+                <Icons.GoogleSlides className="w-6 h-6" />
+                Google Slides
+                <Icons.chevronRight className="w-4 h-4   group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
+              <button className="w-full flex p-2 border rounded-md py-2 h-fit text-sm whitespace-nowrap poppins-bold gap-2 items-center bg-background hover:border-primary/20 group">
+                <Icons.Canva className="w-6 h-6 " />
+                Canva
+                <Icons.chevronRight className="w-4 h-4   group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
+              <button className="w-full flex p-2 border rounded-md py-2 h-fit text-sm whitespace-nowrap poppins-bold gap-2 items-center bg-background hover:border-primary/20 group">
+                <Icons.PowerPoint className="w-6 h-6 " />
+                Power Point
+                <Icons.chevronRight className="w-4 h-4   group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
+            </div>
+          </div>
+
+          <div
+            className="flex gap-4 flex-col p-[2px] h-fit bg-background rounded-md shadow-lg border w-[300px] items-center justify-center fixed bottom-4 right-4
+          bg-gradient-to-tr from-theme-purple to-theme-green via-theme-blue
+          "
+          >
+            <div className="h-fit w-full bg-background/90 blurBack p-4 rounded-sm flex flex-col gap-2 items-center justify-center">
+              <h1 className="text-lg poppins-bold text-center">
+                Want to create interactive presentations?
+              </h1>
+              <Button className="w-full">Join the waitlist</Button>
+            </div>
+          </div>
+        </div>
+      </PresentationProvider>
     </motion.div>
   );
 };
 
-const SlideFormat = () => {
-  type Format = "less-words" | "more-words" | "bullet-points";
+const PresentationCard = ({presId}: {presId: string}) => {
+  const [title, setTitle] = useState<string | undefined>(undefined);
 
-  const [selectedFormat, setSelectedFormat] =
-    React.useState<Format>("less-words");
+  const [slide, setSlide] = useState<Slide | undefined>(undefined);
+
+  const dataIsFetched = useRef(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const docRef = doc(db, "presentations", presId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setSlide(docSnap.data().slideData.slides[0]);
+        setTitle(docSnap.data().title);
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    };
+
+    if (!dataIsFetched.current) {
+      fetchData();
+      dataIsFetched.current = true;
+    }
+  }, [presId]);
+
+  const selectorContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const [thumbScale, setThumbScale] = useState<number | undefined>(undefined);
+
+  const setScale = () => {
+    const selectorContainer = selectorContainerRef.current;
+    if (!selectorContainer) return;
+    const calculateScale = selectorContainer.clientWidth / 1000;
+    setThumbScale(calculateScale);
+  };
+  React.useEffect(() => {
+    window.addEventListener("resize", setScale);
+    return () => {
+      window.removeEventListener("resize", setScale);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    setScale();
+  }, [slide]);
+
+  const router = useRouter();
 
   return (
-    <div className="grid gap-3">
-      <div className="grid gap-0">
-        <h1 className="poppins-bold text-xl">Select a layout</h1>
-        <p className="poppins-regular">This is how the slide will appear </p>
+    <div className="w-[800px] h-fit gap-4  ">
+      <div className="flex flex-col  gap-2 max-w-[800px] w-full h-fit">
+        {slide && (
+          <div
+            ref={selectorContainerRef}
+            style={{
+              background: slide.background,
+            }}
+            onClick={() => {
+              router.push(`/edit/${presId}`);
+            }}
+            className={`rounded-lg w-full relative aspect-[16/9] overflow-hidden p-6 flex items-center justify-center bg-white text-black   duration-300  border`}
+          >
+            {thumbScale ? (
+              <div
+                className="w-[1000px]   aspect-[16/9] absolute overflow-hidden"
+                style={{transform: `scale(${thumbScale})`}}
+              >
+                {slide &&
+                slide.backgroundImage &&
+                slide.backgroundImage.path !== "undefined" ? (
+                  <div
+                    className="absolute w-full h-full bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${slide.backgroundImage.path})`,
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="absolute w-full h-full bg-cover bg-center"
+                    style={{
+                      backgroundColor: slide ? slide.background : "#ffffff",
+                      opacity: slide?.backgroundOpacity
+                        ? slide?.backgroundOpacity
+                        : 1,
+                    }}
+                  />
+                )}
+                {slide.textBoxes &&
+                  slide.textBoxes.map((textbox: TextBoxType, index: number) => (
+                    <div
+                      key={index}
+                      className=" p-2 absolute pointer-events-none"
+                      style={{
+                        top: textbox.position.y,
+                        left: textbox.position.x,
+                        height: "fit-content",
+                        width: textbox.size.width,
+                        transform: `rotate(${textbox.rotation}deg)`,
+                        fontSize: `${textbox.fontSize}px`,
+                      }}
+                      dangerouslySetInnerHTML={{__html: textbox.text}}
+                    />
+                  ))}
+                {slide.images &&
+                  slide.images.map((image, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        top: image.position.y,
+                        left: image.position.x,
+                        width: image.size.width,
+                        transform: `rotate(${image.rotation}deg)`,
+                      }}
+                      className="p-2 h-fit w-fit absolute origin-center pointer-events-none"
+                    >
+                      <img
+                        src={image.image.path}
+                        alt={image.image.title}
+                        className="origin-center p-2 pointer-events-none h-full w-full"
+                      />
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <>no scale</>
+            )}
+          </div>
+        )}
       </div>
-      <div className="grid grid-cols-4 gap-4 w-[100%] mx-auto">
-        <button
-          onClick={() => setSelectedFormat("less-words")}
-          className={`p-2 border flex flex-col rounded-md group cursor-pointer items-center hover:border-primary transition-colors bg-background shadow-lg
-    ${selectedFormat === "less-words" ? "border-primary " : ""}
-            
-            `}
-        >
-          <div className="border rounded-md w-full h-fit">
-            <div className="bg-background w-full flex flex-col gap-1  aspect-[16/9] p-2 rounded-md shadow-lg">
-              <div className="w-1/2 h-5 bg-primary/30 rounded-full"></div>
-              <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              <div className="w-[75%] h-4 bg-primary/30 rounded-full"></div>
-            </div>
-          </div>
-          <h1 className="font-bold text-center mt-2"> Less Words</h1>
-          <p className="text-center text-muted-foreground text-sm mb-3">
-            Slide will have less words and more images, this is great for visual
-            learners
-          </p>
-          <div
-            className={`h-5 w-5 mx-auto mt-auto rounded-full border-2  group-hover:border-primary group-hover:bg-primary  flex items-center justify-center
-              ${
-                selectedFormat === "less-words"
-                  ? "border-primary bg-primary"
-                  : "border-muted-foreground"
-              }
-              `}
-          >
-            <div
-              className={`group-hover:block h-2 w-2 bg-background rounded-full
-     ${selectedFormat === "less-words" ? "block" : "hidden"}
-                `}
-            />
-          </div>
-        </button>
-        <button
-          onClick={() => setSelectedFormat("more-words")}
-          className={`p-2 border flex flex-col rounded-md group cursor-pointer items-center hover:border-primary transition-colors bg-background shadow-lg
-    ${selectedFormat === "more-words" ? "border-primary" : ""}
-            
-            `}
-        >
-          <div className="border rounded-md w-full h-fit">
-            <div className="bg-background w-full flex flex-col gap-1  aspect-[16/9] p-2 rounded-md shadow-lg">
-              <div className="w-1/2 h-5 bg-primary/30 rounded-full"></div>
-              <div className="w- h-4 bg-primary/30 rounded-full"></div>
-              <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-            </div>
-          </div>
-          <h1 className="font-bold text-center mt-2"> More Words</h1>
-          <p className="text-center text-muted-foreground text-sm mb-3">
-            Slide will have more words and less images, this is great for
-            auditory learners
-          </p>
-          <div
-            className={`h-5 w-5 mx-auto mt-auto rounded-full border-2  group-hover:border-primary group-hover:bg-primary  flex items-center justify-center
-              ${
-                selectedFormat === "more-words"
-                  ? "border-primary bg-primary"
-                  : "border-muted-foreground"
-              }
-              `}
-          >
-            <div
-              className={`group-hover:block h-2 w-2 bg-background rounded-full 
-     ${selectedFormat === "more-words" ? "block" : "hidden"}
-                `}
-            />
-          </div>
-        </button>
-        <button
-          onClick={() => setSelectedFormat("bullet-points")}
-          className={`p-2 border flex flex-col  rounded-md group cursor-pointer items-center hover:border-primary transition-colors bg-background shadow-lg
-    ${selectedFormat === "bullet-points" ? "border-primary" : ""}
-            
-            `}
-        >
-          <div className="border rounded-md w-full h-fit">
-            <div className="bg-background w-full flex flex-col gap-1  aspect-[16/9] p-2 rounded-md shadow-lg">
-              <div className="w-1/2 h-5 bg-primary/30 rounded-full"></div>
-              <div className="grid grid-cols-[10px_1fr] items-center gap-1">
-                <div className="h-[10px] w-[10px] bg-primary/30 rounded-full"></div>
-                <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              </div>
-              <div className="grid grid-cols-[10px_1fr] items-center gap-1">
-                <div className="h-[10px] w-[10px] bg-primary/30 rounded-full"></div>
-                <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              </div>
-              <div className="grid grid-cols-[10px_1fr] items-center gap-1">
-                <div className="h-[10px] w-[10px] bg-primary/30 rounded-full"></div>
-                <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              </div>
-            </div>
-          </div>
 
-          <h1 className="font-bold text-center mt-2"> Bullet points</h1>
-          <p className="text-center text-muted-foreground text-sm mb-3">
-            Slide will have bullet points, this is great for summarizing
-          </p>
-          <div
-            className={`h-5 w-5 mt-auto mx-auto  rounded-full border-2  group-hover:border-primary group-hover:bg-primary  flex items-center justify-center
-              ${
-                selectedFormat === "bullet-points"
-                  ? "border-primary bg-primary"
-                  : "border-muted-foreground"
-              }
-              `}
-          >
-            <div
-              className={`group-hover:block h-2 w-2 bg-background rounded-full
-     ${selectedFormat === "bullet-points" ? "block" : "hidden"}
-                `}
-            />
-          </div>
-        </button>
-        <button
-          onClick={() => setSelectedFormat("bullet-points")}
-          className={`p-2 border flex flex-col  rounded-md group cursor-pointer items-center hover:border-primary transition-colors bg-background shadow-lg
-    ${selectedFormat === "bullet-points" ? "border-primary" : ""}
-            
-            `}
-        >
-          <div className="border rounded-md w-full h-fit">
-            <div className="bg-background w-full flex flex-col gap-1  aspect-[16/9] p-2 rounded-md shadow-lg">
-              <div className="w-1/2 h-5 bg-primary/30 rounded-full"></div>
-              <div className="grid grid-cols-[10px_1fr] items-center gap-1">
-                <div className="h-[10px] w-[10px] bg-primary/30 rounded-full"></div>
-                <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              </div>
-              <div className="grid grid-cols-[10px_1fr] items-center gap-1">
-                <div className="h-[10px] w-[10px] bg-primary/30 rounded-full"></div>
-                <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              </div>
-              <div className="grid grid-cols-[10px_1fr] items-center gap-1">
-                <div className="h-[10px] w-[10px] bg-primary/30 rounded-full"></div>
-                <div className="w-full h-4 bg-primary/30 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-
-          <h1 className="font-bold text-center mt-2"> Bullet points</h1>
-          <p className="text-center text-muted-foreground text-sm mb-3">
-            Slide will have bullet points, this is great for summarizing
-          </p>
-          <div
-            className={`h-5 w-5 mt-auto mx-auto  rounded-full border-2  group-hover:border-primary group-hover:bg-primary  flex items-center justify-center
-              ${
-                selectedFormat === "bullet-points"
-                  ? "border-primary bg-primary"
-                  : "border-muted-foreground"
-              }
-              `}
-          >
-            <div
-              className={`group-hover:block h-2 w-2 bg-background rounded-full
-     ${selectedFormat === "bullet-points" ? "block" : "hidden"}
-                `}
-            />
-          </div>
-        </button>
-      </div>
+      {/* <div className="flex-grow h-[100px] w-[1000px] ">
+        <SlideSelector shouldHideToolbar={false} />
+      </div> */}
     </div>
   );
 };

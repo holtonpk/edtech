@@ -27,12 +27,12 @@ export default function GoogleDriveImport() {
   return (
     <button
       onClick={handleOpenPicker}
-      className="w-full p-4 rounded-[1rem] border-2 hover:border-primary items-center flex flex-col gap-2 mb-2"
+      className="w-full p-2 px-4 rounded-[12px] border-2 hover:border-primary items-center flex flex-col gap-2 "
     >
       <div className="flex  items-center gap-2">
-        <Icons.googleDrive className="w-6 h-6" />
-        <p className="text-muted-foreground text-sm poppins-regular">
-          Import your files from{" "}
+        <Icons.googleDrive className="w-4 h-4" />
+        <p className="text-muted-foreground text-[12px] poppins-regular">
+          Import from{" "}
           <span className="poppins-bold font-bold">Google Drive</span>
         </p>
       </div>

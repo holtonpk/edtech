@@ -1,12 +1,19 @@
 "use client";
 
-import React, {useContext, createContext, useEffect, useState} from "react";
+import React, {
+  useContext,
+  useRef,
+  createContext,
+  useEffect,
+  useState,
+} from "react";
 import {presentationResponse} from "@/types";
 import {
   FileLocal,
   SlideData,
   UploadType,
   UnformattedResponse,
+  MAX_FILE_SIZE_MB,
 } from "@/config/data";
 import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
 import {db, app} from "@/config/firebase";
@@ -19,6 +26,12 @@ import {
   deleteObject,
   listAll,
 } from "firebase/storage";
+import {Document, pdfjs} from "react-pdf";
+import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
+import {set} from "zod";
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 interface PresentationContextType {
   // states -----------------------------
   studyMaterial: string;
@@ -35,18 +48,23 @@ interface PresentationContextType {
   setUploadText: React.Dispatch<React.SetStateAction<string[] | undefined>>;
   uploads: File[] | UploadType[] | undefined;
   setUploads: React.Dispatch<React.SetStateAction<UploadType[] | undefined>>;
+  inputFiles: FileList | null;
+  setInputFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
+  files: FileLocal[] | undefined;
+  setFiles: React.Dispatch<React.SetStateAction<FileLocal[] | undefined>>;
+  filesRef: React.MutableRefObject<FileLocal[] | undefined>;
   // functions -----------------------------
-  saveFileToFirebase: (
-    file: File,
-    onProgress: (progress: number) => void
-  ) => Promise<FileLocal | undefined>;
+
   GenerateAiPresentation: () => Promise<UnformattedResponse>;
   deleteFile: (file: string) => Promise<void>;
+  handleCancel: (file: FileLocal) => Promise<void>;
+  processFiles: (fileList: FileList | File[]) => Promise<void>;
+  addNewUploadsText: (text: string) => Promise<void>;
 }
 
 const PresentationContext = createContext<PresentationContextType | null>(null);
 
-export function usePresentation() {
+export function usePresentationCreate() {
   return useContext(PresentationContext);
 }
 
@@ -54,7 +72,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const PresentationProvider = ({children}: Props) => {
+export const PresentationCreateProvider = ({children}: Props) => {
   // states -----------------------------
   const [title, setTitle] = useState<string>("");
   const [studyMaterial, setStudyMaterial] = useState<string>("");
@@ -90,12 +108,18 @@ export const PresentationProvider = ({children}: Props) => {
     return data.response;
   }
 
+  const [inputFiles, setInputFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<FileLocal[] | undefined>(undefined);
+  const filesRef = useRef<FileLocal[] | undefined>(undefined);
+
+  const cancelUpload = useRef<boolean>(false);
+
   const saveFileToFirebase = async (
+    fileID: string,
     file: File,
     onProgress: (progress: number) => void
   ): Promise<FileLocal> => {
     try {
-      const fileID = Math.random().toString(36).substring(7);
       const storage = getStorage(app);
       const fileRef = ref(storage, fileID);
       const uploadTask = uploadBytesResumable(fileRef, file);
@@ -106,7 +130,7 @@ export const PresentationProvider = ({children}: Props) => {
           "state_changed",
           (snapshot) => {
             const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 70;
 
             onProgress(progress);
 
@@ -159,6 +183,419 @@ export const PresentationProvider = ({children}: Props) => {
     }
   };
 
+  //helper function to get file type
+  const getFileType = (
+    file: File
+  ):
+    | "pdf"
+    | "jpg"
+    | "jpeg"
+    | "png"
+    | "mp4"
+    | "mp3"
+    | "doc"
+    | "docx"
+    | undefined => {
+    if (file.type === "application/pdf") return "pdf";
+    if (file.type === "image/jpeg") return "jpg";
+    if (file.type === "image/png") return "png";
+    if (file.type === "video/mp4") return "mp4";
+    if (file.type === "audio/mpeg") return "mp3";
+    if (file.type === "application/msword") return "doc";
+    if (
+      file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+      return "docx";
+    return undefined; // Default type if not matched
+  };
+
+  const handleProgressUpdate = (fileId: string, progress: number) => {
+    console.log(`setting progress to: ${progress}`);
+
+    const filesWithUpdatedProgress = filesRef.current?.map((f) =>
+      f.id === fileId
+        ? {...f, uploadProgress: Math.min(progress, 100)} // Ensure progress is capped at 100%
+        : f
+    );
+
+    setFiles(filesWithUpdatedProgress);
+    filesRef.current = filesWithUpdatedProgress;
+  };
+
+  const processFiles = async (fileList: FileList | File[]) => {
+    try {
+      const filesArray = Array.from(fileList);
+      const vaildFiles = filesArray.filter((file) => {
+        const fileType = getFileType(file);
+
+        if (!fileType) {
+          console.log("Unsupported File Type");
+          //  display error here
+          return false;
+        }
+
+        if (file.size > MAX_FILE_SIZE_MB) {
+          console.log("File Too Large");
+          //  display error here
+          return false;
+        }
+        return true;
+      });
+
+      const newFiles = vaildFiles.map((file) => ({
+        file,
+        uploadProgress: 0,
+        path: URL.createObjectURL(file),
+        title: file.name,
+        type: getFileType(file),
+        id: Math.random().toString(36).substr(2, 9),
+      }));
+
+      const updatedFiles = [...(filesRef.current || []), ...newFiles];
+      setFiles(updatedFiles);
+      filesRef.current = updatedFiles;
+
+      // setFiles((prevFiles) => {
+      //   const updatedFiles = [...(prevFiles || []), ...newFiles];
+      //   return updatedFiles;
+      // });
+
+      for (const fileLocal of newFiles) {
+        await uploadFile(fileLocal);
+      }
+    } catch (error) {
+      console.error("Error processing the files ", error);
+      //  display error here
+    }
+  };
+
+  // async function addNewUploads(file: FileLocal) {
+  //   // this function will be where you save the states for the file - Saving Uploads
+  //   if (file) {
+  //     setUploads((prev) => [
+  //       ...(prev || []),
+  //       {
+  //         title: file.title,
+  //         id: file.title,
+  //         path: file.path,
+  //         type: file.type as UploadType["type"],
+  //         file: file.file,
+  //       },
+  //     ]);
+  //   }
+  // }
+
+  const addNewUploadsText = async (text: string) => {
+    setUploadText([...(uploadText || []), text]);
+  };
+
+  async function uploadFile(fileLocal: FileLocal) {
+    try {
+      const fileID = Math.random().toString(36).substring(7);
+      if (!fileLocal.file) return;
+      const upload = await saveFileToFirebase(
+        fileID,
+        fileLocal.file,
+        (progress: number) => {
+          handleProgressUpdate(fileLocal.id, progress);
+        }
+      );
+
+      if (!upload || !upload.path) {
+        console.error("Upload failed or no URL returnd");
+        //  display error here
+      }
+
+      const updatedFileLocal = {
+        ...fileLocal,
+        uploadProgress: 70,
+        path: upload?.path || fileLocal.path,
+      };
+
+      const updatedFiles = filesRef.current?.map((f) =>
+        f.file === fileLocal.file ? updatedFileLocal : f
+      );
+      setFiles(updatedFiles);
+      filesRef.current = updatedFiles;
+
+      // setFiles((prevFiles) =>
+      //   prevFiles?.map((f) =>
+      //     f.file === fileLocal.file ? updatedFileLocal : f
+      //   )
+      // );
+
+      // TEXT CONVERSION IS HAPPENING HERE _______________________
+      if (fileLocal.type === "pdf") {
+        const extractedText = await extractTextFromPDF(
+          fileID,
+          fileLocal.file,
+          (progress: number) => {
+            handleProgressUpdate(fileLocal.id, progress);
+          }
+        );
+
+        // Saving text to uploads text
+
+        if (extractedText.length > 0) {
+          await addNewUploadsText(extractedText);
+        }
+      } else if (
+        fileLocal.type === "png" ||
+        fileLocal.type === "jpg" ||
+        fileLocal.type === "jpeg"
+      ) {
+        const imageText = await scanImageForText(fileID);
+        await addNewUploadsText(imageText);
+        handleProgressUpdate(fileLocal.id, 100);
+      } else if (fileLocal.type === "mp3") {
+        console.log("audio file");
+        const audioText = await scanAudioForText(fileID);
+        await addNewUploadsText(audioText);
+        handleProgressUpdate(fileLocal.id, 100);
+      } else if (fileLocal.type === "mp4") {
+        console.log("video file");
+        const videoText = await scanVideoForText(fileID);
+        await addNewUploadsText(videoText);
+        handleProgressUpdate(fileLocal.id, 100);
+      }
+
+      // if (upload) {
+      //   // Saving uploads
+      //   await addNewUploads(updatedFileLocal);
+      // }
+
+      return updatedFileLocal;
+      // More stuff here maybe
+    } catch (error) {
+      console.error("File Upload Failed: ", error);
+      //  display error here
+      return null;
+    }
+  }
+
+  const extractTextFromPDF = async (
+    fileID: string,
+    file: File,
+    onProgress: (progress: number) => void
+  ): Promise<string> => {
+    // Function to check if the operation should proceed
+    const checkCancellation = () => {
+      if (cancelUpload.current) {
+        throw new Error("Operation cancelled");
+      }
+    };
+
+    try {
+      const pdf = await pdfjs.getDocument({url: URL.createObjectURL(file)})
+        .promise;
+
+      let progress = 70;
+
+      const textPages: string[] = [];
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        checkCancellation(); // Check if we should continue before starting the next operation
+
+        const page = await pdf.getPage(pageNumber);
+        checkCancellation(); // Check before getting the text content
+
+        const textContent = await page.getTextContent();
+        checkCancellation(); // Check after getting the text content
+
+        const hasTextLayer = textContent.items.length > 0;
+        console.log("hasTextLayer", hasTextLayer);
+        progress += 30 / pdf.numPages;
+        onProgress(progress);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        if (!hasTextLayer) {
+          console.log("------------------ OCR -----------------");
+          const ocrResult = await scanPdfForText(fileID);
+          onProgress(100);
+
+          return ocrResult;
+        }
+
+        textPages.push(
+          textContent.items.map((item: any) => item.str).join(" ")
+        );
+      }
+
+      return textPages.join(" ");
+    } catch (error: any) {
+      if (error.message !== "Operation cancelled") {
+        console.error("Failed to extract PDF text:", error);
+      }
+      return "";
+    }
+  };
+
+  const scanPdfForText = async (fileName: string): Promise<string> => {
+    try {
+      // Send a POST request to initiate PDF-to-text conversion
+      const response = await fetch("/api/convert-pdf-to-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({fileName}),
+      });
+
+      if (!response.ok) {
+        console.error("Conversion API response error:", response.statusText);
+        return "Failed to extract text due to API error.";
+      }
+
+      const data = await response.json();
+
+      // Assuming getTextFromJSON returns a promise that resolves with the extracted text
+      const text = await getTextFromJSON(fileName);
+
+      return text;
+    } catch (error) {
+      console.error("Failed to extract PDF text:", error);
+      return "Failed to extract text due to an unexpected error.";
+    }
+  };
+
+  const scanImageForText = async (fileName: string): Promise<string> => {
+    try {
+      // Send a POST request to initiate PDF-to-text conversion
+      const response = await fetch("/api/convert-image-to-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({fileName}),
+      });
+
+      if (!response.ok) {
+        console.error("Conversion API response error:", response.statusText);
+        return "Failed to extract text due to API error.";
+      }
+
+      const data = await response.json();
+
+      // Assuming getTextFromJSON returns a promise that resolves with the extracted text
+      const text = data.text;
+
+      return text;
+    } catch (error) {
+      console.error("Failed to extract PDF text:", error);
+      return "Failed to extract text due to an unexpected error.";
+    }
+  };
+
+  const scanAudioForText = async (fileName: string): Promise<string> => {
+    try {
+      // Send a POST request to initiate PDF-to-text conversion
+      const response = await fetch("/api/convert-audio-to-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({fileName}),
+      });
+
+      if (!response.ok) {
+        console.error("Conversion API response error:", response.statusText);
+        return "Failed to extract text due to API error.";
+      }
+
+      const data = await response.json();
+
+      // Assuming getTextFromJSON returns a promise that resolves with the extracted text
+      const text = data.text;
+
+      return text;
+    } catch (error) {
+      console.error("Failed to extract PDF text:", error);
+      return "Failed to extract text due to an unexpected error.";
+    }
+  };
+
+  const scanVideoForText = async (fileName: string): Promise<string> => {
+    try {
+      // Send a POST request to initiate PDF-to-text conversion
+      const response = await fetch("/api/convert-video-to-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({fileName}),
+      });
+
+      if (!response.ok) {
+        console.error("Conversion API response error:", response.statusText);
+        return "Failed to extract text due to API error.";
+      }
+
+      const data = await response.json();
+
+      // Assuming getTextFromJSON returns a promise that resolves with the extracted text
+      const text = data.text;
+
+      return text;
+    } catch (error) {
+      console.error("Failed to extract PDF text:", error);
+      return "Failed to extract text due to an unexpected error.";
+    }
+  };
+
+  const getTextFromJSON = async (fileID: string): Promise<string> => {
+    try {
+      const storage = getStorage(app);
+      const folderRef = ref(storage, fileID);
+      const files = await listAll(folderRef);
+      const fileData = files.items[0];
+      const url = await getDownloadURL(fileData);
+      const response = await fetch(url);
+      const data = await response.json();
+      let text = "";
+      data.responses.forEach((response: any) => {
+        text += response.fullTextAnnotation.text;
+      });
+      return text;
+    } catch (e) {
+      console.log("error", e);
+      return "error";
+    }
+  };
+
+  const handleCancel = async (file: FileLocal) => {
+    try {
+      console.log(`Clicked cancel button -> ${JSON.stringify(file)}`);
+      if (file.path) {
+        // Delete from DB
+        await deleteFile(file.path);
+        //  display error here
+
+        // Delete from local state
+        const updatedFiles = filesRef.current?.filter(
+          (f) => f.path !== file.path
+        );
+        setFiles(updatedFiles);
+        filesRef.current = updatedFiles;
+
+        // setFiles(
+        //   (prevFiles) =>
+        //     prevFiles?.filter((f) => f.path !== file.path) || undefined
+        // );
+
+        // Also update the uploads state in the context
+        setUploads(
+          (prevUploads) =>
+            prevUploads?.filter((u) => u.path !== file.path) || undefined
+        );
+      } else {
+        console.error("No File Path provided for deletion");
+      }
+    } catch (error) {
+      console.error("Error deleting file: ", error);
+      //  display error here
+    }
+  };
+
   const values = {
     // states -----------------------------
     title,
@@ -177,10 +614,17 @@ export const PresentationProvider = ({children}: Props) => {
     setUploads,
     slideData,
     setSlideData,
+    inputFiles,
+    setInputFiles,
+    files,
+    setFiles,
+    filesRef,
     // functions -----------------------------
-    saveFileToFirebase,
     GenerateAiPresentation,
     deleteFile,
+    handleCancel,
+    processFiles,
+    addNewUploadsText,
   };
 
   return (

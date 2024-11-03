@@ -6,12 +6,12 @@ import StepContainer from "../step-container";
 import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
 import {useToast} from "@/components/ui/use-toast";
-import {usePresentation} from "@/context/presentation-create-context";
+import {usePresentationCreate} from "@/context/presentation-create-context";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 import {Document, pdfjs} from "react-pdf";
-import GoogleDriveImport from "@/src/app/(auth)/(tool)/create2/components/steps/upload/google-drive-import";
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-import {LucideProps} from "lucide-react";
+import GoogleDriveImport from "@/src/app/(auth)/(tool)/create2/components/steps/upload/google-drive-import";
+import {useRouter} from "next/router";
 import {
   FILE_SIZE,
   FileLocal,
@@ -26,19 +26,11 @@ export const Step1 = ({
   setStep,
   prevStep,
   setPrevStep,
-  inputFiles,
-  setInputFiles,
-  files,
-  setFiles,
 }: {
   step: number;
   setStep: React.Dispatch<React.SetStateAction<number>>;
   prevStep: number;
   setPrevStep: React.Dispatch<React.SetStateAction<number>>;
-  inputFiles: FileList | null;
-  setInputFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
-  files: FileLocal[] | undefined;
-  setFiles: React.Dispatch<React.SetStateAction<FileLocal[] | undefined>>;
 }) => {
   useEffect(() => {
     setTimeout(() => {
@@ -46,291 +38,95 @@ export const Step1 = ({
     }, 1000);
   }, []);
 
+  const {uploadText} = usePresentationCreate()!;
+
+  const [showUploadText, setShowUploadText] = useState(false);
+
   return (
-    <motion.div
-      exit={{opacity: 0, transform: "translateX(-200px)"}}
-      animate={{opacity: 1, transform: "translate(0px)"}}
-      initial={
-        prevStep === 0
-          ? {opacity: 1, transform: "translateY(200px)"}
-          : prevStep > 2
-          ? {opacity: 1, transform: "translateX(-200px)"}
-          : {opacity: 1, transform: "translateX(200px)"}
-      }
-      transition={{duration: 0.3}}
-      className="w-full h-[450px] items-center justify-centers flex flex-col absolute"
-    >
-      <UploadManager
-        step={step}
-        setStep={setStep}
-        inputFiles={inputFiles}
-        setInputFiles={setInputFiles}
-        files={files}
-        setFiles={setFiles}
-        prevStep={prevStep}
-      />
-    </motion.div>
+    <>
+      <motion.div
+        exit={{opacity: 0, transform: "translateX(-200px)"}}
+        animate={{opacity: 1, transform: "translate(0px)"}}
+        initial={
+          prevStep === 0
+            ? {opacity: 1, transform: "translateY(200px)"}
+            : prevStep > 2
+            ? {opacity: 1, transform: "translateX(-200px)"}
+            : {opacity: 1, transform: "translateX(200px)"}
+        }
+        transition={{duration: 0.3}}
+        className="w-full h-[450px] items-center justify-centers flex flex-col absolute"
+      >
+        <UploadManager step={step} setStep={setStep} prevStep={prevStep} />
+      </motion.div>
+
+      <button
+        onClick={() => setShowUploadText(!showUploadText)}
+        className="fixed bottom-0 left-1/2 z-[999] p-4 border hover:text-primary"
+      >
+        Show upload text
+      </button>
+      {showUploadText && (
+        <div className="fixed top-1/2 left-1/2 p-2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] overflow-scroll border rounded-md z-50 bg-background">
+          {uploadText &&
+            uploadText.map((text, index) => (
+              <div key={index}>{uploadText}</div>
+            ))}
+        </div>
+      )}
+    </>
   );
 };
 
 const UploadManager = ({
   step,
   setStep,
-  inputFiles,
-  setInputFiles,
-  files,
-  setFiles,
+
   prevStep,
 }: {
   step: number;
   setStep: React.Dispatch<React.SetStateAction<number>>;
-  inputFiles: FileList | null;
-  setInputFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
-  files: FileLocal[] | undefined;
-  setFiles: React.Dispatch<React.SetStateAction<FileLocal[] | undefined>>;
   prevStep: number;
 }) => {
   const isProcessing = useRef(false);
 
+  const {
+    inputFiles,
+    setInputFiles,
+    files,
+    uploadText,
+    handleCancel,
+    processFiles,
+  } = usePresentationCreate()!;
+
   useEffect(() => {
+    console.log("inputFiles", inputFiles, isProcessing.current);
     if (inputFiles && !isProcessing.current) {
+      console.log("Processing files....");
       isProcessing.current = true;
-      console.log("Processing files", inputFiles);
-      processFiles(inputFiles);
-      setInputFiles(null);
+
+      const processInputFiles = async () => {
+        await processFiles(inputFiles);
+        setInputFiles(null);
+        isProcessing.current = false;
+      };
+      processInputFiles();
     }
   }, [inputFiles]);
 
-  const {
-    setUploadText,
-    uploadText,
-    saveFileToFirebase,
-    setUploads,
-    deleteFile,
-  } = usePresentation()!;
+  // const {
+  //   setUploadText,
+  //   uploadText,
+  //   saveFileToFirebase,
+  //   setUploads,
+  //   deleteFile,
+  // } = usePresentation()!;
 
   //toast initiation
   const {toast} = useToast();
 
   // state for drag and drop
   const [isDragging, setIsDragging] = useState(false);
-
-  //helper function to get file type
-  const getFileType = (
-    file: File
-  ):
-    | "pdf"
-    | "jpg"
-    | "jpeg"
-    | "png"
-    | "mp4"
-    | "mp3"
-    | "doc"
-    | "docx"
-    | undefined => {
-    if (file.type === "application/pdf") return "pdf";
-    if (file.type === "image/jpeg") return "jpg";
-    if (file.type === "image/png") return "png";
-    if (file.type === "video/mp4") return "mp4";
-    if (file.type === "audio/mpeg") return "mp3";
-    if (file.type === "application/msword") return "doc";
-    if (
-      file.type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
-      return "docx";
-    return undefined; // Default type if not matched
-  };
-
-  const handleProgressUpdate = (file: File, progress: number) => {
-    console.log(
-      `4 Updating progress for file: ${file.name}, progress: ${progress}`
-    );
-    setFiles((prevFiles) =>
-      prevFiles?.map((f) =>
-        f.file === file
-          ? {...f, uploadProgress: Math.min(progress, 100)} // Ensure progress is capped at 100%
-          : f
-      )
-    );
-  };
-
-  const processFiles = async (fileList: FileList | File[]) => {
-    try {
-      const filesArray = Array.from(fileList);
-
-      const vaildFiles = filesArray.filter((file) => {
-        const fileType = getFileType(file);
-
-        if (!fileType) {
-          console.log("Unsupported File Type");
-          toast({
-            variant: "destructive",
-            title: "Unsupported File Type",
-            description: `${file.name} is not a supported file type.`,
-          });
-          return false;
-        }
-
-        if (file.size > MAX_FILE_SIZE_MB) {
-          console.log("File Too Large");
-          toast({
-            variant: "destructive",
-            title: "File Too Large",
-            description: `${file.name} exceeds the ${FILE_SIZE}MB limit.`,
-          });
-          return false;
-        }
-        return true;
-      });
-
-      const newFiles = vaildFiles.map((file) => ({
-        file,
-        uploadProgress: 100,
-        path: URL.createObjectURL(file),
-        title: file.name,
-        type: getFileType(file),
-        id: Math.random().toString(36).substr(2, 9),
-      }));
-
-      setFiles((prevFiles) => {
-        const updatedFiles = [...(prevFiles || []), ...newFiles];
-        return updatedFiles;
-      });
-
-      for (const fileLocal of newFiles) {
-        await uploadFile(fileLocal);
-      }
-    } catch (error) {
-      console.error("Error processing the files ", error);
-      toast({
-        variant: "destructive",
-        title: "Error Processing Files",
-        description: "An unexpected error occurred while processing the files.",
-      });
-    }
-  };
-
-  async function addNewUploads(file: FileLocal) {
-    // this function will be where you save the states for the file - Saving Uploads
-    if (file) {
-      setUploads((prev) => [
-        ...(prev || []),
-        {
-          title: file.title,
-          id: file.title,
-          path: file.path,
-          type: file.type as UploadType["type"],
-          file: file.file,
-        },
-      ]);
-    }
-  }
-
-  async function addNewUploadsText(text: string) {
-    setUploadText([...(uploadText || []), text]);
-  }
-
-  async function uploadFile(fileLocal: FileLocal) {
-    try {
-      const upload = await saveFileToFirebase(
-        fileLocal.file,
-        (progress: number) => {
-          handleProgressUpdate(fileLocal.file, progress);
-        }
-      );
-
-      if (!upload || !upload.path) {
-        console.error("Upload failed or no URL returnd");
-        toast({
-          variant: "destructive",
-          title: "File upload failed!",
-          description: `Upload failed or no URL returned`,
-        });
-      }
-
-      const updatedFileLocal = {
-        ...fileLocal,
-        path: upload?.path || fileLocal.path,
-      };
-
-      console.log("Updated File Local: ", updatedFileLocal);
-      setFiles((prevFiles) =>
-        prevFiles?.map((f) =>
-          f.file === fileLocal.file ? updatedFileLocal : f
-        )
-      );
-
-      // TEXT CONVERSION IS HAPPENING HERE _______________________
-      if (fileLocal.type === "pdf") {
-        const extractedText = await extractTextFromPDF(fileLocal.file);
-
-        // Saving text to uploads text
-
-        if (extractedText.length > 0) {
-          await addNewUploadsText(extractedText);
-        }
-      } else if (
-        fileLocal.type === "png" ||
-        fileLocal.type === "jpg" ||
-        fileLocal.type === "jpeg"
-      ) {
-        // This ISNT WORKING EITHER SINCE THE ROUTE ISNT SETUP PROPERLY BECAUSE OF MISSING KEYS :(
-      }
-
-      if (upload) {
-        // Saving uploads
-        await addNewUploads(updatedFileLocal);
-      }
-
-      return updatedFileLocal;
-      // More stuff here maybe
-    } catch (error) {
-      console.error("File Upload Failed: ", error);
-      toast({
-        variant: "destructive",
-        title: "Uh Oh! Something went Wrong.",
-        description:
-          "An error occured while uploading the file. Please retry later.",
-      });
-      return null;
-    }
-  }
-
-  const handleCancel = async (file: FileLocal) => {
-    try {
-      console.log(`Clicked cancel button -> ${JSON.stringify(file)}`);
-      if (file.path) {
-        // Delete from DB
-        await deleteFile(file.path);
-        toast({
-          title: "File deleted.",
-          description: `${file.title} has been deleted successfully.`,
-        });
-
-        // Delete from local state
-        setFiles(
-          (prevFiles) =>
-            prevFiles?.filter((f) => f.path !== file.path) || undefined
-        );
-
-        // Also update the uploads state in the context
-        setUploads(
-          (prevUploads) =>
-            prevUploads?.filter((u) => u.path !== file.path) || undefined
-        );
-      } else {
-        console.error("No File Path provided for deletion");
-      }
-    } catch (error) {
-      console.error("Error deleting file: ", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: `Failed to delete ${file.title}. Please try again.`,
-      });
-    }
-  };
 
   const onDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -408,21 +204,19 @@ const UploadManager = ({
     }
   }, [files]);
 
-  console.log("prevvvvvvv", prevStep);
-
   return (
     <div
       onDrop={onDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      className={` h-fit flex gap-4 items-centers justify-center flex-col w-fit 
+      className={` h-full flex gap-4 items-center  flex-col w-full 
         ${isDragging ? " border-primary  " : ""}
         
         `}
     >
       {(!files || files.length === 0) && (
         <div className={`${step === 1 && "h-[450px]"} flex  items-center `}>
-          <FileUpload files={files} setFiles={setFiles} setStep={setStep} />
+          <FileUpload setStep={setStep} />
         </div>
       )}
       {/* Conditional rendering for the progress bar */}
@@ -437,8 +231,8 @@ const UploadManager = ({
             </div>
           )}
           <motion.div
-            className={`flex flex-col  w-[450px] relative  rounded-lg border  h-fit max-h-[350px]   shadow-xl
-           
+            className={`flex flex-col  w-[450px] relative  rounded-lg   h-fit max-h-[350px]   
+              ${isDragging ? " border-primary  " : ""}
           `}
             animate={prevStep === 0 && {opacity: 1}}
             initial={prevStep === 0 && {opacity: 0}}
@@ -452,7 +246,9 @@ const UploadManager = ({
             <div
               id="upload-manager"
               onScroll={onScroll}
-              className="space-y-2  flex flex-col h-fit max-h-full p-2  overflow-scroll flex-animate"
+              className={`space-y-2  flex flex-col h-fit max-h-full p-2  overflow-scroll flex-animate
+              
+                `}
             >
               <AnimatePresence>
                 {files.map((file, index) => (
@@ -461,7 +257,6 @@ const UploadManager = ({
                     fileLocal={file}
                     onCancel={handleCancel}
                     index={index}
-                    setFiles={setFiles}
                     prevStep={prevStep}
                   />
                 ))}
@@ -490,14 +285,11 @@ const UploadManager = ({
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-none p-0 border-none">
-                <FileUpload
-                  files={files}
-                  setFiles={setFiles}
-                  setStep={setStep}
-                />
+                <FileUpload setStep={setStep} setOpen={setShowUploadDialog} />
               </DialogContent>
             </Dialog>
           </motion.div>
+
           {step === 0 &&
             files &&
             files.every((file: FileLocal) => file.uploadProgress === 100) && (
@@ -515,19 +307,33 @@ const UploadManager = ({
 const ProgressBar = ({
   fileLocal,
   onCancel,
-  setFiles,
+
   index,
   prevStep,
 }: {
   fileLocal: FileLocal;
   onCancel: (file: FileLocal) => void;
-  setFiles: React.Dispatch<React.SetStateAction<FileLocal[] | undefined>>;
+
   index: number;
   prevStep: number;
 }) => {
+  const [uploadProgress, setUploadProgress] = useState<number>(
+    fileLocal.uploadProgress
+  );
+
+  // const uploadComplete = false;
   const uploadComplete = fileLocal.uploadProgress === 100;
 
-  console.log("File Progress: ", fileLocal.uploadProgress);
+  useEffect(() => {
+    if (fileLocal.uploadProgress === 100) return;
+    setTimeout(() => {
+      if (uploadProgress < 99) {
+        setUploadProgress(uploadProgress + 1);
+      }
+    }, 500);
+  }, [uploadProgress]);
+
+  const {deleteFile} = usePresentationCreate()!;
 
   const renderIcon = () => {
     switch (fileLocal.type) {
@@ -547,6 +353,9 @@ const ProgressBar = ({
       case "mp3":
         return <Icons.audio className=" w-5 h-5 text-primary " />;
 
+      case "youtube":
+        return <Icons.Youtube className=" w-5 h-5 " />;
+
       default:
         return <Icons.file className=" w-5 h-5 text-primary " />;
     }
@@ -564,41 +373,51 @@ const ProgressBar = ({
       initial={prevStep === 0 && {opacity: 1, transform: "translateY(500px)"}}
       animate={prevStep === 0 && {opacity: 1, transform: "translateY(0px)"}}
       transition={{duration: 0.5, delay: 0.2 * index}}
-      className="w-full p-2 px-4 flex flex-col gap-2 border shadow-md bg-background rounded-lg "
+      className="w-full p-2 px-4 flex flex-col gap-2 border  bg-background rounded-lg  h-fit "
     >
       <div className="grid grid-cols-[1fr_24px] items-center gap-4">
         <div className="flex flex-col">
-          <div className="flex flex-row gap-4 items-center">
-            <span className="p-2 rounded-sm border aspect-square h-fit flex items-center justify-center">
+          <div className="flex flex-row gap-4 items-center h-fit ">
+            <span className="p-2  rounded-sm border aspect-square h-fit flex items-center justify-center">
               {renderIcon()}
             </span>
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full ">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">{fileLocal.title}</span>
-                </div>
+                <a
+                  href={fileLocal.path}
+                  target="_blank"
+                  className="font-semibold hover:text-primary hover:underline upload-title text-ellipsis "
+                >
+                  {fileLocal.title}
+                </a>
               </div>
-              <div className="flex  relative w-full h-6">
-                {uploadComplete && (
-                  <div className="text-muted-foreground ">
-                    {(fileLocal.file.size / (1024 * 1024)).toFixed(2)} MB
-                  </div>
-                )}
-
-                {!uploadComplete && (
-                  <div className=" flex flex-col items-end  absolute left-0 bottom-0 w-full">
-                    <span className="text-primary font-bold  w-[50px]">{`${Math.ceil(
-                      fileLocal.uploadProgress
-                    ).toFixed(0)}%`}</span>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-primary h-2 rounded-full"
-                        style={{width: `${fileLocal.uploadProgress}%`}}
-                      />
+              {fileLocal.file && (
+                <div className="flex  relative w-full h-6">
+                  {uploadComplete && (
+                    <div className="text-muted-foreground ">
+                      {(fileLocal.file.size / (1024 * 1024)).toFixed(2)} MB
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+
+                  {!uploadComplete && (
+                    <div className=" flex flex-col items-end  absolute left-0 bottom-0 w-full">
+                      <div className="flex  gap-1">
+                        <Icons.spinner className="w-4 h-4 text-primary animate-spin " />
+
+                        <span className="text-[12px] text-primary">
+                          Uploading...
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-primary h-2 rounded-full"
+                          style={{width: `${uploadProgress}%`}}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -607,9 +426,7 @@ const ProgressBar = ({
             if (!uploadComplete) {
               onCancel(fileLocal);
             } else {
-              setFiles((prevFiles) =>
-                prevFiles?.filter((f) => f.path !== fileLocal.path)
-              );
+              deleteFile(fileLocal.path);
             }
           }}
           className="bg-gray-300 hover:bg-gray-500 transition-colors duration-500 rounded-full aspect-square h-fit p-1"
@@ -622,256 +439,23 @@ const ProgressBar = ({
 };
 
 const FileUpload = ({
-  files,
-  setFiles,
   setStep,
+  setOpen,
 }: {
-  files: FileLocal[] | undefined;
-  setFiles: React.Dispatch<React.SetStateAction<FileLocal[] | undefined>>;
   setStep: React.Dispatch<React.SetStateAction<number>>;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const {
-    setUploadText,
-    uploadText,
-    saveFileToFirebase,
-    setUploads,
-    deleteFile,
-  } = usePresentation()!;
+  const {processFiles} = usePresentationCreate()!;
 
   //toast initiation
-  const {toast} = useToast();
-
-  const getFileType = (
-    file: File
-  ):
-    | "pdf"
-    | "jpg"
-    | "jpeg"
-    | "png"
-    | "mp4"
-    | "mp3"
-    | "doc"
-    | "docx"
-    | undefined => {
-    if (file.type === "application/pdf") return "pdf";
-    if (file.type === "image/jpeg") return "jpg";
-    if (file.type === "image/png") return "png";
-    if (file.type === "video/mp4") return "mp4";
-    if (file.type === "audio/mpeg") return "mp3";
-    if (file.type === "application/msword") return "doc";
-    if (
-      file.type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
-      return "docx";
-    return undefined; // Default type if not matched
-  };
-
-  const handleProgressUpdate = (file: File, progress: number) => {
-    console.log(
-      `Updating progress for file: ${file.name}, progress: ${progress}`
-    );
-    setFiles((prevFiles) =>
-      prevFiles?.map((f) =>
-        f.file === file
-          ? {...f, uploadProgress: Math.min(progress, 100)} // Ensure progress is capped at 100%
-          : f
-      )
-    );
-  };
-
-  const processFiles = async (fileList: FileList | File[]) => {
-    try {
-      const filesArray = Array.from(fileList);
-
-      const vaildFiles = filesArray.filter((file) => {
-        const fileType = getFileType(file);
-
-        if (!fileType) {
-          console.log("Unsupported File Type");
-          toast({
-            variant: "destructive",
-            title: "Unsupported File Type",
-            description: `${file.name} is not a supported file type.`,
-          });
-          return false;
-        }
-
-        if (file.size > MAX_FILE_SIZE_MB) {
-          console.log("File Too Large");
-          toast({
-            variant: "destructive",
-            title: "File Too Large",
-            description: `${file.name} exceeds the ${FILE_SIZE}MB limit.`,
-          });
-          return false;
-        }
-        return true;
-      });
-
-      const newFiles = vaildFiles.map((file) => ({
-        file,
-        uploadProgress: 100,
-        path: URL.createObjectURL(file),
-        title: file.name,
-        type: getFileType(file),
-        id: Math.random().toString(36).substr(2, 9),
-      }));
-
-      console.log("New Files: ", newFiles);
-      setFiles((prevFiles) => {
-        const updatedFiles = [...(prevFiles || []), ...newFiles];
-        return updatedFiles;
-      });
-
-      for (const fileLocal of newFiles) {
-        await uploadFile(fileLocal);
-      }
-    } catch (error) {
-      console.error("Error processing the files ", error);
-      toast({
-        variant: "destructive",
-        title: "Error Processing Files",
-        description: "An unexpected error occurred while processing the files.",
-      });
-    }
-  };
+  const {setInputFiles} = usePresentationCreate()!;
 
   const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setStep(1);
-
-    // function to handle the file change event
-
-    // how i would handle the file change event
-    // 1.) get the file from the event
-    // 2.) determine what type of file it is
-    // 3.) save the file to firestore so text layer can be extracted with uploadFile()
-    // 3.) extract the text layer of the file
-    // 4.) save the file to the context states with addNewFile()
-
     const target = event.target as HTMLInputElement;
     const fileList = target.files;
-
-    if (!fileList || fileList.length === 0) {
-      console.log("No files selected");
-      toast({
-        title: "No file selected",
-        description: "Please select a file to proceed further.",
-      });
-      return;
-    }
-    await processFiles(fileList);
-  };
-
-  async function addNewUploads(file: FileLocal) {
-    // this function will be where you save the states for the file - Saving Uploads
-    if (file) {
-      setUploads((prev) => [
-        ...(prev || []),
-        {
-          title: file.title,
-          id: file.title,
-          path: file.path,
-          type: file.type as UploadType["type"],
-          file: file.file,
-        },
-      ]);
-    }
-  }
-
-  async function addNewUploadsText(text: string) {
-    setUploadText([...(uploadText || []), text]);
-  }
-
-  async function uploadFile(fileLocal: FileLocal) {
-    try {
-      const upload = await saveFileToFirebase(
-        fileLocal.file,
-        (progress: number) => {
-          handleProgressUpdate(fileLocal.file, progress);
-        }
-      );
-
-      if (!upload || !upload.path) {
-        console.error("Upload failed or no URL returnd");
-        toast({
-          variant: "destructive",
-          title: "File upload failed!",
-          description: `Upload failed or no URL returned`,
-        });
-      }
-
-      const updatedFileLocal = {
-        ...fileLocal,
-        path: upload?.path || fileLocal.path,
-      };
-      setFiles((prevFiles) =>
-        prevFiles?.map((f) =>
-          f.file === fileLocal.file ? updatedFileLocal : f
-        )
-      );
-
-      // TEXT CONVERSION IS HAPPENING HERE _______________________
-      if (fileLocal.type === "pdf") {
-        const extractedText = await extractTextFromPDF(fileLocal.file);
-
-        // Saving text to uploads text
-
-        if (extractedText.length > 0) {
-          await addNewUploadsText(extractedText);
-        }
-      } else if (
-        fileLocal.type === "png" ||
-        fileLocal.type === "jpg" ||
-        fileLocal.type === "jpeg"
-      ) {
-        // This ISNT WORKING EITHER SINCE THE ROUTE ISNT SETUP PROPERLY BECAUSE OF MISSING KEYS :(
-      }
-
-      if (upload) {
-        // Saving uploads
-        await addNewUploads(updatedFileLocal);
-      }
-
-      return updatedFileLocal;
-      // More stuff here maybe
-    } catch (error) {
-      console.error("File Upload Failed: ", error);
-      toast({
-        variant: "destructive",
-        title: "Uh Oh! Something went Wrong.",
-        description:
-          "An error occured while uploading the file. Please retry later.",
-      });
-      return null;
-    }
-  }
-
-  // Extract text from a PDF file
-  const extractTextFromPDF = async (file: File): Promise<string> => {
-    try {
-      const pdf = await pdfjs.getDocument({url: URL.createObjectURL(file)})
-        .promise;
-      const textPages: string[] = [];
-
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-        const page = await pdf.getPage(pageNumber);
-        const textContent = (await page.getTextContent()) as any;
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(" ");
-        textPages.push(pageText);
-      }
-      return textPages.join(" ");
-    } catch (error) {
-      console.error("Error extracting text from PDF:", error);
-      toast({
-        variant: "destructive",
-        title: `Oops!`,
-        description: `Error extracting text from ${file.name}`,
-      });
-      return "";
-    }
+    setInputFiles(fileList);
+    setOpen && setOpen(false);
+    // setStep(1);
   };
 
   return (
@@ -884,7 +468,7 @@ const FileUpload = ({
   `}
       >
         <input
-          id="file-input"
+          id="file-input-pop"
           style={{display: "none"}}
           type="file"
           accept=".pdf, .jpg, .png, .mp4, .doc, .mp3, docx"
@@ -896,7 +480,7 @@ const FileUpload = ({
 
         <button
           onClick={() => {
-            document.getElementById("file-input")?.click();
+            document.getElementById("file-input-pop")?.click();
             // setStep(2);
           }}
           className="w-full  items-center flex flex-col gap-2 group"

@@ -1,0 +1,7 @@
+.Pages {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: 100%;
+  margin: 0;
+}

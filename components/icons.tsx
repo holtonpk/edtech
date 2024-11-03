@@ -482,4 +482,329 @@ export const Icons = {
       ></path>
     </svg>
   ),
+  Youtube: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      {...props}
+      fill="none"
+      viewBox="0 0 32 21"
+    >
+      <path fill="url(#pattern0)" d="M0 0H32V21H0z"></path>
+      <defs>
+        <pattern
+          id="pattern0"
+          width="1"
+          height="1"
+          patternContentUnits="objectBoundingBox"
+        >
+          <use
+            transform="matrix(.01563 0 0 .0238 0 -.024)"
+            xlinkHref="#image0_12_177"
+          ></use>
+        </pattern>
+        <image
+          id="image0_12_177"
+          width="64"
+          height="44"
+          xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAsCAMAAADigU7NAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABcVBMVEUAAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/Gxv/DQ3/UFD/6+v/b2//AwP/////zc3/PT3/s7P/ISH/9vb/iIj/5eX/Zmb/AgL/ysr/Ojr//v7/qqr/Hh7/9fX/gID/CAj/4+P/Xl7/AQH/4uL/Pj7/7Oz/Dg5eL04FAAAAW3RSTlMAES9JX3WCjJmmsLvL1d3k7vAuBVSy4rEEMtzbMfdIIe0gpKIV+BRYV466tt7aAvv5ARMPJyM7N09LXlxmZG5rc3x7g21sXU06JiISDtmLVZ8e60fhUxAtdIGAfY/lMQAAAAFiS0dEYiu5HTwAAAAHdElNRQfoAQcQAB5wXbxVAAABjUlEQVRIx63WZ1MCMRAG4EV6O0ARUKqiiL1gxd47FlDQs8bee/31RhhkdMjdkfX9dHPJPjNXkixAPqoytUar0xuMJrPFKgiCzW63O0QaB72w0RtWi9lkNOh1Wo26XAW/U+GsdIklxeV2egr1VdUiR7y+fL3aL3LFH8jVB0MiZ0I1WaBW5E74u76unh/wRyjQICISpUAjBtBToAkDNFOgBQO0ArS1Y4COTuhije3sKhFi0M0a2ts/OJQHeqCXCRBydCwL9EG/BEDIyakMMABxSYCcnUu/ikEYkgYIubi8kgCGYUQOIOT6hg2MglYeILd396xZYzCuACDk4fGp+KwJmFQEEPL88lpslk4x8MYC0I+AfolTuM84jf+RkL/yDMxiF9Oc1HJ+V7Cc55nAh5INZQEWmVvap5ItbQm/qYKAAZb/42BBHW0JCkQxwAoFItjjHcL8wGq2Q1lb5623B3NNUoC3yUrm2zSfl+to9xUaRY/TnSqtOuXe8PzpVjfTyXhmKyHX6ia2M/FkOvZT9gWILJodAt3I3QAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNC0wMS0wN1QxNjowMDozMCswMDowMMlDtJcAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjQtMDEtMDdUMTY6MDA6MzArMDA6MDC4HgwrAAAAAElFTkSuQmCC"
+        ></image>
+      </defs>
+    </svg>
+  ),
+  GoogleSlides: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+      fill="none"
+      viewBox="0 0 73 100"
+    >
+      <mask
+        id="mask0_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask0_1:2)">
+        <path
+          fill="#F4B400"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894L56.03 15.688z"
+        ></path>
+      </g>
+      <mask
+        id="mask1_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask1_1:2)">
+        <path
+          fill="#F1F1F1"
+          d="M50.426 44.823H21.291a3.37 3.37 0 0 0-3.362 3.362V77.32a3.37 3.37 0 0 0 3.362 3.362h29.135a3.37 3.37 0 0 0 3.362-3.362V48.185a3.37 3.37 0 0 0-3.362-3.362m-1.12 25.774H22.412V54.909h26.894z"
+        ></path>
+      </g>
+      <mask
+        id="mask2_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask2_1:2)">
+        <path
+          fill="url(#paint0_linear_1:2)"
+          d="M46.79 24.927 71.717 49.85V26.894z"
+        ></path>
+      </g>
+      <mask
+        id="mask3_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask3_1:2)">
+        <path
+          fill="#FADA80"
+          d="M44.823 0v20.17a6.72 6.72 0 0 0 6.724 6.724h20.17z"
+        ></path>
+      </g>
+      <mask
+        id="mask4_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask4_1:2)">
+        <path
+          fill="#fff"
+          fillOpacity="0.1"
+          d="M44.823 0v.56l26.334 26.334h.56z"
+        ></path>
+      </g>
+      <mask
+        id="mask5_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask5_1:2)">
+        <path
+          fill="#fff"
+          fillOpacity="0.2"
+          d="M6.723 0C3.026 0 0 3.026 0 6.723v.56C0 3.587 3.026.56 6.723.56h38.1V0z"
+        ></path>
+      </g>
+      <mask
+        id="mask6_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask6_1:2)">
+        <path
+          fill="#BF360C"
+          fillOpacity="0.2"
+          d="M64.994 98.05H6.724C3.025 98.05 0 95.026 0 91.328v.56c0 3.698 3.026 6.724 6.723 6.724h58.27c3.699 0 6.724-3.026 6.724-6.723v-.56c0 3.697-3.025 6.723-6.723 6.723"
+        ></path>
+      </g>
+      <mask
+        id="mask7_1:2"
+        width="72"
+        height="99"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
+        style={{maskType: "alpha"}}
+      >
+        <path
+          fill="#fff"
+          d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+        ></path>
+      </mask>
+      <g mask="url(#mask7_1:2)">
+        <path
+          fill="#BF360C"
+          fillOpacity="0.1"
+          d="M51.547 26.894a6.72 6.72 0 0 1-6.724-6.723v.56a6.72 6.72 0 0 0 6.724 6.723h20.17v-.56z"
+        ></path>
+      </g>
+      <path
+        fill="url(#paint1_radial_1:2)"
+        d="M44.823 0h-38.1C3.026 0 0 3.026 0 6.723v85.165c0 3.697 3.026 6.723 6.723 6.723h58.27c3.699 0 6.724-3.026 6.724-6.723V26.894z"
+      ></path>
+      <defs>
+        <radialGradient
+          id="paint1_radial_1:2"
+          cx="0"
+          cy="0"
+          r="1"
+          gradientTransform="translate(2.272 1.96)scale(115.643)"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#fff" stopOpacity="0.1"></stop>
+          <stop offset="1" stopColor="#fff" stopOpacity="0"></stop>
+        </radialGradient>
+        <linearGradient
+          id="paint0_linear_1:2"
+          x1="59.255"
+          x2="59.255"
+          y1="27.067"
+          y2="49.852"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#BF360C" stopOpacity="0.2"></stop>
+          <stop offset="1" stopColor="#BF360C" stopOpacity="0.02"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+  Canva: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+      fillRule="evenodd"
+      baseProfile="basic"
+      clipRule="evenodd"
+      viewBox="0 0 48 48"
+    >
+      <linearGradient
+        id="N8aMJ-jZ4-cfldZrsnvhda"
+        x1="38.263"
+        x2="10.15"
+        y1="1373.62"
+        y2="1342.615"
+        gradientTransform="translate(0 -1333.89)"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop offset="0" stopColor="#823af3"></stop>
+        <stop offset="0.36" stopColor="#4b66e1"></stop>
+        <stop offset="0.906" stopColor="#01f1c4"></stop>
+      </linearGradient>
+      <path
+        fill="url(#N8aMJ-jZ4-cfldZrsnvhda)"
+        d="M44 24c0 11.045-8.955 20-20 20S4 35.045 4 24 12.955 4 24 4s20 8.955 20 20"
+      ></path>
+      <path
+        fill="#fff"
+        d="M29.194 26.962c-.835.915-2.007 1.378-2.556 1.378-.635 0-.982-.389-1.053-.974a2.4 2.4 0 0 1 .024-.673c.21-1.31.692-2.124.662-2.372-.009-.071-.049-.106-.101-.106-.406 0-1.83 1.47-2.046 2.443l-.168.779c-.11.549-.648.902-1.018.902-.177 0-.311-.088-.334-.283a.9.9 0 0 1 .021-.266l.079-.41c-.768.574-1.596.962-1.984.962-.53 0-.827-.283-.933-.709-.35.461-.813.709-1.306.709-.63 0-1.237-.417-1.528-1.034a7.3 7.3 0 0 1-1.496 1.299c-.869.55-1.836.992-2.982.992-1.058 0-1.956-.566-2.453-1.026-.737-.69-1.126-1.718-1.241-2.656-.362-2.957 1.438-6.834 4.227-8.533a3.93 3.93 0 0 1 2.008-.584c1.34 0 2.34.958 2.48 2.104.126 1.032-.286 1.924-1.431 2.501-.584.296-.874.282-.965.141-.061-.094-.026-.254.091-.351 1.076-.899 1.096-1.637.97-2.677-.082-.669-.522-1.098-1.016-1.098-2.115 0-5.149 4.745-4.727 8.197.165 1.346.99 2.904 2.682 2.904.564 0 1.162-.159 1.694-.425.928-.474 1.453-.85 1.98-1.464-.13-1.596 1.24-3.6 3.278-3.6.882 0 1.612.354 1.698 1.062.108.885-.646 1.062-.928 1.062-.247 0-.643-.071-.671-.301-.03-.248.534-.106.464-.673-.043-.354-.411-.478-.763-.478-1.269 0-1.97 1.77-1.835 2.869.061.496.315.991.774.991.37 0 .904-.531 1.109-1.31.13-.531.632-.885 1.003-.885.194 0 .328.088.352.283a.8.8 0 0 1-.021.266c-.042.23-.219.996-.21 1.154.006.138.086.328.326.328.19 0 .89-.378 1.538-.958l.474-2.454c.079-.426.232-.865 1.096-.865.177 0 .311.088.337.301q.013.106-.021.266l-.242 1.093c.758-1.01 1.936-1.752 2.642-1.752.3 0 .531.158.57.478.022.178-.03.478-.147.814-.251.69-.533 1.727-.72 2.62-.04.19.026.476.373.476.277 0 1.166-.339 1.885-1.288q-.007-.201-.007-.408c0-.744.053-1.346.194-1.787.141-.461.723-.902 1.11-.902.194 0 .335.106.335.318 0 .071-.018.16-.053.248-.264.779-.405 1.506-.405 2.231 0 .407.088 1.062.177 1.398.018.071.034.142.105.142.123 0 .952-.814 1.551-1.806-.53-.337-.829-.956-.829-1.718 0-1.274.758-1.93 1.498-1.93.582 0 1.11.425 1.11 1.274 0 .532-.212 1.134-.51 1.718 0 0 .123.018.176.018a1.32 1.32 0 0 0 1.006-.443c.088-.1.17-.178.248-.224.59-.713 1.455-1.228 2.47-1.228.864 0 1.61.337 1.696 1.045.11.902-.661 1.08-.926 1.08-.264 0-.661-.071-.689-.301s.551-.106.484-.654c-.043-.354-.413-.496-.766-.496-1.182 0-1.994 1.576-1.838 2.85.062.514.299 1.01.758 1.01.37 0 .923-.532 1.127-1.31.131-.514.632-.885 1.002-.885.176 0 .328.088.354.301.013.106-.03.337-.227 1.168a2.6 2.6 0 0 0-.066.903c.063.514.298.85.516 1.045.079.07.126.158.132.213.017.142-.091.266-.267.266-.053 0-.123 0-.181-.035-.908-.372-1.285-.991-1.391-1.576-.35.442-.814.69-1.29.69-.811 0-1.603-.709-1.715-1.629a2.9 2.9 0 0 1 .123-1.184c-.329.203-.683.316-1.001.316-.106 0-.194 0-.299-.018-.793 1.15-1.622 1.947-2.257 2.302-.264.142-.51.213-.687.213-.142 0-.3-.035-.37-.159-.166-.277-.275-.713-.339-1.225m2.873-3.771c0 .496.246 1.01.564 1.346.124-.337.194-.673.194-1.01 0-.638-.247-.921-.441-.921-.229 0-.317.32-.317.585"
+      ></path>
+    </svg>
+  ),
+  PowerPoint: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      xmlSpace="preserve"
+      id="Livello_1"
+      x="0"
+      y="0"
+      version="1.1"
+      viewBox="0 0 1919.95 1786"
+      {...props}
+    >
+      <path
+        fill="#ED6C47"
+        d="M1160.9 982.3 1026.95 0h-10.002C529.872 1.422 135.372 395.922 133.95 882.998V893z"
+      ></path>
+      <path
+        fill="#FF8F6B"
+        d="M1036.952 0h-10.002v893l446.5 178.6 446.5-178.6v-10.002C1918.528 395.922 1524.028 1.422 1036.952 0"
+      ></path>
+      <path
+        fill="#D35230"
+        d="M1919.95 893v9.823c-1.398 487.185-395.992 881.779-883.177 883.177h-19.646c-487.185-1.398-881.779-395.992-883.177-883.177V893z"
+      ></path>
+      <path
+        d="M1071.6 438.909v952.831c-.222 33.109-20.286 62.852-50.901 75.458a79.1 79.1 0 0 1-30.809 6.251H344.698c-12.502-14.288-24.557-29.469-35.72-44.65A875.77 875.77 0 0 1 133.95 902.822v-19.646a873.13 873.13 0 0 1 143.773-481.327c9.823-15.181 20.092-30.362 31.255-44.65H989.89c44.986.341 81.37 36.725 81.71 81.71"
+        opacity="0.1"
+      ></path>
+      <path
+        d="M1026.95 483.56v952.831a79.1 79.1 0 0 1-6.251 30.808c-12.606 30.615-42.35 50.679-75.459 50.901H385.329a764 764 0 0 1-40.632-44.65c-12.502-14.288-24.557-29.469-35.72-44.65a875.77 875.77 0 0 1-175.028-525.977v-19.646A873.13 873.13 0 0 1 277.722 401.85H945.24c44.986.34 81.37 36.724 81.71 81.71"
+        opacity="0.2"
+      ></path>
+      <path
+        d="M1026.95 483.56v863.531c-.34 44.985-36.724 81.369-81.709 81.71H308.978A875.77 875.77 0 0 1 133.95 902.824v-19.646a873.13 873.13 0 0 1 143.773-481.327H945.24c44.986.339 81.37 36.723 81.71 81.709"
+        opacity="0.2"
+      ></path>
+      <path
+        d="M982.3 483.56v863.531c-.34 44.985-36.724 81.369-81.709 81.71H308.978A875.77 875.77 0 0 1 133.95 902.824v-19.646a873.13 873.13 0 0 1 143.773-481.327H900.59c44.986.339 81.37 36.723 81.71 81.709"
+        opacity="0.2"
+      ></path>
+      <linearGradient
+        id="SVGID_1_"
+        x1="170.645"
+        x2="811.655"
+        y1="1450.101"
+        y2="339.899"
+        gradientTransform="matrix(1 0 0 -1 0 1788)"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop offset="0" stopColor="#CA4C28"></stop>
+        <stop offset="0.5" stopColor="#C5401E"></stop>
+        <stop offset="1" stopColor="#B62F14"></stop>
+      </linearGradient>
+      <path
+        fill="url(#SVGID_1_)"
+        d="M81.843 401.85h818.613c45.201 0 81.843 36.643 81.843 81.843v818.613c0 45.201-36.643 81.844-81.843 81.844H81.843c-45.2 0-81.843-36.643-81.843-81.843V483.693c0-45.2 36.643-81.843 81.843-81.843"
+      ></path>
+      <path
+        fill="#FFF"
+        d="M500.08 620.144a225 225 0 0 1 149.042 43.668 156.27 156.27 0 0 1 51.883 126.493 176 176 0 0 1-25.584 94.524 170.96 170.96 0 0 1-72.646 64.207 246.66 246.66 0 0 1-109.259 22.95H389.973v192.441H283.929V620.144zM389.884 888.848h91.265a118.5 118.5 0 0 0 80.683-24.066 89.3 89.3 0 0 0 27.281-70.413q0-89.97-104.57-89.97h-94.658z"
+      ></path>
+    </svg>
+  ),
 };

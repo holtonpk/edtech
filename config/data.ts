@@ -133,7 +133,7 @@ export type AlignmentJustify =
   | "none";
 
 export type UploadType = {
-  file: File;
+  file?: File;
   title: string;
   id: string;
   path: string;
@@ -142,7 +142,7 @@ export type UploadType = {
 
 export type FileLocal = {
   id: string;
-  file: File;
+  file?: File;
   uploadProgress: number;
   path: string;
   title: string;
@@ -155,6 +155,7 @@ export type FileLocal = {
     | "mp3"
     | "doc"
     | "docx"
+    | "youtube"
     | undefined;
 };
 
@@ -163,7 +164,7 @@ export type Image = {
   path: string;
 };
 
-export const FILE_SIZE = 50;
+export const FILE_SIZE = 20000;
 export const MAX_FILE_SIZE_MB = FILE_SIZE * 1024 * 1024;
 
 export interface CreatePresentationData {
