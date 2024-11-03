@@ -88,8 +88,7 @@ const Presentation = ({params}: {params: {projectId: string}}) => {
 export default Presentation;
 
 // const SaveToCanva = () => {
-//   const clientId = "OC-AZL0Lg895BNJ";
-// const sK ="cnvcaX11QkbSk5C357mIUaFdWOw-NJyBqnMAtNdXeVYQ89O43c115440"
+
 //   const redirectUri = "https://edtech-lac.vercel.app/canva-redirect"; // Update this to your redirect page
 //   const [error, setError] = useState(null);
 
