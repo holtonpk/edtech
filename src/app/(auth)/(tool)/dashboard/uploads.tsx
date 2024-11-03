@@ -6,10 +6,10 @@ import {motion, AnimatePresence} from "framer-motion";
 import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
 import {useToast} from "@/components/ui/use-toast";
-import {usePresentation} from "@/context/presentation-create-context";
+import usePresentation from "@/context/presentation-create-context";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
 import {Document, pdfjs} from "react-pdf";
-import GoogleDriveImport from "@/src/app/(auth)/(tool)/create2/components/steps/upload/google-drive-import";
+// import GoogleDriveImport from "@/src/app/(auth)/(tool)/create2/components/steps/upload/google-drive-import";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 import {LucideProps} from "lucide-react";
@@ -527,7 +527,7 @@ const FileUpload = ({
         <span className="px-4 text-gray-600 font-bold">or</span>
         <div className="flex-1 border-t border-gray-300"></div>
       </div>
-      <GoogleDriveImport />
+      {/* <GoogleDriveImport /> */}
     </div>
   );
 };
