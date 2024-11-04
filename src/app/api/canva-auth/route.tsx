@@ -4,29 +4,23 @@ import {NextResponse} from "next/server";
 export async function POST(req: Request) {
   try {
     const requestData = await req.json();
-    const code = requestData.fileName;
-    const clientId = "OC-AZLz4cnziII1";
-    const redirectUri = "https://edtech-lac.vercel.app/";
-
-    const codeVerifier = sessionStorage.getItem("code_verifier");
-
-    if (!codeVerifier) {
-      return NextResponse.json({success: false});
-    }
+    const {code} = requestData;
+    const codeVerifier = sessionStorage.getItem("code_verifier"); // Retrieve the code verifier
 
     const tokenResponse = await fetch("https://www.canva.com/api/oauth/token", {
       method: "POST",
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: new URLSearchParams({
-        client_id: clientId,
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        client_id: "OC-AZLz4cnziII1",
+        redirect_uri: "https://edtech-lac.vercel.app/",
         grant_type: "authorization_code",
-        redirect_uri: redirectUri,
-        code_verifier: codeVerifier, // Now guaranteed to be a string
-        code,
+        code_verifier: codeVerifier,
+        code: code,
       }),
     });
 
     const tokenData = await tokenResponse.json();
+    // Handle the access token (store, use for API calls, etc.)
 
     return NextResponse.json(tokenData);
   } catch (e) {

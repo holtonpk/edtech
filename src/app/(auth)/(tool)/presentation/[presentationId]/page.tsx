@@ -13,6 +13,7 @@ import Background from "./background";
 import ProfileNav from "@/src/app/(auth)/(tool)/components/profile-nav";
 import ToolBar from "./toolbar/toolbar";
 import {auth} from "@canva/user";
+import crypto from "crypto";
 
 const Presentation = ({params}: {params: {projectId: string}}) => {
   const SlideId = "DkKdB59cscUg0RSZJOJx";
@@ -89,173 +90,82 @@ export default Presentation;
 
 // const SaveToCanva = () => {
 //   const clientId = "OC-AZLz4cnziII1";
-//   const redirectUri = "https://edtech-lac.vercel.app/canva-redirect"; // Update this to your redirect page
-//   const [error, setError] = useState(null);
+//   const redirectUri = "https://edtech-lac.vercel.app/"; // Redirect URI registered with Canva
+//   const scopes = "design:content:read design:content:write";
 
-//   // Helper function to generate a code verifier
 //   function generateCodeVerifier() {
-//     const array = new Uint32Array(56 / 2);
+//     const array = new Uint8Array(32);
 //     window.crypto.getRandomValues(array);
-//     return Array.from(array, (dec) => ("0" + dec.toString(16)).substr(-2)).join(
-//       ""
-//     );
+//     return btoa(String.fromCharCode(...array))
+//       .replace(/=/g, "")
+//       .replace(/\+/g, "-")
+//       .replace(/\//g, "_");
 //   }
 
-//   // Helper function to generate a code challenge
 //   async function generateCodeChallenge(codeVerifier) {
 //     const encoder = new TextEncoder();
 //     const data = encoder.encode(codeVerifier);
 //     const digest = await window.crypto.subtle.digest("SHA-256", data);
 //     return btoa(String.fromCharCode(...new Uint8Array(digest)))
+//       .replace(/=/g, "")
 //       .replace(/\+/g, "-")
-//       .replace(/\//g, "_")
-//       .replace(/=+$/, "");
+//       .replace(/\//g, "_");
 //   }
 
-//   // Function to initiate Canva authorization
-//   async function redirectToCanvaAuth() {
-//     try {
-//       const codeVerifier = generateCodeVerifier();
-//       const codeChallenge = await generateCodeChallenge(codeVerifier);
+//   async function saveToCanva() {
+//     const codeVerifier = generateCodeVerifier();
+//     const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-//       // Store code_verifier in sessionStorage for later use
-//       sessionStorage.setItem("code_verifier", codeVerifier);
+//     sessionStorage.setItem("code_verifier", codeVerifier); // Store code verifier for later use
 
-//       const authUrl = `https://www.canva.com/api/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-//         redirectUri
-//       )}&scope=design:content:read%20design:content:write&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+//     const authUrl = `https://www.canva.com/api/oauth/authorize?code_challenge_method=s256&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
+//       redirectUri
+//     )}&scope=${encodeURIComponent(scopes)}&code_challenge=${codeChallenge}`;
 
-//       // Redirect to Canva's OAuth page
-//       const popup = window.open(authUrl, "Canva Auth", "width=600,height=700");
-//     } catch (err) {
-//       console.error("Error generating PKCE challenge:", err);
-//       setError("Failed to initiate Canva authorization.");
-//     }
-//   }
-//   async function openPopupForCanvaAuth() {
-//     try {
-//       const codeVerifier = generateCodeVerifier();
-//       const codeChallenge = await generateCodeChallenge(codeVerifier);
+//     // Open the Canva auth URL in a popup window
+//     const popup = window.open(authUrl, "canvaAuth", "width=500,height=600");
 
-//       // Store code_verifier in sessionStorage for later use
-//       sessionStorage.setItem("code_verifier", codeVerifier);
+//     // Listen for messages from the popup window
+//     window.addEventListener("message", (event) => {
+//       if (event.origin === new URL(redirectUri).origin) {
+//         const {code} = event.data;
 
-//       const authUrl = `https://www.canva.com/api/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-//         redirectUri
-//       )}&scope=design:content:read%20design:content:write&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-
-//       // Open the authorization URL in a popup window
-//       const popup = window.open(authUrl, "Canva Auth", "width=600,height=700");
-//       if (!popup) return;
-
-//       // Polling to check if the popup has been closed
-//       const timer = setInterval(() => {
-//         if (popup.closed) {
-//           clearInterval(timer);
-//           setError("Popup closed before authorization.");
-//         }
-//       }, 1000);
-
-//       // Listen for messages from the popup
-
-//       // window.addEventListener("message", async (event) => {
-//       //   console.log("event", event);
-//       //   if (event.origin !== window.location.origin) return; // Validate origin
-
-//       //   const {code} = event.data;
-//       //   console.log("code", code);
-//       //   if (code) {
-//       //     // Exchange the authorization code for an access token
-//       //     try {
-//       //       const response = await fetch(`/api/canva-auth?code=${code}`, {
-//       //         method: "GET",
-//       //       });
-
-//       //       const data = await response.json();
-
-//       //       if (response.ok) {
-//       //         // Store access token in localStorage or state for API requests
-//       //         localStorage.setItem("canva_access_token", data.access_token);
-//       //         popup.close(); // Close the popup after successful authorizations
-//       //       } else {
-//       //         throw new Error(data.error || "Failed to get access token.");
-//       //       }
-//       //     } catch (err) {
-//       //       console.error("Error exchanging code for token:", err);
-//       //       setError("Failed to complete Canva authorization.");
-//       //     } finally {
-//       //       clearInterval(timer);
-//       //     }
-//       //   }
-//       // });
-//     } catch (err) {
-//       console.error("Error generating PKCE challenge:", err);
-//       setError("Failed to initiate Canva authorization.");
-//     }
-//   }
-
-//   // Function to handle the redirect back from Canva
-//   useEffect(() => {
-//     const urlParams = new URLSearchParams(window.location.search);
-//     const code = urlParams.get("code");
-
-//     if (code) {
-//       // Exchange the authorization code for an access token
-//       async function exchangeCodeForToken() {
-//         try {
-//           const codeVerifier = sessionStorage.getItem("code_verifier");
-
-//           if (!codeVerifier) {
-//             throw new Error("Code verifier not found.");
-//           }
-
-//           const response = await fetch(`/api/canva-auth?code=${code}`, {
-//             method: "GET",
-//           });
-
-//           const data = await response.json();
-
-//           if (response.ok) {
-//             // Store access token in localStorage or state for API requests
-//             localStorage.setItem("canva_access_token", data.access_token);
-//           } else {
-//             throw new Error(data.error || "Failed to get access token.");
-//           }
-//         } catch (err) {
-//           console.error("Error exchanging code for token:", err);
-//           setError("Failed to complete Canva authorization.");
+//         if (code) {
+//           popup.close(); // Close popup after receiving code
+//           handleTokenExchange(code); // Exchange the code for tokens
 //         }
 //       }
+//     });
+//   }
 
-//       exchangeCodeForToken();
-//     }
-//   }, []);
+//   async function handleTokenExchange(code) {
+//     const codeVerifier = sessionStorage.getItem("code_verifier");
 
-//   // const SaveToCanva = async() => {
-//   //     const accessToken =
-//   //     const response = await fetch("https://api.canva.com/v1/files/upload", {
-//   //         method: "POST",
-//   //         headers: {
-//   //           Authorization: `Bearer ${accessToken}`,
-//   //           "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-//   //         },
-//   //         body: YOUR_PPTX_FILE, // Obtain this file from your app's file system or state
-//   //       });
+//     const tokenResponse = await fetch("https://www.canva.com/api/oauth/token", {
+//       method: "POST",
+//       headers: {"Content-Type": "application/json"},
+//       body: JSON.stringify({
+//         client_id: clientId,
+//         redirect_uri: redirectUri,
+//         grant_type: "authorization_code",
+//         code_verifier: codeVerifier,
+//         code: code,
+//       }),
+//     });
 
-//   // }
+//     const tokenData = await tokenResponse.json();
+//     console.log("Access Token:", tokenData); // Handle or store access token here
+//   }
 
 //   return (
-//     <div>
-//       <button
-//         onClick={openPopupForCanvaAuth}
-//         className="w-full flex p-2 border rounded-md py-2 h-fit text-sm whitespace-nowrap poppins-bold gap-2 items-center bg-background hover:border-primary/20 group"
-//       >
-//         <Icons.Canva className="w-6 h-6 " />
-//         Canva
-//         <Icons.chevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-//       </button>
-//       {error && <p className="text-red-500">{error}</p>}
-//     </div>
+//     <button
+//       onClick={saveToCanva}
+//       className="w-full flex p-2 border rounded-md py-2 h-fit text-sm whitespace-nowrap poppins-bold gap-2 items-center bg-background hover:border-primary/20 group"
+//     >
+//       <Icons.Canva className="w-6 h-6 " />
+//       Canva
+//       <Icons.chevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+//     </button>
 //   );
 // };
 
