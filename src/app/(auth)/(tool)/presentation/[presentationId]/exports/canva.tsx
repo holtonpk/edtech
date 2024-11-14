@@ -7,7 +7,7 @@ import {Slide, SlideData, TextBoxType} from "@/config/data";
 import {db} from "@/config/firebase";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
-import {createPPTX} from "../page";
+import {createPPTX} from "../create-pptx";
 
 import {
   Dialog,

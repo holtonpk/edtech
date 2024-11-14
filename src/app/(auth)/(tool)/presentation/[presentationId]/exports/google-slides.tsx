@@ -24,7 +24,7 @@ import {
 } from "@/lib/utils";
 import PptxGenJS from "pptxgenjs";
 import {usePresentation} from "@/context/presentation-context-basic";
-import {createPPTX} from "../page";
+import {createPPTX} from "../create-pptx";
 
 export const SaveToGoogleSlides = () => {
   const [openMenu, setOpenMenu] = React.useState(false);

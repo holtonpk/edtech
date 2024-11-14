@@ -1,7 +1,7 @@
 "use client";
 import {Icons} from "@/components/icons";
 import React, {useEffect, useState, useRef} from "react";
-import {createPPTX} from "../page";
+import {createPPTX} from "../create-pptx";
 import {
   Dialog,
   DialogContent,
