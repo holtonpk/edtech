@@ -164,29 +164,31 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
   useEffect(() => {
     if (!currentUser) {
-      if (localStorage.getItem("unSubscribedUserId"))
+      console.log("no user");
+      if (localStorage.getItem("unSubscribedUserId")) {
         setUnSubscribedUserId(
           localStorage.getItem("unSubscribedUserId") as string
         );
-      const userDoc = doc(
-        db,
-        "users",
-        localStorage.getItem("unSubscribedUserId") as string
-      );
-      getDoc(userDoc).then((snap) => {
-        if (!snap.exists()) {
-          createUserStorage(
-            localStorage.getItem("unSubscribedUserId") as string
-          );
-          setRerender(!rerender);
-        }
-      });
-    } else {
-      const uId = Math.random().toString(36).substring(2, 14);
-      localStorage.setItem("unSubscribedUserId", uId);
-      setUnSubscribedUserId(uId);
-      createUserStorage(uId);
-      setRerender(!rerender);
+        const userDoc = doc(
+          db,
+          "users",
+          localStorage.getItem("unSubscribedUserId") as string
+        );
+        getDoc(userDoc).then((snap) => {
+          if (!snap.exists()) {
+            createUserStorage(
+              localStorage.getItem("unSubscribedUserId") as string
+            );
+            setRerender(!rerender);
+          }
+        });
+      } else {
+        const uId = Math.random().toString(36).substring(2, 14);
+        localStorage.setItem("unSubscribedUserId", uId);
+        setUnSubscribedUserId(uId);
+        createUserStorage(uId);
+        setRerender(!rerender);
+      }
     }
   }, [currentUser]);
 
