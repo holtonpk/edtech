@@ -1,7 +1,7 @@
 "use client";
 import React, {useState} from "react";
 import {Icons} from "@/components/icons";
-import {NavBar} from "../page";
+import {NavBar} from "../navbar";
 import UserUploads from "./user-uploads";
 import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";

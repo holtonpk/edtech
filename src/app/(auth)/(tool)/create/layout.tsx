@@ -1,7 +1,7 @@
 import {constructMetadata} from "@/lib/utils";
 
 export const metadata = constructMetadata({
-  title: "Dashboard",
+  title: "Create - Frizzle AI",
   image: "image/favicon.ico",
 });
 

@@ -1,7 +1,7 @@
 import React from "react";
 import {Icons} from "@/components/icons";
 import {UserPresentations} from "./user-presentations";
-import {NavBar} from "../page";
+import {NavBar} from "../navbar";
 import {User} from "firebase/auth";
 import {FullSlideData, UploadTypeServer} from "@/config/data";
 

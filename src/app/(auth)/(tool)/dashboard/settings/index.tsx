@@ -1,7 +1,7 @@
 "use client";
 import React, {useState} from "react";
 import {Icons} from "@/components/icons";
-import {NavBar} from "../page";
+import {NavBar} from "../navbar";
 import UserSettings from "./user-settings";
 
 import {
