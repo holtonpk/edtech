@@ -164,7 +164,6 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
   useEffect(() => {
     if (!currentUser) {
-      console.log("no user");
       if (localStorage.getItem("unSubscribedUserId")) {
         setUnSubscribedUserId(
           localStorage.getItem("unSubscribedUserId") as string
@@ -303,7 +302,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     // setVerifyCode(newCode);
     verifyCode.current = newCode;
     await emailjs.send(
-      "service_3hrbxiu",
+      "service_78m74ru",
       "template_uyczd6a",
       {
         to_name: auth.currentUser?.displayName,
@@ -316,7 +315,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
   async function sendVerificationEmail(to_name: string, to_email: string) {
     await emailjs.send(
-      "service_3hrbxiu",
+      "service_78m74ru",
       "template_uyczd6a",
       {
         to_name,
