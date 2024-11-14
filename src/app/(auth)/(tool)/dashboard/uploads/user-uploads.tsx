@@ -54,7 +54,7 @@ import {
   deleteObject,
   listAll,
 } from "firebase/storage";
-import {useUserData} from "../page";
+import {useUserData} from "@/context/user-data-context";
 
 const UserUploads = () => {
   const {userUploads, setUserUploads} = useUserData()!;

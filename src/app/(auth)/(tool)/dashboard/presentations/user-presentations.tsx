@@ -80,7 +80,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {MAX_UNSUB_GENERATIONS} from "@/config/data";
-import {useUserData} from "../page";
+import {useUserData} from "@/context/user-data-context";
 
 export const UserPresentations = () => {
   const {currentUser, unSubscribedUserId, setShowLoginModal} = useAuth()!;
