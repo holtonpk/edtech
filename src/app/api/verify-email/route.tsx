@@ -1,16 +1,6 @@
 import {NextResponse} from "next/server";
 import admin from "firebase-admin";
 
-if (admin.apps.length === 0) {
-  // Check if the app is already initialized
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(
-        process.env.NEXT_PUBLIC_FIREBASE_SERVICE_ACCOUNT_KEY as string
-      ) as admin.ServiceAccount
-    ),
-  });
-}
 async function verifyEmail(userId: string) {
   try {
     // Update the emailVerified field to true
@@ -28,6 +18,16 @@ export async function POST(req: Request) {
   const {userId} = await req.json();
 
   try {
+    if (admin.apps.length === 0) {
+      // Check if the app is already initialized
+      admin.initializeApp({
+        credential: admin.credential.cert(
+          JSON.parse(
+            process.env.NEXT_PUBLIC_FIREBASE_SERVICE_ACCOUNT_KEY as string
+          ) as admin.ServiceAccount
+        ),
+      });
+    }
     await verifyEmail(userId);
     return NextResponse.json({
       success: true,
