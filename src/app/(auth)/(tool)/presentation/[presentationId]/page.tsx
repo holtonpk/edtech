@@ -31,9 +31,7 @@ const Presentation = ({params}: {params: {presentationId: string}}) => {
 
   return (
     <div className="h-fit md:h-screen w-screen  flex flex-col overflow-hidden gap-2">
-      {/* <NewProjectMessage /> */}
       <Background />
-      {/* <NavBar /> */}
       <AuthModal />
       <div className="h-screen w-screen overflow-hidden">
         <PresentationProvider projectId={presentationId}>
