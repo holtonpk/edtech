@@ -14,8 +14,17 @@ import {
   UploadType,
   UnformattedResponse,
   MAX_FILE_SIZE_MB,
+  FullSlideData,
 } from "@/config/data";
-import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
+import {
+  collection,
+  serverTimestamp,
+  addDoc,
+  setDoc,
+  getDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import {db, app} from "@/config/firebase";
 import {useRouter} from "next/navigation";
 import {
@@ -28,9 +37,22 @@ import {
 } from "firebase/storage";
 import {Document, pdfjs} from "react-pdf";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.min.js";
-import {set} from "zod";
-
+import {useAuth} from "@/context/user-auth";
+import path from "path";
+import {text} from "stream/consumers";
+import {MAX_UNSUB_GENERATIONS} from "@/config/data";
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+export type Format = "less-words" | "more-words" | "bullet-points" | "mixed";
+
+type YoutubeScrapeResponse = {
+  id: string;
+  uploadProgress: number;
+  path: string;
+  title: string;
+  type: "youtube";
+  text: string;
+};
 
 interface PresentationContextType {
   // states -----------------------------
@@ -53,13 +75,25 @@ interface PresentationContextType {
   files: FileLocal[] | undefined;
   setFiles: React.Dispatch<React.SetStateAction<FileLocal[] | undefined>>;
   filesRef: React.MutableRefObject<FileLocal[] | undefined>;
+  isProcessing: React.MutableRefObject<boolean>;
+  step: number;
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+  prevStep: number;
+  setPrevStep: React.Dispatch<React.SetStateAction<number>>;
+  selectedFormat: Format;
+  setSelectedFormat: React.Dispatch<React.SetStateAction<Format>>;
+  slideCount: number[];
+  setSlideCount: React.Dispatch<React.SetStateAction<number[]>>;
+  generatingComplete: boolean;
+  setGeneratingComplete: React.Dispatch<React.SetStateAction<boolean>>;
   // functions -----------------------------
 
   GenerateAiPresentation: () => Promise<UnformattedResponse>;
-  deleteFile: (file: string) => Promise<void>;
+  deleteFile: (file: string, id: string) => Promise<void>;
   handleCancel: (file: FileLocal) => Promise<void>;
   processFiles: (fileList: FileList | File[]) => Promise<void>;
   addNewUploadsText: (text: string) => Promise<void>;
+  scrapeYoutube: (url: string) => Promise<YoutubeScrapeResponse>;
 }
 
 const PresentationContext = createContext<PresentationContextType | null>(null);
@@ -70,9 +104,10 @@ export function usePresentationCreate() {
 
 interface Props {
   children?: React.ReactNode;
+  startStep: number;
 }
 
-export const PresentationCreateProvider = ({children}: Props) => {
+export const PresentationCreateProvider = ({children, startStep}: Props) => {
   // states -----------------------------
   const [title, setTitle] = useState<string>("");
   const [studyMaterial, setStudyMaterial] = useState<string>("");
@@ -81,15 +116,26 @@ export const PresentationCreateProvider = ({children}: Props) => {
   const [numOfSlides, setNumOfSlides] = useState<number[]>([5]);
 
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [generatingComplete, setGeneratingComplete] = useState<boolean>(false);
   const [uploadText, setUploadText] = useState<string[] | undefined>([]);
   const [uploads, setUploads] = useState<UploadType[] | undefined>([]);
+  const isProcessing = useRef(false);
 
   // const [slideData, setSlideData] = useState<SlideData | undefined>(DummyData);
   const [slideData, setSlideData] = useState<SlideData | undefined>(undefined);
 
-  const router = useRouter();
+  const [prevStep, setPrevStep] = useState(0);
+
+  const [step, setStep] = useState(startStep);
+
+  const [slideCount, setSlideCount] = useState<number[]>([5]);
+
+  const [selectedFormat, setSelectedFormat] =
+    React.useState<Format>("less-words");
+
   // functions -----------------------------
   async function GenerateAiPresentation(): Promise<UnformattedResponse> {
+    console.log("Generating AI Presentation", selectedFormat);
     const response = await fetch("/api/gen-presentation", {
       method: "POST",
       headers: {
@@ -97,8 +143,7 @@ export const PresentationCreateProvider = ({children}: Props) => {
       },
       body: JSON.stringify({
         uploadText: uploadText?.join(" "),
-        description:
-          "a fun detailed presentation to present the material to my class ",
+        selectedFormat,
         // description,
         numOfSlides: 8,
       }),
@@ -113,6 +158,13 @@ export const PresentationCreateProvider = ({children}: Props) => {
   const filesRef = useRef<FileLocal[] | undefined>(undefined);
 
   const cancelUpload = useRef<boolean>(false);
+  const {
+    currentUser,
+    unSubscribedUserId,
+    createUserStorage,
+    setShowLoginModal,
+    userPresentations,
+  } = useAuth()!;
 
   const saveFileToFirebase = async (
     fileID: string,
@@ -171,14 +223,41 @@ export const PresentationCreateProvider = ({children}: Props) => {
     }
   };
 
-  const deleteFile = async (filePath: string): Promise<void> => {
+  const deleteFile = async (filePath: string, id: string): Promise<void> => {
     try {
+      const updatedFiles = filesRef.current?.filter((f) => f.id !== id);
+      setFiles(updatedFiles);
+      filesRef.current = updatedFiles;
       const storage = getStorage();
       const fileRef = ref(storage, filePath);
       await deleteObject(fileRef);
+      // if (currentUser) {
+      //   const userDocRef = doc(db, "users", currentUser.uid);
+      //   const userDoc = await getDoc(userDocRef);
+      //   if (userDoc.exists()) {
+      //     const userData = userDoc.data();
+
+      //     await setDoc(
+      //       userDocRef,
+      //       {
+      //         uploads: [
+      //           ...(userData.uploads || []).filter(
+      //             (upload: any) => upload.id !== id
+      //           ),
+      //         ],
+      //       },
+      //       {merge: true}
+      //     );
+      //   }
+      // }
+      // // Delete from uploads collection
+      // const uploadDocRef = doc(db, "uploads", id);
+      // if (uploadDocRef) {
+      //   await deleteDoc(uploadDocRef);
+      // }
       console.log("File deleted successfully!");
     } catch (error) {
-      console.error("Error deleting file. ", error);
+      console.log("Error deleting file. ", error);
       throw error;
     }
   };
@@ -224,49 +303,54 @@ export const PresentationCreateProvider = ({children}: Props) => {
   };
 
   const processFiles = async (fileList: FileList | File[]) => {
-    try {
-      const filesArray = Array.from(fileList);
-      const vaildFiles = filesArray.filter((file) => {
-        const fileType = getFileType(file);
+    if (!currentUser && userPresentations.length >= MAX_UNSUB_GENERATIONS) {
+      setShowLoginModal(true);
+      return;
+    } else {
+      try {
+        const filesArray = Array.from(fileList);
+        const vaildFiles = filesArray.filter((file) => {
+          const fileType = getFileType(file);
 
-        if (!fileType) {
-          console.log("Unsupported File Type");
-          //  display error here
-          return false;
+          if (!fileType) {
+            console.log("Unsupported File Type");
+            //  display error here
+            return false;
+          }
+
+          if (file.size > MAX_FILE_SIZE_MB) {
+            console.log("File Too Large");
+            //  display error here
+            return false;
+          }
+          return true;
+        });
+
+        const newFiles = vaildFiles.map((file) => ({
+          file,
+          uploadProgress: 0,
+          path: URL.createObjectURL(file),
+          title: file.name,
+          type: getFileType(file),
+          id: Math.random().toString(36).substr(2, 9),
+        }));
+
+        const updatedFiles = [...(filesRef.current || []), ...newFiles];
+        setFiles(updatedFiles);
+        filesRef.current = updatedFiles;
+
+        // setFiles((prevFiles) => {
+        //   const updatedFiles = [...(prevFiles || []), ...newFiles];
+        //   return updatedFiles;
+        // });
+
+        for (const fileLocal of newFiles) {
+          await uploadFile(fileLocal);
         }
-
-        if (file.size > MAX_FILE_SIZE_MB) {
-          console.log("File Too Large");
-          //  display error here
-          return false;
-        }
-        return true;
-      });
-
-      const newFiles = vaildFiles.map((file) => ({
-        file,
-        uploadProgress: 0,
-        path: URL.createObjectURL(file),
-        title: file.name,
-        type: getFileType(file),
-        id: Math.random().toString(36).substr(2, 9),
-      }));
-
-      const updatedFiles = [...(filesRef.current || []), ...newFiles];
-      setFiles(updatedFiles);
-      filesRef.current = updatedFiles;
-
-      // setFiles((prevFiles) => {
-      //   const updatedFiles = [...(prevFiles || []), ...newFiles];
-      //   return updatedFiles;
-      // });
-
-      for (const fileLocal of newFiles) {
-        await uploadFile(fileLocal);
+      } catch (error) {
+        console.error("Error processing the files ", error);
+        //  display error here
       }
-    } catch (error) {
-      console.error("Error processing the files ", error);
-      //  display error here
     }
   };
 
@@ -324,6 +408,7 @@ export const PresentationCreateProvider = ({children}: Props) => {
       //     f.file === fileLocal.file ? updatedFileLocal : f
       //   )
       // );
+      let uploadTextLocal = "";
 
       // TEXT CONVERSION IS HAPPENING HERE _______________________
       if (fileLocal.type === "pdf") {
@@ -339,6 +424,7 @@ export const PresentationCreateProvider = ({children}: Props) => {
 
         if (extractedText.length > 0) {
           await addNewUploadsText(extractedText);
+          uploadTextLocal = extractedText;
         }
       } else if (
         fileLocal.type === "png" ||
@@ -347,16 +433,19 @@ export const PresentationCreateProvider = ({children}: Props) => {
       ) {
         const imageText = await scanImageForText(fileID);
         await addNewUploadsText(imageText);
+        uploadTextLocal = imageText;
         handleProgressUpdate(fileLocal.id, 100);
       } else if (fileLocal.type === "mp3") {
         console.log("audio file");
         const audioText = await scanAudioForText(fileID);
         await addNewUploadsText(audioText);
+        uploadTextLocal = audioText;
         handleProgressUpdate(fileLocal.id, 100);
       } else if (fileLocal.type === "mp4") {
         console.log("video file");
         const videoText = await scanVideoForText(fileID);
         await addNewUploadsText(videoText);
+        uploadTextLocal = videoText;
         handleProgressUpdate(fileLocal.id, 100);
       }
 
@@ -365,7 +454,50 @@ export const PresentationCreateProvider = ({children}: Props) => {
       //   await addNewUploads(updatedFileLocal);
       // }
 
-      return updatedFileLocal;
+      // save to file to userStorage
+      let userDoc = null;
+      let userDocRef = null;
+      if (currentUser) {
+        userDocRef = doc(db, "users", currentUser?.uid);
+        userDoc = await getDoc(userDocRef);
+        if (!userDoc.exists()) {
+          await createUserStorage(currentUser.uid);
+        }
+      } else if (unSubscribedUserId) {
+        userDocRef = doc(db, "users", unSubscribedUserId);
+        userDoc = await getDoc(userDocRef);
+        if (!userDoc.exists()) {
+          console.log("creating user storage for unsubscribed user");
+          await createUserStorage(unSubscribedUserId);
+        }
+      }
+
+      if (userDocRef && userDoc && userDoc.exists()) {
+        const userData = userDoc.data();
+        await setDoc(
+          userDocRef,
+          {
+            uploads: [...(userData.uploads || []), fileID],
+          },
+          {merge: true}
+        );
+      }
+      try {
+        const uploadDocRef = doc(db, "uploads", fileID);
+        await setDoc(uploadDocRef, {
+          title: fileLocal.title,
+          id: fileID,
+          path: upload.path,
+          type: fileLocal.type,
+          uploadedBy: currentUser?.uid || unSubscribedUserId,
+          createdAt: serverTimestamp(),
+          text: uploadTextLocal,
+        });
+        return updatedFileLocal;
+      } catch (error) {
+        console.error("Error saving file to uploads collection", error);
+        return null;
+      }
       // More stuff here maybe
     } catch (error) {
       console.error("File Upload Failed: ", error);
@@ -562,13 +694,91 @@ export const PresentationCreateProvider = ({children}: Props) => {
     }
   };
 
+  const scrapeYoutube = async (url: string): Promise<YoutubeScrapeResponse> => {
+    const res = await fetch("/api/scrape-youtube", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        url,
+      }),
+    });
+
+    const data = await res.json();
+    const fileID = Math.random().toString(36).substring(7);
+
+    const newFile = {
+      id: fileID,
+      uploadProgress: 100,
+      path: url,
+      title: data.title as string,
+      type: "youtube" as "youtube",
+      text: data.text as string,
+    };
+    if (currentUser) {
+      const userDocRef = doc(db, "users", currentUser?.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        await setDoc(
+          userDocRef,
+          {
+            uploads: [...(userData.uploads || []), fileID],
+          },
+          {merge: true}
+        );
+      }
+    }
+
+    const uploadDocRef = doc(db, "uploads", fileID);
+    await setDoc(uploadDocRef, {
+      title: data.title,
+      id: fileID,
+      path: url,
+      type: "youtube",
+      uploadedBy: currentUser?.uid,
+      createdAt: serverTimestamp(),
+      text: data.text as string,
+    });
+
+    return newFile;
+  };
+
   const handleCancel = async (file: FileLocal) => {
     try {
       console.log(`Clicked cancel button -> ${JSON.stringify(file)}`);
       if (file.path) {
         // Delete from DB
-        await deleteFile(file.path);
+        await deleteFile(file.path, file.id);
         //  display error here
+
+        // delete from user storage
+        if (currentUser) {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+
+            await setDoc(
+              userDocRef,
+              {
+                uploads: [
+                  ...(userData.uploads || []).filter(
+                    (upload: any) => upload.id !== file.id
+                  ),
+                ],
+              },
+              {merge: true}
+            );
+          }
+        }
+        // Delete from uploads collection
+        const uploadDocRef = doc(db, "uploads", file.id);
+        if (uploadDocRef) {
+          await deleteDoc(uploadDocRef);
+        }
 
         // Delete from local state
         const updatedFiles = filesRef.current?.filter(
@@ -619,12 +829,24 @@ export const PresentationCreateProvider = ({children}: Props) => {
     files,
     setFiles,
     filesRef,
+    isProcessing,
+    step,
+    setStep,
+    prevStep,
+    setPrevStep,
+    selectedFormat,
+    setSelectedFormat,
+    slideCount,
+    setSlideCount,
+    generatingComplete,
+    setGeneratingComplete,
     // functions -----------------------------
     GenerateAiPresentation,
     deleteFile,
     handleCancel,
     processFiles,
     addNewUploadsText,
+    scrapeYoutube,
   };
 
   return (

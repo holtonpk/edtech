@@ -1,4 +1,5 @@
 "use client";
+import React, {useState} from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -34,47 +35,69 @@ import {
 import {motion, AnimatePresence} from "framer-motion";
 import {useAuth} from "@/context/user-auth";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+
+import {
+  Dialog,
+  DialogTrigger,
+  DialogFooter,
+  DialogHeader,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
+
+import {useRouter} from "next/navigation";
 
 export function DashSidebar() {
   const items = [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: Home,
+      title: "Presentations",
+      url: "/dashboard#presentations",
+      icon: Icons.presIcon,
     },
     {
       title: "Uploads",
-      url: "#",
+      url: "/dashboard#uploads",
       icon: FileText,
     },
 
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard#settings",
       icon: Settings,
     },
   ];
 
   const {open} = useSidebar();
+  const {currentUser, logOut, setShowLoginModal} = useAuth()!;
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex gap-2 items-center w-full  ">
-          <div className="bg-primary/20 rounded-[6px] p-1 aspect-square h-fit w-fit flex items-center justify-center">
-            <Icons.wand className="w-5 h-5 text-primary" />
+        {open ? (
+          <motion.div
+            animate={{opacity: 1}}
+            initial={{opacity: 0}}
+            transition={{duration: 0.8, delay: 0.2}}
+            className="flex gap-1  justify-center items-center  w-full  mt-1  "
+          >
+            <Icons.logo className="w-[24px] h-[24px] text-primary" />
+            <h1 className="font-bold flex items-center text-black gap-[2px] mt-[2px] text-2xl poppins-bold group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0 opacity-100 transition-opacity duration-300">
+              Frizzle
+              <span className="text-primary">.AI</span>
+            </h1>
+          </motion.div>
+        ) : (
+          <div className="flex gap-1 items-center justify-center w-full pl-1 mt-1 h-[28px] ">
+            <Icons.logo className="w-[22px] h-[22px] text-primary" />
           </div>
-
-          <h1 className="font-bold flex items-center text-black gap-[2px] text-xl poppins-bold group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0 opacity-100 transition-opacity duration-300">
-            Frizzle
-            <span className="text-primary">.ai</span>
-          </h1>
-        </div>
+        )}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Pages</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -90,10 +113,34 @@ export function DashSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {!currentUser && open && (
+          <motion.div
+            animate={{opacity: 1}}
+            initial={{opacity: 0}}
+            transition={{duration: 0.8, delay: 0.2}}
+            className="h-fit w-[90%] mx-auto  rounded-lg  flex flex-col gap-4 p-4 bg-card border-border border"
+          >
+            <p className="text-sm text-center  poppins-regular">
+              Create an account to access the full power of Frizzle. Don&apos;t
+              worry it&apos;s free!
+            </p>
+
+            <Button
+              onClick={() => {
+                setShowLoginModal(true);
+              }}
+              className="text-sm w-full "
+            >
+              Create account
+            </Button>
+          </motion.div>
+        )}
       </SidebarContent>
-      <SidebarFooter>
-        <UserInfo />
-      </SidebarFooter>
+      {currentUser && currentUser?.uid && (
+        <SidebarFooter>
+          <UserInfo />
+        </SidebarFooter>
+      )}
       <SidebarRail>
         <motion.div
           animate={
@@ -121,11 +168,13 @@ export function DashSidebar() {
 
 export const UserInfo = () => {
   const {open} = useSidebar();
-  const {currentUser, logOut} = useAuth()!;
+  const {currentUser, logOut, setShowLoginModal} = useAuth()!;
+
+  const [openMenu, setOpenMenu] = useState(false);
 
   return (
     <>
-      {currentUser && currentUser?.uid ? (
+      {currentUser && currentUser?.uid && (
         <div className="flex flex-col gap-4 items-center s  relative ">
           <AnimatePresence>
             {open ? (
@@ -136,7 +185,7 @@ export const UserInfo = () => {
                 transition={{duration: 0.2}}
                 className="w-full h-fit"
               >
-                <DropdownMenu>
+                <DropdownMenu open={openMenu} onOpenChange={setOpenMenu}>
                   <DropdownMenuTrigger asChild>
                     {/* {currentUser.displayName} */}
 
@@ -173,9 +222,7 @@ export const UserInfo = () => {
             <Link href="/settings">Notifications</Link>
           </DropdownMenuItem> */}
                     <DropdownMenuItem className="hover:bg-destructive/30">
-                      <button onClick={logOut} className=" text-destructive">
-                        Logout
-                      </button>
+                      <LogoutDialog setOpenMenu={setOpenMenu} />
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -193,13 +240,30 @@ export const UserInfo = () => {
             )}
           </AnimatePresence>
         </div>
-      ) : (
-        <>
-          {open && (
-            <div className="flex flex-col gap-4 items-center border-b border-border  relative mt-auto" />
-          )}
-        </>
       )}
     </>
+  );
+};
+
+const LogoutDialog = ({
+  setOpenMenu,
+}: {
+  setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const router = useRouter();
+
+  const {logOut} = useAuth()!;
+
+  const [openLogout, setOpenLogout] = useState(false);
+
+  const handleLogout = async () => {
+    await logOut();
+    setOpenMenu(false);
+  };
+
+  return (
+    <button onClick={handleLogout} className=" text-destructive">
+      Logout
+    </button>
   );
 };

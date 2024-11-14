@@ -33,6 +33,10 @@ export interface formatting {
 }
 
 export interface UnformattedResponse {
+  titleSlide: {
+    title: string;
+    description: string;
+  };
   slides: {
     textBoxes: {
       text: string;
@@ -51,6 +55,7 @@ export interface FullSlideData {
   slideData: {slides: Slide[]};
   recentColors: string[];
   title: string;
+  creator?: string;
 }
 
 export interface SlideData {
@@ -139,7 +144,15 @@ export type UploadType = {
   path: string;
   type: "pdf" | "mp4" | "jpg" | "png" | "jpeg" | "mp3" | "doc" | "docx";
 };
-
+export type UploadTypeServer = {
+  title: string;
+  id: string;
+  path: string;
+  type: string;
+  uploadedBy: string;
+  createdAt: Timestamp;
+  text: string;
+};
 export type FileLocal = {
   id: string;
   file?: File;
@@ -166,6 +179,8 @@ export type Image = {
 
 export const FILE_SIZE = 20000;
 export const MAX_FILE_SIZE_MB = FILE_SIZE * 1024 * 1024;
+
+export const MAX_UNSUB_GENERATIONS = 1;
 
 export interface CreatePresentationData {
   uploadText: string;

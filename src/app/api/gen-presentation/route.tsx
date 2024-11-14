@@ -6,13 +6,30 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-  const {uploadText, description, numOfSlides} = await req.json();
+  const {uploadText, selectedFormat} = await req.json();
+
+  let slideLayout = "";
+
+  if (selectedFormat === "less-words") {
+    slideLayout = "with a max word count of 50.`";
+  } else if (selectedFormat === "more-words") {
+    slideLayout = "with a min word count of 100.";
+  } else if (selectedFormat === "bullet-points") {
+    slideLayout = "containing bullet points.";
+  } else {
+    slideLayout = "containing a mix of bullet points and paragraphs.";
+  }
 
   const completion = await openai.chat.completions.create({
     messages: [
       {
         role: "system",
-        content: `Respond only in the following json type: ${responseType}. Create a presentation with the following in mind ${description}. The presentation should have ${numOfSlides} slides. Each slide should have one text box with a title and one or more text boxes with body text. Text should be formatted in html. The presentation should help teach the following material:${uploadText}`,
+        content: `Create presentation content based on: "${uploadText}". 
+Only respond in this format: ${responseType} 
+- The titleSlide.title should be a short, descriptive title. 
+- The titleSlide.description should be a one-sentence overview. 
+- Each slide should include a textBox for a header and text boxes ${slideLayout} with key data points or insights on the topic, ensuring clarity and engagement.
+Focus on concise, impactful content that’s easy for a general audience to follow.`,
       },
     ],
     model: "gpt-4-turbo",
@@ -20,22 +37,35 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     success: true,
-    response:
-      // DummyResponse
-      JSON.parse(completion.choices[0].message.content || "[]"),
+    response: JSON.parse(completion.choices[0].message.content || "[]"),
   });
 }
 
 export async function GET() {
   const uploadText = dummyUploadText;
-  const description = "a fun engaging presentation for may 5th grade class";
-  const numOfSlides = "5";
+  let selectedFormat = "more-words";
+  let slideLayout = "";
+
+  if (selectedFormat === "less-words") {
+    slideLayout = "with a max word count of 50.`";
+  } else if (selectedFormat === "more-words") {
+    slideLayout = "with a min word count of 100.";
+  } else if (selectedFormat === "bullet-points") {
+    slideLayout = "containing bullet points.";
+  } else {
+    slideLayout = "containing a mix of bullet points and paragraphs.";
+  }
 
   const completion = await openai.chat.completions.create({
     messages: [
       {
         role: "system",
-        content: `Respond only in the following json type: ${responseType}. Create a presentation with the following in mind ${description}. The presentation should have ${numOfSlides} slides. The material for the presentation is as follows:${uploadText}`,
+        content: `Create presentation content based on: "${uploadText}". 
+Only respond in this format: ${responseType} 
+- The titleSlide.title should be a short, descriptive title. 
+- The titleSlide.description should be a one-sentence overview. 
+- Each slide should include a textBox for a header and text boxes ${slideLayout} with key data points or insights on the topic, ensuring clarity and engagement.
+Focus on concise, impactful content that’s easy for a general audience to follow.`,
       },
     ],
     model: "gpt-4-turbo",
@@ -43,13 +73,15 @@ export async function GET() {
 
   return NextResponse.json({
     success: true,
-    response:
-      // JSON.parse(completion.choices[0].message.content),
-      JSON.parse(completion.choices[0].message.content || "[]"),
+    response: JSON.parse(completion.choices[0].message.content || "[]"),
   });
 }
 
 const responseType = `type UnformattedResponse = {
+titleSlide:{
+  title: string;
+  description: string;
+  },
     slides: {
       textBoxes: {
         text: string;
@@ -58,6 +90,5 @@ const responseType = `type UnformattedResponse = {
   };
 }`;
 
-// export const testResponseTypeString = JSON.stringify(responseFormat);
-
-const dummyUploadText = `Throughout my years, I’ve been captivated by the stories that shape our  world – tales of determination, of individuals rising against odds, of  dreams sculpting realities. The world is teeming with success stories, each  as unique as the fingerprints of those who forged them. But as I navigated  my way through countless tales of triumphs and trials, I noticed a void.  While there were countless expansive biographies and technical business  texts, there was a lack of compelling narratives that could inspire us in  mere minutes. I envisioned a collection that could be savored during brief  moments stolen from a bustling day—a coffee break, a short commute, or  those fleeting minutes before sleep.  “Snapshots of Success” is the culmination of that vision. It is  a passion project, fueled by my deep respect for the indomitable spirit  of entrepreneurs and an earnest desire to offer nuggets of inspiration to  dreamers everywhere. Every narrative chosen, every entrepreneur’s story  penned down, has been a personal journey for me, intertwining my pas -  sion for storytelling with my respect for the world’s changemakers. This is  not just a book; it’s a labor of love, capturing the essence of the entrepre -  neurial journey.  Preface Justin Kan  Bernard Arnault  Tyler Perry  Ray Kroc  Elon Musk  Mrs. B  Howard Schultz  Michael Dell  Austin Russell  Mr. Beast  Richard Branson  Pavel Durov  Reed Hastings  Tope Awotona  Ingvar Kamprad  Travis Kalanick  Whitney Wolfe Herd  Jan Koum  The Collison Brothers  Masayoshi Son  Peter Thiel  Michael Rubin  Mark Zuckerberg  Sophia Amoruso  Palmer Luckey  Jamie Siminoff  Phil Knight  Shahid Khan  Dave Portnoy  Tony Xu  Stewart Butterfield  Henry Ford  Felix Dennis  Dana White  Oprah Winfrey  Jeff Bezos  Samwer Brothers  Ben Francis  Steve Ells  Luis von Ahn  Walt Disney  Mark Cuban  Sam Altman  Marc Lore  Flexport  Rocket Labs  Melanie Perkins  Apoorva Mehta  Steve Jobs  Sam Zemurray  1   80  4   83  14   93  7   86  10   89  17   96  20   99  23   102  26   105  29   108  33   111  36   114  39   118  42   121  45   125  48   129  53   133  56   136  59   139  62   142  65   145  68   148  71   151  74   154  77   157  Contents Entrepreneurship is about more than just profits and losses. It is about  heartbeats, relentless pursuits, and the unyielding spirit that rises from  failures to embrace success. “Snapshots of Success” is a curated journey  through the tapestry of such dreams and realities. Through these pages,  you will traverse the lives of 50 trailblazers, witnessing their lowest lows  and their highest highs. You will delve deep into the moments of doubt,  the leaps of faith, and the tireless perseverance that define each journey.  You will read stories of people who, just like you, started with a dream,  navigated through storms and transformed their vision into ventures that  left an indelible mark on the business realm.  But more than the tales of their success, this collection seeks to  unveil the person behind the business, making it a profoundly human  experience. The ethos of this book is to inspire, but also to remind readers  that success isn’t just about the destination; it’s profoundly about the jour -  ney. Whether you’re an aspiring entrepreneur at the cusp of a new venture  or a seasoned veteran seeking a spark of inspiration, these tales promise  insights, lessons, and above all, a reflection of a human’s innate drive to  create, conquer, and thrive.  Introduction 1  This college student’s seemingly silly idea exploded into an online revolu -  tion. A hat, a camera, and a vision led to a nearly billion-dollar handshake.  Let’s uncover the mastermind behind the game-changer.  After graduating from Yale with a double major in physics and  philosophy, Justin Kan, armed with a curious mind and a desire to make  his mark in the world, embarked on a path that would change the face of  live streaming and gaming forever.  The story began when Justin launched Justin.tv, a platform where  he lifecasted every moment of his daily life using a camera affixed to his  cap. This concept of “lifecasting” was novel and quickly captured the  world’s attention. Media outlets clamored for interviews with Justin to  delve deeper into this fascinating idea and the platform itself.  Justin Kan  1 2  However, as Justin explored the possibilities of his creation, he  realized its potential beyond just lifecasting. Together with his friends  Emmett Shear, Michael Seibel, and Kyle Vogt, he relaunched Justin.tv in  2007, this time allowing other users to create their own channels and lives -  tream anything they wanted.  The platform’s popularity soared as it attracted millions of viewers  to watch everything from football to UFC. Within a year, Justin.tv boast -  ed over 30,000 broadcasting accounts and started expanding its horizons,  adding various categories to cater to a diverse audience. Among these new  categories, gaming streams emerged as the most popular and compelling  content, attracting a massive and dedicated following.  The success of gaming streams inspired Justin to create a dedi -  cated platform for gamers. Thus, on June 6, 2011, Twitch.tv was born, a  live streaming service exclusively for gaming enthusiasts. Twitch quickly  became a sensation in the gaming community, drawing over 35 million  unique visitors every month by 2013. The platform’s meteoric rise earned  it a place as a leader in the industry.  The burgeoning popularity of Twitch led to significant changes  within the parent company, Justin.tv, Inc. After three years of operating  as an offshoot of Justin.tv, Twitch took over as the primary brand and the  company rebranded to Twitch Interactive in 2014, signaling a shift in fo -  cus and resources towards Twitch as their primary offering. Twitch contin -  ued to flourish, captivating millions with gameplay streams and transform -  ing gamers into online celebrities.  Not long after, the Twitch team announced that they would delete  all of Justin.tv’s archived content, which marked the true beginning of the  end for Justin.tv. Around this time, rumors began circulating that Google  and YouTube were both interested in acquiring Twitch. Finally, on August 3  5, 2014, Justin.tv’s co-founders announced that they were shutting down  their original platform for good.  Less than a month later, Amazon announced that it had acquired  Twitch for a jaw-dropping $970 million. It’s estimated that each of the  four Twitch founders owned around 12.5% of Twitch at the time it sold.  That means Justin’s pre-tax cut would have been around $120 million.  After cashing out of Twitch, Justin went on to found multiple other  successful ventures including Socialcam, a video sharing app that was  acquired for a remarkable $60 million just a year after launch.  Today, Justin can be found pouring his millions into what he be -  lieves is the next big thing; Web 3 Gaming.  1 Lesson For You: “First they ignore you, then  they laugh at you, then they fight you, then you  win.”  - Mahatma Gandhi`;
+const dummyUploadText = `American Civil War Study Guide - Grade 8 Overview The American Civil War, fought from 1861 to 1865, was a pivotal conflict in United States history. It was primarily between the Northern states (the Union) and the Southern states that seceded to form the Confederate States of America. Key Topics 1. Causes of the Civil War Economic Differences: Industrial North vs. Agricultural South. Slavery: Central issue, differing views on morality and economics of slavery. States' Rights: Debate over the power of federal vs. state governments. Key Events: Missouri Compromise, Compromise of 1850, Kansas-Nebraska Act, Dred Scott Decision. 2. Major Battles and Campaigns First Battle of Bull Run: First major battle, showed that the war would be long and costly. Battle of Gettysburg: Turning point of the war, Union victory that stopped Confederate invasion of the North. Siege of Vicksburg: Gave the Union control of the Mississippi River. Sherman's March to the Sea: Devastating total war strategy used by the North to break the Southern will to fight. 3. Important Figures Abraham Lincoln: President of the United States, led the Union. Jefferson Davis: President of the Confederate States of America. Ulysses S. Grant: Union general, later became the 18th President of the U.S. Robert E. Lee: Confederate general, known for his leadership in several major battles. 4. Emancipation Proclamation Issued by Lincoln in 1863: Declared the freedom of all slaves in Confederate-held territory. Impact: Changed the moral and political stakes of the Civil War, allowing Union to recruit African American soldiers. 5. End of the War and Reconstruction Appomattox Court House: Site of Lee's surrender to Grant in 1865, marking the end of the Civil War. Reconstruction: Period following the war, focused on rebuilding the South and integrating freed slaves into society. Amendments: 13th (abolished slavery), 14th (citizenship and equal protection under the law), and 15th (voting rights regardless of race). Study Tips Review Key Dates and Events: Helps in understanding the sequence and impact of events. Understand Key Figures' Contributions: Knowing what each person contributed can help contextualize the war. Use Flashcards: For memorizing important terms and definitions. Practice with Timelines: Helps visualize the chronological order of events. Sample Questions What were the main economic differences between the North and the South? Explain the significance of the Emancipation Proclamation. Describe the effects of the American Civil War on the southern states.
+`;

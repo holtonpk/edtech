@@ -158,16 +158,15 @@ export const PresentationCard = ({presId}: {presId: string}) => {
             style={{
               background: selectedSlide.background,
             }}
-            onClick={() => {
-              router.push(`/edit/${presId}`);
-            }}
-            className={`rounded-lg w-full relative aspect-[16/9] overflow-hidden p-6 flex items-center justify-center bg-white text-black   duration-300  border`}
+            className={`rounded-lg  w-full relative aspect-[16/9] overflow-hidden p-6 flex items-center justify-center bg-white text-black   duration-300  border`}
           >
             {scale ? (
               <div
                 className="w-[1000px]   aspect-[16/9] absolute overflow-hidden"
                 style={{transform: `scale(${scale})`}}
               >
+                {/* <div className="absolute top-20 left-[50px] w-[900px] bg-theme-purple h-4 z-[999]"></div> */}
+
                 {selectedSlide &&
                 selectedSlide.backgroundImage &&
                 selectedSlide.backgroundImage.path !== "undefined" ? (
@@ -195,9 +194,10 @@ export const PresentationCard = ({presId}: {presId: string}) => {
                     (textbox: TextBoxType, index: number) => (
                       <div
                         key={index}
-                        className=" p-2 absolute pointer-events-none"
+                        className=" absolute pointer-events-none"
                         style={{
                           top: textbox.position.y,
+                          // left: 30,
                           left: textbox.position.x,
                           textAlign: textbox.textAlign
                             ? textbox.textAlign
@@ -207,6 +207,8 @@ export const PresentationCard = ({presId}: {presId: string}) => {
                           width: textbox.size.width,
                           transform: `rotate(${textbox.rotation}deg)`,
                           fontSize: `${textbox.fontSize}px`,
+
+                          padding: ".05in .1in .05in .1in",
                         }}
                         dangerouslySetInnerHTML={{__html: textbox.text}}
                       />

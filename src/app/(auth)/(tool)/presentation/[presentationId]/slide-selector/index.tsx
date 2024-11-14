@@ -199,6 +199,9 @@ const SlideSelector = ({areaWidth}: {areaWidth: number}) => {
           <div className="upload-row-edge-grad-left h-full w-20 z-30 pointer-events-none"></div>
         </div>
       )}
+      <div className="absolute right-0 h-full  z-30 animate-in fade-in-0 duration-500">
+        <div className="upload-row-edge-grad-right h-full w-20 z-30 pointer-events-none"></div>
+      </div>
       {/* <div className="absolute h-full right-0 flex">
         <div className=" w-20 h-full  upload-row-edge-grad-right z-30 pointer-events-none" />
         <button

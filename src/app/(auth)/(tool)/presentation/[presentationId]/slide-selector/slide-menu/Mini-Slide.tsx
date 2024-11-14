@@ -115,7 +115,7 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
         </PopoverContent>
       </Popover> */}
       {!active && !clone && (
-        <span className=" absolute bottom-0 p-2 px-3 pb-1 left-0 text-[12px] poppins-regular z-40 w-full overflow-hidden text-ellipsis h-fit whitespace-nowrap">
+        <span className=" absolute bottom-0 p-2 px-3 pb-1 left-0 text-[12px] poppins-regular z-40 w-full overflow-hidden text-ellipsis h-fit whitespace-nowrap pointer-events-none">
           {index} {slide?.title && ` - ${slide.title}`}
         </span>
       )}
@@ -176,20 +176,27 @@ ${
 
             {selectorScale ? (
               <div
-                className="w-[960px] h-[540px] absolute overflow-hidden"
+                className="w-[1000px] aspect-[16/9] absolute overflow-hidden"
                 style={{transform: `scale(${selectorScale})`}}
               >
                 {slide.textBoxes &&
                   slide.textBoxes.map((textbox: TextBoxType, index: number) => (
                     <div
                       key={index}
-                      className=" p-2 absolute pointer-events-none whitespace-pre-wrap break-words overflow-hidden"
+                      className=" absolute pointer-events-none  "
                       style={{
                         top: textbox.position.y,
+                        // left: 30,
                         left: textbox.position.x,
+                        textAlign: textbox.textAlign
+                          ? textbox.textAlign
+                          : "left",
+
                         height: "fit-content",
-                        width: textbox.size.width + 20,
+                        width: textbox.size.width + 17,
                         transform: `rotate(${textbox.rotation}deg)`,
+                        fontSize: `${textbox.fontSize}px`,
+                        padding: ".05in .1in .05in .1in",
                       }}
                     >
                       <div

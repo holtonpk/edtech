@@ -84,6 +84,14 @@ import {
   SendToBack,
   BringToFront,
   Clock,
+  LayoutGrid,
+  LayoutList,
+  Presentation,
+  Eye,
+  EyeOff,
+  Home,
+  LayoutDashboardIcon,
+  Mail,
 } from "lucide-react";
 
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
@@ -112,7 +120,16 @@ import ImageIcon from "@mui/icons-material/Image";
 import TitleIcon from "@mui/icons-material/Title";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
+
 export const Icons = {
+  mail: Mail,
+  dash: LayoutDashboardIcon,
+  home: Home,
+  showPassword: Eye,
+  hidePassword: EyeOff,
+  presentation: Presentation,
+  grid: LayoutGrid,
+  list: LayoutList,
   clock: Clock,
   sendToBack: SendToBack,
   bringToFront: BringToFront,
@@ -805,6 +822,322 @@ export const Icons = {
         fill="#FFF"
         d="M500.08 620.144a225 225 0 0 1 149.042 43.668 156.27 156.27 0 0 1 51.883 126.493 176 176 0 0 1-25.584 94.524 170.96 170.96 0 0 1-72.646 64.207 246.66 246.66 0 0 1-109.259 22.95H389.973v192.441H283.929V620.144zM389.884 888.848h91.265a118.5 118.5 0 0 0 80.683-24.066 89.3 89.3 0 0 0 27.281-70.413q0-89.97-104.57-89.97h-94.658z"
       ></path>
+    </svg>
+  ),
+  presIcon: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2.5"
+      className="lucide lucide-presentation"
+      viewBox="0 0 24 24"
+    >
+      <path d="M2 3h20M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3M7 21l5-5 5 5"></path>
+    </svg>
+  ),
+  uploadIcon: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2.5"
+      className="lucide lucide-upload"
+      viewBox="0 0 24 24"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path>
+    </svg>
+  ),
+  settingsIcon: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2.5"
+      className="lucide lucide-settings"
+      viewBox="0 0 24 24"
+    >
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  ),
+  google: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="705.6"
+      height="720"
+      viewBox="0 0 186.69 190.5"
+      {...props}
+    >
+      <path
+        fill="#4285f4"
+        d="M-1089.333-687.239v36.888h51.262c-2.251 11.863-9.006 21.908-19.137 28.662l30.913 23.986c18.011-16.625 28.402-41.044 28.402-70.052 0-6.754-.606-13.249-1.732-19.483z"
+        transform="translate(1184.583 765.171)"
+      ></path>
+      <path
+        fill="#34a853"
+        d="M-1142.714-651.791l-6.972 5.337-24.679 19.223c15.673 31.086 47.796 52.561 85.03 52.561 25.717 0 47.278-8.486 63.038-23.033l-30.913-23.986c-8.486 5.715-19.31 9.179-32.125 9.179-24.765 0-45.806-16.712-53.34-39.226z"
+        transform="translate(1184.583 765.171)"
+      ></path>
+      <path
+        fill="#fbbc05"
+        d="M-1174.365-712.61c-6.494 12.815-10.217 27.276-10.217 42.689s3.723 29.874 10.217 42.689c0 .086 31.693-24.592 31.693-24.592-1.905-5.715-3.031-11.776-3.031-18.098s1.126-12.383 3.031-18.098z"
+        transform="translate(1184.583 765.171)"
+      ></path>
+      <path
+        fill="#ea4335"
+        d="M-1089.333-727.244c14.028 0 26.497 4.849 36.455 14.201l27.276-27.276c-16.539-15.413-38.013-24.852-63.731-24.852-37.234 0-69.359 21.388-85.032 52.561l31.692 24.592c7.533-22.514 28.575-39.226 53.34-39.226z"
+        transform="translate(1184.583 765.171)"
+      ></path>
+    </svg>
+  ),
+  presIll: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+      fill="none"
+      viewBox="0 0 238 154"
+    >
+      <g clipPath="url(#clip0_3_15491)">
+        <path fill="#fff" d="M0 0h238v154H0z"></path>
+        <path fill="#197DFF" fillOpacity="0.7" d="M0 0h238v154H0z"></path>
+        <path
+          fill="#fff"
+          fillOpacity="0.3"
+          d="M163.901 14.25 0 19.5V141l167.062-7.783a40 40 0 0 0 9.147-1.507c57.081-16.368 59.452-97.08 2.938-115.311a45 45 0 0 0-15.246-2.149"
+        ></path>
+        <g filter="url(#filter0_d_3_15491)">
+          <rect width="143" height="86" x="40" y="35" fill="#fff" rx="7"></rect>
+        </g>
+        <path
+          fill="#197DFF"
+          d="m187.583 39.75 2.604-5.73 5.73-2.603-5.73-2.605-2.604-5.729-2.604 5.73-5.729 2.604 5.729 2.604zm-15.625 1.042-5.208-11.459-5.208 11.459L150.083 46l11.459 5.208 5.208 11.459 5.208-11.459L183.417 46zm15.625 11.458-2.604 5.73-5.729 2.603 5.729 2.605 2.604 5.729 2.604-5.73 5.73-2.604-5.73-2.604z"
+        ></path>
+        <rect
+          width="81"
+          height="16"
+          x="46"
+          y="43"
+          fill="#197DFF"
+          fillOpacity="0.3"
+          rx="3"
+        ></rect>
+        <rect
+          width="125"
+          height="12"
+          x="46"
+          y="65"
+          fill="#197DFF"
+          fillOpacity="0.3"
+          rx="3"
+        ></rect>
+        <rect
+          width="125"
+          height="12"
+          x="46"
+          y="83"
+          fill="#197DFF"
+          fillOpacity="0.3"
+          rx="3"
+        ></rect>
+        <rect
+          width="125"
+          height="12"
+          x="46"
+          y="101"
+          fill="#197DFF"
+          fillOpacity="0.3"
+          rx="3"
+        ></rect>
+      </g>
+      <defs>
+        <clipPath id="clip0_3_15491">
+          <path fill="#fff" d="M0 0h238v154H0z"></path>
+        </clipPath>
+        <filter
+          id="filter0_d_3_15491"
+          width="151"
+          height="94"
+          x="36"
+          y="35"
+          colorInterpolationFilters="sRGB"
+          filterUnits="userSpaceOnUse"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix"></feFlood>
+          <feColorMatrix
+            in="SourceAlpha"
+            result="hardAlpha"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          ></feColorMatrix>
+          <feOffset dy="4"></feOffset>
+          <feGaussianBlur stdDeviation="2"></feGaussianBlur>
+          <feComposite in2="hardAlpha" operator="out"></feComposite>
+          <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"></feColorMatrix>
+          <feBlend
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_3_15491"
+          ></feBlend>
+          <feBlend
+            in="SourceGraphic"
+            in2="effect1_dropShadow_3_15491"
+            result="shape"
+          ></feBlend>
+        </filter>
+      </defs>
+    </svg>
+  ),
+  uploadsIll: ({...props}: LucideProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+      fill="none"
+      viewBox="0 0 238 154"
+    >
+      <g clipPath="url(#clip0_5_15559)">
+        <path fill="#fff" d="M0 0h238v154H0z"></path>
+        <path fill="#9266F0" fillOpacity="0.6" d="M0 0h238v154H0z"></path>
+        <path
+          fill="#9266F0"
+          fillOpacity="0.4"
+          d="m118.5-27 19.942 45.64 48.395-35.49-12.461 46.752 67.262-18.31-42.395 38.603 72.808 2.497L208.117 75.5l63.934 22.808-72.808 2.497 42.395 38.603-67.262-18.31 12.461 46.751-48.395-35.489L118.5 178l-19.942-45.64-48.395 35.489 12.461-46.751-67.262 18.31 42.395-38.603-72.808-2.497L28.883 75.5l-63.934-22.808 72.808-2.497-42.395-38.603 67.262 18.31-12.46-46.751L98.557 18.64z"
+        ></path>
+        <path
+          fill="url(#paint0_linear_5_15559)"
+          d="m76.847 47.691.001.001 10.764 5.997 9.217 52.195a5.59 5.59 0 0 1-4.54 6.476l-47.991 8.449a5.6 5.6 0 0 1-6.486-4.534l-11.756-66.57a5.59 5.59 0 0 1 4.541-6.475l29.807-5.248z"
+        ></path>
+        <path
+          stroke="#B695FD"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="5"
+          d="m44.332 59.87 37.044 15.467-29.512 27.184z"
+        ></path>
+        <path
+          fill="#AB89F4"
+          fillOpacity="0.2"
+          d="m60.321 37.923 27.356 15.72-18.254 3.213a5.67 5.67 0 0 1-6.57-4.593z"
+        ></path>
+        <path
+          fill="url(#paint1_linear_5_15559)"
+          d="M200.281 54.789v.001l8.06 9.31-9.217 52.196a5.6 5.6 0 0 1-6.486 4.535l-47.989-8.449a5.59 5.59 0 0 1-4.541-6.476l11.756-66.57a5.597 5.597 0 0 1 6.485-4.533l29.806 5.247z"
+        ></path>
+        <path
+          stroke="#B695FD"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="4"
+          d="m189.447 63.469-25.153-4.429a3.65 3.65 0 0 0-4.227 2.955l-4.435 25.114a3.643 3.643 0 0 0 2.96 4.22l25.151 4.429a3.65 3.65 0 0 0 4.228-2.956l4.435-25.113a3.644 3.644 0 0 0-2.959-4.22"
+        ></path>
+        <path
+          stroke="#B695FD"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="4"
+          d="M168.946 74.656a3.643 3.643 0 1 0 1.267-7.175 3.643 3.643 0 1 0-1.267 7.175M189.239 85.627l-4.568-6.512a3.65 3.65 0 0 0-5.081-.894l-19.202 13.425"
+        ></path>
+        <path
+          fill="#AB89F4"
+          fillOpacity="0.2"
+          d="M188.097 39.966 208.42 64.08l-18.255-3.214a5.663 5.663 0 0 1-4.599-6.56z"
+        ></path>
+        <g filter="url(#filter0_d_5_15559)">
+          <path
+            fill="url(#paint2_linear_5_15559)"
+            d="M88.344 40.068a5.667 5.667 0 0 1 5.67-5.662h30.294l14.524 12.43 9.584 7.794v53.035a5.666 5.666 0 0 1-5.671 5.662h-48.73a5.667 5.667 0 0 1-5.671-5.662z"
+          ></path>
+          <path
+            fill="#AB89F4"
+            fillOpacity="0.2"
+            d="m124.21 34.406 24.207 20.224h-18.536a5.667 5.667 0 0 1-5.671-5.663z"
+          ></path>
+          <path
+            stroke="#B695FD"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="4"
+            d="M97.829 73.867h41.201M97.829 87.58h41.201M97.829 60.154h41.201"
+          ></path>
+        </g>
+      </g>
+      <defs>
+        <linearGradient
+          id="paint0_linear_5_15559"
+          x1="67.98"
+          x2="56.529"
+          y1="114.81"
+          y2="59.494"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#BEA4F6"></stop>
+          <stop offset="1" stopColor="#F2ECFE"></stop>
+        </linearGradient>
+        <linearGradient
+          id="paint1_linear_5_15559"
+          x1="168.957"
+          x2="182.129"
+          y1="114.832"
+          y2="40.017"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#BEA4F6"></stop>
+          <stop offset="1" stopColor="#F2ECFE"></stop>
+        </linearGradient>
+        <linearGradient
+          id="paint2_linear_5_15559"
+          x1="118.38"
+          x2="118.38"
+          y1="111.453"
+          y2="35.491"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#BEA4F6"></stop>
+          <stop offset="1" stopColor="#F2ECFE"></stop>
+        </linearGradient>
+        <clipPath id="clip0_5_15559">
+          <path fill="#fff" d="M0 0h238v154H0z"></path>
+        </clipPath>
+        <filter
+          id="filter0_d_5_15559"
+          width="68.073"
+          height="86.921"
+          x="84.344"
+          y="34.406"
+          colorInterpolationFilters="sRGB"
+          filterUnits="userSpaceOnUse"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix"></feFlood>
+          <feColorMatrix
+            in="SourceAlpha"
+            result="hardAlpha"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          ></feColorMatrix>
+          <feOffset dy="4"></feOffset>
+          <feGaussianBlur stdDeviation="2"></feGaussianBlur>
+          <feComposite in2="hardAlpha" operator="out"></feComposite>
+          <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"></feColorMatrix>
+          <feBlend
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_5_15559"
+          ></feBlend>
+          <feBlend
+            in="SourceGraphic"
+            in2="effect1_dropShadow_5_15559"
+            result="shape"
+          ></feBlend>
+        </filter>
+      </defs>
     </svg>
   ),
 };

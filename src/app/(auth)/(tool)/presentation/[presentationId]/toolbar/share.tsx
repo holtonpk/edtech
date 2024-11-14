@@ -265,7 +265,10 @@ const Share = () => {
     <>
       <DropdownMenu open={openMenu} onOpenChange={setOpenMenu}>
         <DropdownMenuTrigger asChild>
-          <Button variant={"outline"}>
+          <Button
+            variant={"outline"}
+            className=" shadow-none  text-[12px]  py-2 h-fit rounded-[8px]"
+          >
             <Icons.upload className="w-4 h-4 mr-3" />
             Share
           </Button>
@@ -340,7 +343,7 @@ const Share = () => {
                 )}
               </Button>
             </div>
-            <Button
+            {/* <Button
               onClick={downloadPPTX}
               variant={"ghost"}
               className="justify-start"
@@ -363,7 +366,7 @@ const Share = () => {
                 <Icons.googleDrive className="w-4 h-4 mr-2" />
               )}
               Save to Google Drive
-            </Button>
+            </Button> */}
           </DropdownMenuContent>
         )}
         {tab === "drive-permission" && (

@@ -1,40 +1,178 @@
 "use client";
-import {Icons} from "@/components/icons";
 import React, {
-  useContext,
-  useRef,
-  createContext,
   useEffect,
   useState,
-  useCallback,
-  useMemo,
+  useContext,
+  createContext,
+  ReactNode,
 } from "react";
-import {
-  FullSlideData,
-  Slide,
-  Modes,
-  AlignType,
-  TextBoxType,
-  Image,
-  Position,
-  Size,
-} from "@/config/data";
-
-import {db} from "@/config/firebase";
-import {useRouter} from "next/navigation";
-import {Button} from "@/components/ui/button";
-import ProfileNav from "@/src/app/(auth)/(tool)/components/profile-nav";
 import {useAuth} from "@/context/user-auth";
-import {createNewBlankPresentation} from "@/lib/utils";
-import Background from "@/components/background";
-import {UserPresentations} from "@/src/app/(auth)/(tool)/dashboard/user-presentations";
-import {FeaturedPresentations} from "@/src/app/(auth)/(tool)/dashboard/featured-pres";
 import {useSidebar} from "@/components/ui/sidebar";
+import Settings from "./settings";
+import Presentations from "./presentations";
+import Uploads from "./uploads";
+import AuthModal from "@/components/auth/auth-modal";
+import {doc, getDoc} from "firebase/firestore";
+import {db} from "@/config/firebase";
+import {FullSlideData, UploadTypeServer} from "@/config/data";
+
+interface UserContextType {
+  userPresentations: FullSlideData[];
+  setUserPresentations: React.Dispatch<React.SetStateAction<FullSlideData[]>>;
+  userUploads: UploadTypeServer[];
+  setUserUploads: React.Dispatch<React.SetStateAction<UploadTypeServer[]>>;
+  isLoading: boolean;
+}
+
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+// Context provider component
+export const UserDataProvider: React.FC<{children: ReactNode}> = ({
+  children,
+}) => {
+  const [userPresentations, setUserPresentations] = useState<FullSlideData[]>(
+    []
+  );
+  const [userUploads, setUserUploads] = useState<UploadTypeServer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const {currentUser, unSubscribedUserId, rerender} = useAuth()!;
+
+  const fetchPresentations = async (presentations: string[]) => {
+    if (!presentations) return [];
+    const presentationData = await Promise.all(
+      presentations.map(async (presentationId) => {
+        const presentationRef = doc(db, "presentations", presentationId);
+        const presentationSnap = await getDoc(presentationRef);
+        return presentationSnap.data();
+      })
+    );
+    setUserPresentations(presentationData as FullSlideData[]);
+  };
+
+  const fetchUploads = async (uploads: string[]) => {
+    if (!uploads) return [];
+    const uploadData = await Promise.all(
+      uploads.map(async (uploadId) => {
+        const uploadRef = doc(db, "uploads", uploadId);
+        const uploadSnap = await getDoc(uploadRef);
+        return uploadSnap.data();
+      })
+    );
+    setUserUploads(uploadData as UploadTypeServer[]);
+  };
+
+  const fetchUserData = async (userId: string) => {
+    if (!userId) return;
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const {presentations, uploads} = userSnap.data();
+      await fetchPresentations(presentations);
+      await fetchUploads(uploads);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const userId = currentUser?.uid || unSubscribedUserId;
+    if (userId) {
+      fetchUserData(userId);
+    }
+  }, [currentUser, unSubscribedUserId, rerender]);
+
+  const values = {
+    userPresentations,
+    setUserPresentations,
+    userUploads,
+    setUserUploads,
+    isLoading,
+  };
+
+  return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
+};
+
+// Custom hook to access user context
+export const useUserData = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error("useUserContext must be used within a UserProvider");
+  }
+  return context;
+};
 
 const Dashboard = () => {
   const {open} = useSidebar();
 
-  const {currentUser} = useAuth()!;
+  const [view, setView] = useState<string>(); // Default view
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setView(window.location.hash.replace("#", "") || "presentations");
+    };
+
+    // Set the initial view based on the current hash
+    handleHashChange();
+
+    // Add event listener for hash change
+    window.addEventListener("hashchange", handleHashChange);
+
+    // Cleanup event listener on component unmount
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const {currentUser, unSubscribedUserId} = useAuth()!;
+
+  // const [userPresentations, setUserPresentations] = useState<FullSlideData[]>(
+  //   []
+  // );
+  // const [userUploads, setUserUploads] = useState<UploadTypeServer[]>([]);
+
+  // const [isLoading, setIsLoading] = useState(true);
+
+  // const fetchPresentations = async (presentations: string[]) => {
+  //   if (!presentations) return [];
+  //   const presentationData = await Promise.all(
+  //     presentations.map(async (presentationId) => {
+  //       const presentationRef = doc(db, "presentations", presentationId);
+  //       const presentationSnap = await getDoc(presentationRef);
+  //       return presentationSnap.data();
+  //     })
+  //   );
+  //   setUserPresentations(presentationData as FullSlideData[]);
+  // };
+
+  // const fetchUploads = async (uploads: string[]) => {
+  //   if (!uploads) return [];
+  //   const uploadData = await Promise.all(
+  //     uploads.map(async (uploadId) => {
+  //       const uploadRef = doc(db, "uploads", uploadId);
+  //       const uploadSnap = await getDoc(uploadRef);
+  //       return uploadSnap.data();
+  //     })
+  //   );
+  //   setUserUploads(uploadData as UploadTypeServer[]);
+  // };
+
+  // useEffect(() => {
+  //   const fetchUserData = async (userId: string) => {
+  //     if (!userId) return;
+  //     const userRef = doc(db, "users", userId);
+  //     const userSnap = await getDoc(userRef);
+  //     if (userSnap.exists()) {
+  //       const {presentations, uploads} = userSnap.data();
+  //       await fetchPresentations(presentations);
+  //       await fetchUploads(uploads);
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   if (currentUser?.uid) {
+  //     fetchUserData(currentUser.uid);
+  //   } else if (unSubscribedUserId) {
+  //     fetchUserData(unSubscribedUserId);
+  //   }
+  // }, [currentUser, unSubscribedUserId]);
 
   return (
     <div
@@ -43,91 +181,24 @@ const Dashboard = () => {
     
     `}
     >
-      <div className="flex w-full justify-between items-center">
-        <h1 className="text-3xl poppins-bold">
-          Welcome back, {currentUser?.firstName}
-        </h1>
-        <div className="flex w-fit gap-4 text-primary">
-          <a>About</a>
-          <a>Learn</a>
-          <a>Share</a>
-        </div>
-      </div>
-      <div className="w-full flex gap-8  ">
-        <CreateNew />
-        <button className="w-fit border rounded-md flex gap-2 p-2 items-center text-left">
-          <div className="bg-primary/20 rounded-sm p-2 aspect-square w-fit h-fit flex items-center justify-center">
-            <Icons.wand className="w-5 h-5 text-primary" />
-          </div>
-          <div className="flex flex-col ">
-            <h1 className="text-lg font-bold">Create from upload</h1>
-            <p className="text-sm text-gray-500 whitespace-nowrap">
-              Create a new presentation from an uploaded file
-            </p>
-          </div>
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-8 w-full  relative z-30">
-        <FeaturedPresentations />
-        <UserPresentations />
-      </div>
+      <AuthModal />
+      <UserDataProvider>
+        {view === "presentations" && <Presentations />}
+        {view === "uploads" && <Uploads />}
+      </UserDataProvider>
+      {view === "settings" && <Settings />}
     </div>
   );
 };
 
 export default Dashboard;
 
-const NavBar = () => {
+export const NavBar = () => {
   return (
-    <div className="h-[60px] w-full   flex items-center justify-between px-10 relative z-50">
-      <div className="flex gap-2 items-center">
-        <div className="bg-primary/20 rounded-[6px] p-1 aspect-square h-fit w-fit flex items-center justify-center">
-          <Icons.wand className="w-5 h-5 text-primary" />
-        </div>
-        <h1 className="font-bold flex items-center gap-[2px] text-xl poppins-bold">
-          Frizzle
-          <span className="text-primary">ai</span>
-        </h1>
-      </div>
-      <ProfileNav />
+    <div className="flex w-fit gap-4 poppins-bold text-muted-foreground">
+      <a>About</a>
+      <a>Learn</a>
+      <a>Share</a>
     </div>
-  );
-};
-
-const CreateNewFromUpload = () => {
-  return <Button>Turn uploaded into presentation</Button>;
-};
-
-const CreateNew = () => {
-  const router = useRouter();
-  const {currentUser} = useAuth()!;
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const createNew = async () => {
-    if (!currentUser) return;
-    setIsLoading(true);
-    const projectId = await createNewBlankPresentation(currentUser);
-    router.push(`/edit/${projectId}`);
-    setIsLoading(false);
-  };
-
-  return (
-    <button
-      onClick={createNew}
-      disabled={isLoading}
-      className="w-fit border rounded-md hover:border-primary flex gap-2 p-2 items-center text-left "
-    >
-      <div className="bg-primary/20 rounded-sm p-2 aspect-square w-fit h-fit flex items-center justify-center">
-        <Icons.add className="w-5 h-5 text-primary" />
-      </div>
-      <div className="flex flex-col ">
-        <h1 className="text-lg font-bold">New blank presentation</h1>
-        <p className="text-sm text-gray-500 whitespace-nowrap">
-          Create a new presentation from an uploaded file
-        </p>
-      </div>
-    </button>
   );
 };

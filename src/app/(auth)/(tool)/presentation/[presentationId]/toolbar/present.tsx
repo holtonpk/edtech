@@ -5,6 +5,7 @@ import {Button} from "@/components/ui/button";
 import {Icons} from "@/components/icons";
 import {usePresentation} from "@/context/presentation-context-basic";
 import {Slide, TextBoxType} from "@/config/data";
+import {useAuth} from "@/context/user-auth";
 
 function Present() {
   const handle = useFullScreenHandle();
@@ -79,14 +80,24 @@ function Present() {
 
   const [showSlideMenu, setShowSlideMenu] = React.useState<boolean>(false);
 
+  const {currentUser, setShowLoginModal} = useAuth()!;
+
+  const handleClick = () => {
+    if (!currentUser) {
+      setShowLoginModal(true);
+    } else {
+      handle.enter();
+    }
+  };
+
   return (
     <div>
       <Button
         onClick={handle.enter}
         variant={"outline"}
-        className="bg-primary text-white"
+        className="bg-primary text-white hover:text-white  shadow-none border-none text-[12px] grad-animation py-2 h-fit rounded-[8px]"
       >
-        <Icons.play className="h-3 w-3 mr-3" />
+        <Icons.play style={{height: 16, width: 16}} className="h-2 w-2 mr-2" />
         Present
       </Button>
       {slideData && slideData.slides[activeSlideIndex] && (

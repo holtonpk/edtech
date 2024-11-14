@@ -3,6 +3,7 @@ import {twMerge} from "tailwind-merge";
 import {FullSlideData, Slide, TextBoxType, SlideImage} from "@/config/data";
 import {Timestamp} from "firebase/firestore";
 import {UserData} from "@/context/user-auth";
+import {Metadata} from "next";
 import {
   collection,
   addDoc,
@@ -242,3 +243,34 @@ export const createNewBlankPresentation = async (currentUser: UserData) => {
   const projectId = await saveToFirebase();
   return projectId;
 };
+
+export function constructMetadata({
+  title = "Frizzle AI",
+  description = "Turn anything into a presentation",
+  image = `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+}: {
+  title?: string;
+  description?: string;
+  image?: string;
+}): Metadata {
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: image,
+        },
+      ],
+    },
+    icons: {
+      icon: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+      shortcut: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+      apple: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+    },
+    metadataBase: new URL("https://useFrizzle.ai"),
+    themeColor: "#FFF",
+  };
+}

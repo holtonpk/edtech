@@ -916,6 +916,15 @@ input[type="number"] {
   transition: top 0.2s ease 0s;
 }
 
+.dashboard-presentCard-title {
+  display: -webkit-box;
+  max-width: 200px;
+  height: 50px;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .presentCard-content-closed {
   display: -webkit-box;
   max-width: 200px;
@@ -1095,4 +1104,50 @@ svg g .loading-animation {
     which means we could even have corner-gradients borders
   */
   background: hsl(var(--primary));
+}
+
+.grad-animation {
+  background: linear-gradient(90deg, #197dff, #9166f0);
+  background-size: 200% 200%;
+
+  -webkit-animation: AnimationName 8s ease infinite;
+  -moz-animation: AnimationName 8s ease infinite;
+  animation: AnimationName 8s ease infinite;
+}
+.grad-animation:hover {
+  filter: saturate(200%);
+}
+
+@-webkit-keyframes AnimationName {
+  0% {
+    background-position: 0% 58%;
+  }
+  50% {
+    background-position: 100% 43%;
+  }
+  100% {
+    background-position: 0% 58%;
+  }
+}
+@-moz-keyframes AnimationName {
+  0% {
+    background-position: 0% 58%;
+  }
+  50% {
+    background-position: 100% 43%;
+  }
+  100% {
+    background-position: 0% 58%;
+  }
+}
+@keyframes AnimationName {
+  0% {
+    background-position: 0% 58%;
+  }
+  50% {
+    background-position: 100% 43%;
+  }
+  100% {
+    background-position: 0% 58%;
+  }
 }
