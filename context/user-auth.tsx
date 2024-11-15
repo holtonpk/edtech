@@ -301,6 +301,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
     // setVerifyCode(newCode);
     verifyCode.current = newCode;
+
     await emailjs.send(
       "service_78m74ru",
       "template_uyczd6a",
@@ -314,16 +315,20 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
   }
 
   async function sendVerificationEmail(to_name: string, to_email: string) {
-    await emailjs.send(
-      "service_78m74ru",
-      "template_uyczd6a",
-      {
-        to_name,
-        code: verifyCode.current,
-        to_email,
-      },
-      "_xxtFZFU5RPJivl-9"
-    );
+    try {
+      await emailjs.send(
+        "service_78m74ru",
+        "template_uyczd6a",
+        {
+          to_name,
+          code: verifyCode.current,
+          to_email,
+        },
+        "_xxtFZFU5RPJivl-9"
+      );
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+    }
   }
 
   async function CreateCurrentUser() {
