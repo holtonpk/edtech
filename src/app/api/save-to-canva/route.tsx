@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 const fs = require("fs");
-
+export const maxDuration = 300;
 async function checkJobStatus(jobId: string, token: string) {
   const statusUrl = `https://api.canva.com/rest/v1/imports/${jobId}`;
   const delay = (ms: any) => new Promise((resolve) => setTimeout(resolve, ms));

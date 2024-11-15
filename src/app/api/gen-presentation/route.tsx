@@ -4,6 +4,7 @@ import {Size} from "@/config/data";
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const {uploadText, selectedFormat} = await req.json();
