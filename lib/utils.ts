@@ -247,9 +247,8 @@ export const createNewBlankPresentation = async (currentUser: UserData) => {
 export function constructMetadata({
   title = "Frizzle AI",
   description = "Turn anything into a presentation",
-  image = `/image/favicon.ico`,
-}: // image = `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
-{
+  image = `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+}: {
   title?: string;
   description?: string;
   image?: string;
