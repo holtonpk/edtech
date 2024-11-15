@@ -247,8 +247,9 @@ export const createNewBlankPresentation = async (currentUser: UserData) => {
 export function constructMetadata({
   title = "Frizzle AI",
   description = "Turn anything into a presentation",
-  image = `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
-}: {
+  image = `/image/favicon.ico`,
+}: // image = `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+{
   title?: string;
   description?: string;
   image?: string;
@@ -266,9 +267,12 @@ export function constructMetadata({
       ],
     },
     icons: {
-      icon: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
-      shortcut: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
-      apple: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+      // icon: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+      // shortcut: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+      // apple: `${process.env.NEXT_PUBLIC_SITE_URL}/image/favicon.ico`,
+      icon: `/image/favicon.ico`,
+      shortcut: `/image/favicon.ico`,
+      apple: `/image/favicon.ico`,
     },
     metadataBase: new URL("https://www.usefrizzle.ai/"),
     themeColor: "#FFF",
