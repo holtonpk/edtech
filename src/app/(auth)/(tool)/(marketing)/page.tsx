@@ -31,6 +31,8 @@ const CreatePageLayout = () => {
   return (
     <div className="h-fit">
       <Background />
+
+      <BackgroundIcons />
       <AuthModal />
       <div className="h-screen w-screen">
         <NavBar />
@@ -43,6 +45,59 @@ const CreatePageLayout = () => {
         </>
       )}
       <Footer />
+    </div>
+  );
+};
+
+const icons = [
+  "pencil",
+  "ruler",
+  "notebook",
+  "backpack",
+  "microscope",
+  "sparkles",
+  "grad",
+  "bulb",
+  "magnet",
+];
+
+// Function to shuffle an array
+const shuffleArray = (array: any[]) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+const BackgroundIcons = () => {
+  const columns = 9; // Fixed number of columns
+  const iconCount = icons.length * 9; // Each icon appears 3 times
+  const rows = Math.ceil(iconCount / columns); // Calculate required rows
+  const iconsPerRow = Array.from({length: rows}, () =>
+    shuffleArray(icons).flat().slice(0, columns)
+  ); // Generate random rows
+
+  return (
+    <div
+      className="w-screen h-screen grid  top-0 left-0 fixed z-[1]"
+      style={{
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        gridTemplateRows: `repeat(${rows}, 1fr)`,
+      }}
+    >
+      {iconsPerRow.flat().map((iconName, index) => {
+        const IconComponent = Icons[iconName];
+        return (
+          <div
+            key={index}
+            className="flex items-center justify-center w-full h-full"
+          >
+            <IconComponent className="w-10 h-10 fill-muted/20 text-muted/50" />
+          </div>
+        );
+      })}
     </div>
   );
 };

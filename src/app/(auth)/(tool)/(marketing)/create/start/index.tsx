@@ -59,18 +59,20 @@ export const Start = ({
           onDrop={onDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          className={`flex flex-col items-center pt-10 z-50 relative h-[calc(100vh-60px)] 
+          className={`flex flex-col items-center pt-4 z-50 relative h-[calc(100vh-60px)] 
   w-full
       `}
         >
-          <div className="h-fit relative w-full flex items-center  flex-col gap-8">
+          <div className="h-fit relative w-full flex items-center flex-col gap-8">
             <motion.div
               animate={{opacity: 1}}
               initial={{opacity: 0}}
               transition={{duration: 0.5, delay: 0.2}}
               exit={{opacity: 0}}
-              className="flex flex-col items-center  h-[150px] top-0 gap-4"
+              className="flex flex-col items-center  h-[150px] top-0 gap-4 relative"
             >
+              {/* <BackgroundIcons /> */}
+
               <h1 className="text-5xl font-bold poppins-bold text-center leading-[60px]">
                 Turn <i className="text-primary">anything</i> into a <br />{" "}
                 class presentation with AI
@@ -102,11 +104,11 @@ export const Start = ({
                 exit={{opacity: 0}}
                 className="flex flex-col absolute -left-10 -translate-x-full top-[30%] -translate-y-1/2 gap-1"
               >
-                <h1 className=" text-center text-primary hand-font text-2xl">
+                <h1 className=" text-center text-theme-purple hand-font text-2xl">
                   Get started by <br />
                   uploading a resource
                 </h1>
-                <Arrow1 className=" h-[90px] rotate-[0deg] fill-primary ml-20 -scale-x-[1]" />
+                <Arrow1 className=" h-[90px] rotate-[0deg] fill-theme-purple ml-20 -scale-x-[1]" />
               </motion.div>
             </motion.div>
           </div>
@@ -117,14 +119,30 @@ export const Start = ({
             exit={{opacity: 0}}
             className="flex absolute left-[80%] -translate-x-1/2 bottom-[120px] "
           >
-            <h1 className=" text-center text-primary hand-font  text-2xl">
+            <h1 className=" text-center text-theme-green hand-font  text-2xl">
               See why teachers are loving Frizzle AI.
             </h1>
-            <Arrow2 className="absolute h-[90px] rotate-[80deg] fill-primary ml-20 scale-x-[1] left-[20%] -translate-x-1/2 -bottom-4 translate-y-full" />
+            <Arrow2 className="absolute h-[90px] rotate-[80deg] fill-theme-green ml-20 scale-x-[1] left-[20%] -translate-x-1/2 -bottom-4 translate-y-full" />
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
+  );
+};
+
+const BackgroundIcons = () => {
+  return (
+    <div className="w-full h-full absolute">
+      <Icons.pencil className="w-8 h-8 fill-muted/50 text-muted absolute top-0 left-0" />
+      <Icons.ruler className="w-8 h-8 fill-muted/50 text-muted absolute top-0 -left-20" />
+      <Icons.notebook className="w-8 h-8 fill-muted/50 text-muted absolute -top-10 -left-10" />
+      <Icons.backpack className="w-8 h-8 fill-muted/50 text-muted absolute -top-14 left-5 rotate-[-12deg]" />
+      <Icons.microscope className="w-8 h-8 fill-muted/50 text-muted absolute -top-10 -left-24" />
+      <Icons.sparkles className="w-8 h-8 fill-muted/50 text-muted absolute -top-20 right-0" />
+      <Icons.grad className="w-8 h-8 fill-muted/50 text-muted absolute -top-20 right-0" />
+      <Icons.bulb className="w-8 h-8 fill-muted/50 text-muted absolute -top-20 right-0" />
+      <Icons.magnet className="w-8 h-8 fill-muted/50 text-muted absolute -top-20 right-0" />
+    </div>
   );
 };
 
@@ -144,7 +162,7 @@ const UploadManagerStart = ({
 
   return (
     <div
-      className={` h-fit flex gap-4 items-centers justify-center flex-col w-fit 
+      className={` h-fit flex gap-4 items-centers justify-center flex-col w-fit hover:scale-[102%] hover:rotate-[.5deg] transition-transform duration-300
           
             
             `}
@@ -209,7 +227,7 @@ const FileUploadStart = ({
           }}
           className="w-full  items-center flex flex-col gap-2 group"
         >
-          <Icons.files className="w-[150px] text-primary" />
+          <Icons.files className="w-[200px] text-primary" />
           {/* <div className="h-[80px]"></div> */}
           <span className="text-2xl font-bold">
             Drag & drop files to upload
@@ -217,7 +235,7 @@ const FileUploadStart = ({
           <p className="text-muted-foreground">
             Supported formats: .pdf .docs .mp4 .mp3 .png .jpg
           </p>
-          <div className="grid grid-cols-2 gap-4 items-center mt-2">
+          <div className="grid w-full gap-4 items-center mt-2">
             <div className="w-full p-2 px-4 h-fit rounded-[12px] border bg-primary text-white text-[12px] poppins-regular hover:bg-primary/90  ">
               Select files
             </div>
@@ -276,14 +294,14 @@ const YoutubeInput = ({
           Invalid link must be a youtube link
         </div>
       )}
-      <div className="w-full border rounded-md flex relative gap-1 p-2 items-center px-4 mb-4">
+      <div className="w-full border rounded-md flex relative gap-1 p-2 items-center px-4 ">
         <Icons.Youtube className="w-8 h-8 text-primary " />
         <input
           onChange={(e) => setUrl(e.target.value)}
           value={url}
           type="text"
           placeholder="Paste a youtube link here..."
-          className="w-full px-4 rounded-md border-none bg-transparent noFocus"
+          className="w-full px-2 rounded-md border-none bg-transparent noFocus"
         />
         {url && (
           <button

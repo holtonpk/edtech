@@ -92,6 +92,14 @@ import {
   Home,
   LayoutDashboardIcon,
   Mail,
+  Users,
+  RulerIcon,
+  Notebook,
+  Microscope,
+  Backpack,
+  GraduationCap,
+  LightbulbIcon,
+  Magnet,
 } from "lucide-react";
 
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
@@ -122,6 +130,13 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
 
 export const Icons = {
+  magnet: Magnet,
+  bulb: LightbulbIcon,
+  grad: GraduationCap,
+  notebook: Notebook,
+  microscope: Microscope,
+  backpack: Backpack,
+  people: Users,
   mail: Mail,
   dash: LayoutDashboardIcon,
   home: Home,

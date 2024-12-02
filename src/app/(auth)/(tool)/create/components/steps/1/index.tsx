@@ -460,14 +460,15 @@ const FileUploadStart = ({
           multiple
         />
 
-        <button
-          onClick={() => {
-            document.getElementById("file-input")?.click();
-            // setStep(1);
-          }}
-          className="w-full  items-center flex flex-col gap-2 group"
-        >
-          <Icons.files className="w-[150px] text-primary" />
+        <div className="w-full  items-center flex flex-col gap-2 group">
+          <button
+            onClick={() => {
+              document.getElementById("file-input")?.click();
+              // setStep(1);
+            }}
+            className="absolute  w-full h-full z-10"
+          ></button>
+          <Icons.files className="w-[200px] text-primary" />
           {/* <div className="h-[80px]"></div> */}
           <span className="text-2xl font-bold">
             Drag & drop files to upload
@@ -476,12 +477,12 @@ const FileUploadStart = ({
             Supported formats: .pdf .docs .mp4 .mp3 .png .jpg
           </p>
           <div className="grid grid-cols-2 gap-4 items-center mt-2">
-            <div className="w-full p-2 px-4 h-fit rounded-[12px] border bg-primary text-white text-[12px] poppins-regular hover:bg-primary/90  ">
+            <div className="w-full p-2 px-4 h-fit rounded-[12px] text-center border bg-primary text-white text-[12px] poppins-regular hover:bg-primary/90  ">
               Select files
             </div>
             <GoogleDriveImport />
           </div>
-        </button>
+        </div>
       </div>
       <div className="flex items-center text-center my-4">
         <div className="flex-1 border-t border-gray-300"></div>
@@ -532,11 +533,11 @@ const YoutubeInput = ({
   return (
     <>
       {error && (
-        <div className=" text-theme-red poppins-regular text-sm mb-2">
+        <div className=" text-theme-red poppins-regular text-sm mb-2 relative z-30">
           Invalid link must be a youtube link
         </div>
       )}
-      <div className="w-full border rounded-md flex relative gap-1 p-2 items-center px-4 mb-4">
+      <div className="w-full border rounded-md flex relative gap-1 p-2 items-center px-4 mb-4 relative z-30">
         <Icons.Youtube className="w-8 h-8 text-primary " />
         <input
           onChange={(e) => setUrl(e.target.value)}

@@ -86,7 +86,7 @@ const LoginForm = () => {
       setIsGoogleLoading(true);
       const createAccountResult = await logInWithGoogle();
       if (createAccountResult.success) {
-        router.push("/upload");
+        // router.push("/dashboard");
       } else if (createAccountResult.error) {
         handleLoginError(createAccountResult.error);
       }

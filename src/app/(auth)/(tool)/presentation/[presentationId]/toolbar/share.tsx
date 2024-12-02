@@ -26,17 +26,8 @@ import {
   imageUrlToBase64,
 } from "@/lib/utils";
 import {useAuth} from "@/context/user-auth";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import {db} from "@/config/firebase";
+import {doc, setDoc} from "firebase/firestore";
 import {
   Dialog,
   DialogContent,
@@ -48,14 +39,35 @@ import {
 import {useRouter} from "next/router";
 
 const Share = () => {
-  const [isPublic, setIsPublic] = React.useState(false);
   const {
     saveFileToGoogleDrive,
     logInWithGoogle,
     checkUserAccessScopes,
     currentUser,
   } = useAuth()!;
-  const {slideData, title} = usePresentation()!;
+  const {slideData, fullSlideData, projectId, title} = usePresentation()!;
+
+  const [isPublic, setIsPublic] = React.useState(
+    fullSlideData?.isPublic || false
+  );
+
+  useEffect(() => {
+    if (fullSlideData?.isPublic && fullSlideData?.isPublic !== isPublic) {
+      setIsPublic(fullSlideData?.isPublic);
+    }
+  }, [fullSlideData]);
+
+  const toggleIsPublic = async (value: "public" | "private") => {
+    setIsPublic(value === "public");
+
+    // update the database
+
+    await setDoc(
+      doc(db, "presentations", projectId),
+      {isPublic: value === "public"},
+      {merge: true}
+    );
+  };
 
   const [isDownloading, setIsDownloading] = React.useState(false);
   const [isSavingToDrive, setIsSavingToDrive] = React.useState(false);
@@ -279,7 +291,7 @@ const Share = () => {
               <Label>Collaboration Link</Label>
               <Select
                 value={isPublic ? "public" : "private"}
-                onValueChange={(value) => setIsPublic(value == "public")}
+                onValueChange={toggleIsPublic}
               >
                 <SelectTrigger className="w-[300px] ">
                   <SelectValue className="flex items-center leading-[5px]">

@@ -22,6 +22,7 @@ import {
   TextBoxesToUpdate,
   SlideImage,
   SlideShape,
+  FullSlideData,
 } from "@/config/data";
 import {collection, addDoc, setDoc, getDoc, doc} from "firebase/firestore";
 import {db} from "@/config/firebase";
@@ -120,6 +121,11 @@ interface PresentationContextType {
   activeSlide: string | undefined;
   setActiveSlide: React.Dispatch<React.SetStateAction<string | undefined>>;
   activeSlideRef: React.MutableRefObject<string | undefined>;
+  fullSlideData: FullSlideData | undefined;
+  setFullSlideData: React.Dispatch<
+    React.SetStateAction<FullSlideData | undefined>
+  >;
+  projectId: string;
   // functions -----------------------------
 
   // add upload image function
@@ -167,6 +173,9 @@ export const PresentationProvider = ({children, projectId}: Props) => {
 
   // const [slideData, setSlideData] = useState<SlideData | undefined>(DummyData);
   const [slideData, setSlideData] = useState<SlideData | undefined>(undefined);
+  const [fullSlideData, setFullSlideData] = useState<FullSlideData | undefined>(
+    undefined
+  );
 
   const slideDataRef = useRef<SlideData | undefined>(slideData);
 
@@ -307,6 +316,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         setRecentColors(docSnap.data().recentColors);
         setTitle(docSnap.data().title);
         setHistory([docSnap.data().slideData]);
+        setFullSlideData(docSnap.data() as FullSlideData);
       } else {
         // doc.data() will be undefined in this case
         console.log("No such document!");
@@ -1273,6 +1283,9 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     activeSlide,
     setActiveSlide,
     activeSlideRef,
+    fullSlideData,
+    setFullSlideData,
+    projectId,
     // functions -----------------------------
 
     updateData,

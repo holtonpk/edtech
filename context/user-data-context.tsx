@@ -41,7 +41,7 @@ export const UserDataProvider: React.FC<{children: ReactNode}> = ({
       presentations.map(async (presentationId) => {
         const presentationRef = doc(db, "presentations", presentationId);
         const presentationSnap = await getDoc(presentationRef);
-        return presentationSnap.data();
+        return {...presentationSnap.data(), id: presentationId};
       })
     );
     setUserPresentations(presentationData as FullSlideData[]);
@@ -77,6 +77,8 @@ export const UserDataProvider: React.FC<{children: ReactNode}> = ({
       fetchUserData(userId);
     }
   }, [currentUser, unSubscribedUserId, rerender]);
+
+  console.log("presentations", userPresentations);
 
   const values = {
     userPresentations,

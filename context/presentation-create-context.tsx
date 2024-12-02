@@ -275,7 +275,11 @@ export const PresentationCreateProvider = ({children, startStep}: Props) => {
     | "doc"
     | "docx"
     | undefined => {
-    if (file.type === "application/pdf") return "pdf";
+    if (
+      file.type === "application/pdf" ||
+      file.type === "application/vnd.google-apps.document"
+    )
+      return "pdf";
     if (file.type === "image/jpeg") return "jpg";
     if (file.type === "image/png") return "png";
     if (file.type === "video/mp4") return "mp4";
@@ -303,6 +307,7 @@ export const PresentationCreateProvider = ({children, startStep}: Props) => {
   };
 
   const processFiles = async (fileList: FileList | File[]) => {
+    console.log(fileList);
     if (!currentUser && userPresentations.length >= MAX_UNSUB_GENERATIONS) {
       setShowLoginModal(true);
       return;

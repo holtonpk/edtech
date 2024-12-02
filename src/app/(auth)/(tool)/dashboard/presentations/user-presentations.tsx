@@ -1,35 +1,11 @@
 "use client";
 import {Icons} from "@/components/icons";
-import React, {
-  useContext,
-  useRef,
-  createContext,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
-import {
-  FullSlideData,
-  Slide,
-  Modes,
-  AlignType,
-  TextBoxType,
-  Image,
-  Position,
-  Size,
-} from "@/config/data";
+import React, {useRef, useEffect, useState} from "react";
+import {FullSlideData, Slide, TextBoxType} from "@/config/data";
 import {db} from "@/config/firebase";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {
-  collection,
-  addDoc,
-  Timestamp,
-  getDoc,
-  doc,
-  deleteDoc,
-  updateDoc,
-} from "firebase/firestore";
+import {LinkButton} from "@/components/ui/link";
+import {Timestamp, getDoc, doc, deleteDoc, updateDoc} from "firebase/firestore";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,9 +44,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
-import {LinkButton} from "@/components/ui/link";
+import Link, {LinkProps} from "next/link";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -331,12 +306,10 @@ const PresTableRow = ({presentation}: {presentation: FullSlideData}) => {
 
   return (
     <TableRow className="relative overflow-hidden">
-      <button
-        onClick={() => {
-          router.push(`/presentation/${presentation.id}`);
-        }}
+      <Link
+        href={`/presentation/${presentation.id}`}
         className="absolute w-full h-full  z-10 bgs-red-600"
-      ></button>
+      ></Link>
       <TableCell className="font-medium max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap ">
         {title}
       </TableCell>
@@ -459,12 +432,10 @@ const PresentationCard = ({presentation}: {presentation: FullSlideData}) => {
 
   return (
     <div className="flex flex-col gap-2 bg-background rounded-lg overflow-hidden shadow-lg hover:scale-[102%] transition-transform duration-300 relative">
-      <button
-        onClick={() => {
-          router.push(`/presentation/${presentation.id}`);
-        }}
-        className="w-full h-full absolute z-30"
-      ></button>
+      <Link
+        href={`/presentation/${presentation.id}`}
+        className="w-full h-full absolute z-30 "
+      ></Link>
       {slide ? (
         <>
           <div
@@ -544,8 +515,17 @@ const PresentationCard = ({presentation}: {presentation: FullSlideData}) => {
               {title}
             </h1>
             <div className="p-2 bg-muted flex items-center gap-1 text-[12px] text-muted-foreground poppins-bold rounded-sm w-fit px-2 mt-2">
-              <Icons.lock style={{height: 16, width: 16}} />
-              Private
+              {presentation.isPublic ? (
+                <>
+                  <Icons.people style={{height: 16, width: 16}} />
+                  Public
+                </>
+              ) : (
+                <>
+                  <Icons.lock style={{height: 16, width: 16}} />
+                  Private
+                </>
+              )}
             </div>
             <div className="grid grid-cols-[1fr_30px] gap-2 mt-2">
               <div className="flex items-center gap-2">

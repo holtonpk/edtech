@@ -56,6 +56,7 @@ export interface FullSlideData {
   recentColors: string[];
   title: string;
   creator?: string;
+  isPublic?: boolean;
 }
 
 export interface SlideData {
@@ -170,6 +171,12 @@ export type FileLocal = {
     | "docx"
     | "youtube"
     | undefined;
+};
+
+export type GoogleDriveFile = {
+  id: string;
+  name: string;
+  mimeType: string;
 };
 
 export type Image = {

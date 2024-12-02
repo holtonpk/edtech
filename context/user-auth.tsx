@@ -90,6 +90,12 @@ interface AuthContextType {
   unSubscribedUserId: string | undefined;
   setUnSubscribedUserId: (value: string | undefined) => void;
   rerender: boolean;
+  getGoogleAccessToken: (
+    scope: string,
+    cancelFunction?: () => void
+  ) => Promise<string>;
+  googleDriveTokenRef: React.MutableRefObject<string | null>;
+  googleDriveFileTokenRef: React.MutableRefObject<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -125,6 +131,11 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     string | undefined
   >();
 
+  // token for scope https://www.googleapis.com/auth/drive
+  const googleDriveTokenRef = useRef<string | null>(null);
+  // token for scope https://www.googleapis.com/auth/drive.file
+  const googleDriveFileTokenRef = useRef<string | null>(null);
+
   useEffect(() => {
     const fetchUserData = (userId: string) => {
       if (!userId) return;
@@ -133,9 +144,16 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       // Set up the real-time listener
       const unsubscribe = onSnapshot(userRef, (userSnap) => {
         if (userSnap.exists()) {
-          const {presentations, uploads} = userSnap.data();
+          const {
+            presentations,
+            uploads,
+            googleDriveToken,
+            googleDriveFileToken,
+          } = userSnap.data();
           setUserPresentations(presentations);
           setUserUploads(uploads);
+          googleDriveFileTokenRef.current = googleDriveFileToken;
+          googleDriveTokenRef.current = googleDriveToken;
         }
       });
 
@@ -352,12 +370,16 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
   async function logInWithGoogle(): Promise<{success?: any; error?: any}> {
     try {
       const provider = new GoogleAuthProvider();
-      provider.addScope("https://www.googleapis.com/auth/drive.file"); // Add Google Drive scope
+      // provider.addScope("https://www.googleapis.com/auth/drive.file");
+      // provider.addScope("https://www.googleapis.com/auth/docs");
+      // provider.addScope("https://www.googleapis.com/auth/drive"); // Add Google Drive scope
+      // Add Google Drive scope
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
         console.log("result===============", result);
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential?.accessToken; // This is the OAuth access token
+        console.log("token===============", token);
         if (token) {
           accessTokenRef.current = token;
         }
@@ -382,6 +404,90 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       return {error};
     }
   }
+
+  async function getGoogleAccessToken(
+    scope: string,
+    cancelFunction?: () => void
+  ): Promise<string> {
+    const clientId =
+      "531390591850-cki12ma1v3o5ktjk3u5d1qg8bnliksk9.apps.googleusercontent.com";
+    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/google-redirect`;
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&scope=${encodeURIComponent(scope)}&prompt=consent`;
+
+    // Open a popup for OAuth
+    const width = 600;
+    const height = 700;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const popup = window.open(
+      authUrl,
+      "Google OAuth",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+
+    // Monitor the popup for token response
+    return await new Promise((resolve, reject) => {
+      const pollTimer = setInterval(() => {
+        try {
+          if (!popup || popup.closed) {
+            clearInterval(pollTimer);
+            cancelFunction && cancelFunction();
+            reject("Popup closed by user");
+          } else if (popup) {
+            const url = popup.location.href;
+            if (url.includes("access_token")) {
+              clearInterval(pollTimer);
+
+              // Extract the access token from the URL
+              const params = new URL(url).hash.substring(1);
+              const token = new URLSearchParams(params).get("access_token");
+
+              if (token) {
+                popup.close();
+                saveGoogleTokenToUser(token, scope);
+                resolve(token);
+              } else {
+                reject("Failed to retrieve access token");
+              }
+            }
+          }
+        } catch (error) {
+          // Ignore cross-origin errors until popup redirects to the same origin
+        }
+      }, 500);
+    });
+  }
+
+  const saveGoogleTokenToUser = async (token: string, scope: string) => {
+    let userRef;
+    if (currentUser) {
+      userRef = doc(db, "users", currentUser.uid);
+    } else if (unSubscribedUserId) {
+      userRef = doc(db, "users", unSubscribedUserId);
+    }
+    if (!userRef) return;
+    let data = null;
+
+    if (scope === "https://www.googleapis.com/auth/drive.file") {
+      data = {
+        googleDriveFileToken: token,
+      };
+      googleDriveFileTokenRef.current = token;
+    } else if (scope === "https://www.googleapis.com/auth/drive") {
+      data = {
+        googleDriveToken: token,
+      };
+      googleDriveTokenRef.current = token;
+    }
+    if (!data) return;
+    await updateDoc(userRef, {
+      ...data,
+    });
+  };
 
   const checkUserAccessScopes = async (scope: string) => {
     const response = await fetch(
@@ -723,6 +829,9 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     userUploads,
     setUserUploads,
     rerender,
+    getGoogleAccessToken,
+    googleDriveTokenRef,
+    googleDriveFileTokenRef,
   };
 
   return (
