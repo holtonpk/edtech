@@ -58,7 +58,7 @@ function DeleteAccountModal({
           <AlertDialogTitle>Delete Account</AlertDialogTitle>
           <AlertDialogDescription>
             Warning: This will permanently delete your account and all your{" "}
-            Moltar data.
+            Frizzle AI data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <form

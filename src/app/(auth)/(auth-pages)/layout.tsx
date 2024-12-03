@@ -11,10 +11,6 @@ interface AuthLayoutProps {
 }
 import Link from "next/link";
 
-// export const metadata: Metadata = constructMetadata({
-//   title: `Register - Moltar`,
-// });
-
 export default function AuthLayout({children}: AuthLayoutProps) {
   return (
     // <AuthProvider>

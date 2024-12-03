@@ -32,7 +32,7 @@ const CreatePageLayout = () => {
     <div className="h-fit">
       <Background />
 
-      <BackgroundIcons />
+      {/* <BackgroundIcons /> */}
       <AuthModal />
       <div className="h-screen w-screen">
         <NavBar />
@@ -88,13 +88,13 @@ const BackgroundIcons = () => {
       }}
     >
       {iconsPerRow.flat().map((iconName, index) => {
-        const IconComponent = Icons[iconName];
+        // const IconComponent = Icons[iconName];
         return (
           <div
             key={index}
             className="flex items-center justify-center w-full h-full"
           >
-            <IconComponent className="w-10 h-10 fill-muted/20 text-muted/50" />
+            {/* <IconComponent className="w-10 h-10 fill-muted/20 text-muted/50" /> */}
           </div>
         );
       })}

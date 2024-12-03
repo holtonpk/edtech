@@ -394,7 +394,7 @@ const DeleteAccount = () => {
       <div className="flex flex-col space-y-3 p-5 sm:p-10">
         <label className="text-xl font-bold">Delete Account</label>
         <p className="text-sm text-muted-foreground mb-3  ">
-          Permanently delete your Moltar account and all of your account data -
+          Permanently delete your Frizzle account and all of your account data -
           please proceed with caution.
         </p>
       </div>
