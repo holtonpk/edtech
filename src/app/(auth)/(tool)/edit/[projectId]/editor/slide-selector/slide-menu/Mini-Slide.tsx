@@ -115,7 +115,7 @@ export const MiniSlide = forwardRef<HTMLLIElement, Props>(function Page(
         </PopoverContent>
       </Popover>
       {!active && !clone && (
-        <span className=" absolute bottom-0 p-2 px-3 pb-1 left-0 text-[12px] poppins-regular z-40 w-full overflow-hidden text-ellipsis h-fit whitespace-nowrap">
+        <span className=" absolute bottom-0 p-2 px-3 pb-1 left-0 text-[12px] poppins-regular z-40 w-full overflow-hidden text-ellipsis h-fit whitespace-nowrap  pointer-events-none">
           {index} {slide?.title && ` - ${slide.title}`}
         </span>
       )}

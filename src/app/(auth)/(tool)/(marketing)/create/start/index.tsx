@@ -59,25 +59,25 @@ export const Start = ({
           onDrop={onDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          className={`flex flex-col items-center pt-4 z-50 relative h-[calc(100vh-60px)] 
+          className={`flex flex-col items-center pt-4 z-50  relative   md:h-[calc(100vh-60px)] xsm:container
   w-full
       `}
         >
-          <div className="h-fit relative w-full flex items-center flex-col gap-8">
+          <div className="h-fit relative w-full flex items-center flex-col md:gap-8 ">
             <motion.div
               animate={{opacity: 1}}
               initial={{opacity: 0}}
               transition={{duration: 0.5, delay: 0.2}}
               exit={{opacity: 0}}
-              className="flex flex-col items-center  h-[150px] top-0 gap-4 relative"
+              className="flex flex-col items-center  h-[150px] top-0 gap-2 md:gap-4 relative"
             >
               {/* <BackgroundIcons /> */}
 
-              <h1 className="text-5xl font-bold poppins-bold text-center leading-[60px]">
+              <h1 className="text-2xl md:text-5xl font-bold poppins-bold text-center md:leading-[60px]">
                 Turn <i className="text-primary">anything</i> into a <br />{" "}
                 class presentation with AI
               </h1>
-              <p className="poppins-regular text-center text-lg">
+              <p className="poppins-regular text-center text-base md:text-lg">
                 Don&apos;t start from scratch. Start from a{" "}
                 <i className="text-primary">PDF</i>,{" "}
                 <i className="text-primary">Youtube Link</i>,{" "}
@@ -102,7 +102,7 @@ export const Start = ({
                 initial={{opacity: 0}}
                 transition={{duration: 0.5, delay: 1}}
                 exit={{opacity: 0}}
-                className="flex flex-col absolute -left-10 -translate-x-full top-[30%] -translate-y-1/2 gap-1"
+                className=" flex-col absolute -left-10 -translate-x-full top-[30%] -translate-y-1/2 gap-1 hidden md:flex"
               >
                 <h1 className=" text-center text-theme-purple hand-font text-2xl">
                   Get started by <br />
@@ -117,12 +117,12 @@ export const Start = ({
             initial={{opacity: 0}}
             transition={{duration: 0.5, delay: 1}}
             exit={{opacity: 0}}
-            className="flex absolute left-[80%] -translate-x-1/2 bottom-[120px] "
+            className="hidden md:flex absolute md:left-[80%] -translate-x-1/2 md:bottom-[120px] left-1/2 bottom-20 "
           >
             <h1 className=" text-center text-theme-green hand-font  text-2xl">
               See why teachers are loving Frizzle AI.
             </h1>
-            <Arrow2 className="absolute h-[90px] rotate-[80deg] fill-theme-green ml-20 scale-x-[1] left-[20%] -translate-x-1/2 -bottom-4 translate-y-full" />
+            <Arrow2 className="absolute h-[80px] md:h-[90px] md:rotate-[80deg] rotate-[40deg] fill-theme-green ml-20 scale-x-[1] top-10  left-[60%] md:left-[20%] -translate-x-1/2 -bottom-4 md:translate-y-full" />
           </motion.div>
         </motion.div>
       )}
@@ -196,7 +196,7 @@ const FileUploadStart = ({
 
   return (
     <div
-      className={`overflow-hidden h-fit border rounded-md p-8 bg-background/70 blurBack shadow-xl
+      className={`overflow-hidden h-fit border rounded-md p-4 md:p-8 bg-background/70 blurBack shadow-xl
           ${
             isDragging
               ? " border-primary border-dashed  "
@@ -227,7 +227,7 @@ const FileUploadStart = ({
           }}
           className="w-full  items-center flex flex-col gap-2 group"
         >
-          <Icons.files className="w-[200px] text-primary" />
+          <Icons.files className="w-[150px] md:w-[200px] text-primary" />
           {/* <div className="h-[80px]"></div> */}
           <span className="text-2xl font-bold">
             Drag & drop files to upload

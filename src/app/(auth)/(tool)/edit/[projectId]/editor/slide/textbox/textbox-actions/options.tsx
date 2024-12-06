@@ -16,7 +16,7 @@ const Options = () => {
       <PopoverTrigger>
         <ActionButton
           onClick={() => setOpen(!open)}
-          className={`nodrag hover:bg-theme-purple/30  p-2 text-theme-purple 
+          className={`nodrag nodrag2 hover:bg-theme-purple/30  p-2 text-theme-purple 
             ${open ? "bg-theme-purple/30" : ""}
             
             `}
@@ -30,8 +30,8 @@ const Options = () => {
       >
         <button
           onClick={() => {
-            setOpen(false);
             duplicateTextBox();
+            setOpen(false);
           }}
           className="w-full p-2 px-4 hover:bg-muted flex items-center "
         >

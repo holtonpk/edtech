@@ -34,6 +34,7 @@ export const TextColor = () => {
   const textColorCommand = (commandValue: string) => {
     setTextColor(commandValue);
     if (selectedTextBox) {
+      console.log("selectedTextBox == ", selectedTextBox);
       applyColor(selectedTextBox?.textBoxId, commandValue);
       const newText = document.getElementById(
         `text-box-${selectedTextBox.textBoxId}`
@@ -62,6 +63,7 @@ export const TextColor = () => {
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0 && selection.toString() !== "") {
       // Apply the color using execCommand
+
       document.execCommand("foreColor", false, color);
       setOpenMenu(true);
       return;
@@ -72,7 +74,7 @@ export const TextColor = () => {
       const text = elementText.replaceAll(/<\/?font[^>]*>/g, "");
       const newText = `<font color="${color}">${text}</font>`;
       paragraph.innerHTML = newText;
-      console.log("newText == ", paragraph.innerHTML);
+      console.log("newText ===== ", paragraph.innerHTML);
     }
   };
 
@@ -107,10 +109,10 @@ export const TextColor = () => {
       );
       if (!element) return;
 
-      const paragraph = element.querySelector("p");
-      if (!paragraph) return;
-      const font = paragraph?.querySelector("font");
-      const color = font?.getAttribute("color");
+      // const paragraph = element.querySelector("p");
+      // if (!paragraph) return;
+      const font = element.querySelector("font");
+      const color = font?.getAttribute("color") || "#000000";
       return {
         color: color,
         usageId: textBox.textBoxId,
@@ -161,6 +163,7 @@ export const TextColor = () => {
   const [originalColor, setOriginalColor] = React.useState<string>(textColor);
 
   useEffect(() => {
+    // console.log("openMenu == og color", textColor);
     setOriginalColor(textColor);
   }, [openMenu]);
 
@@ -171,6 +174,18 @@ export const TextColor = () => {
         .includes(originalColor) &&
       textColor !== originalColor) ||
     false;
+
+  // console.log(
+  //   "suuuuuu ",
+  //   documentColors.map((color) => color?.color && color.color)
+  // );
+  // console.log(
+  //   "suggestChangeAll == ",
+  //   suggestChangeAll,
+  //   originalColor,
+  //   textColor,
+  //   originalColor
+  // );
 
   const ChangeAllMenu = (
     <div className="slide-top absolute top-0 border-t  bg-background rounded-b-md h-fit w-full flex items-center  py-2 px-2 justify-between">
@@ -195,6 +210,9 @@ export const TextColor = () => {
       </div>
     </div>
   );
+
+  console.log("documentColors == ", documentColors);
+  console.log("textColor == ", textColor);
 
   return (
     <div className="relative  w-fit ml-auto">
@@ -231,7 +249,6 @@ export const TextColor = () => {
               colorCommand={textColorCommand}
               currentColor={textColor}
               documentColors={documentColors as DocumentColor[]}
-              
               suggestChangeAll={suggestChangeAll}
               ChangeAllMenu={ChangeAllMenu}
             />

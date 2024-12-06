@@ -34,7 +34,7 @@ const CreatePageLayout = () => {
 
       {/* <BackgroundIcons /> */}
       <AuthModal />
-      <div className="h-screen w-screen">
+      <div className="md:h-screen w-screen">
         <NavBar />
         <CreateSteps />
       </div>
@@ -106,8 +106,8 @@ const NavBar = () => {
   const {currentUser} = useAuth()!;
 
   return (
-    <div className="h-[60px] w-full  flex items-center justify-between px-6 relative z-50">
-      <div className="flex gap-2 items-center ">
+    <div className="h-[60px] w-full flex  items-center justify-between px-4 md:px-6 relative z-50">
+      <div className="flex  md:gap-2 items-center ">
         <div className=" aspect-square h-fit w-fit flex items-center justify-center">
           <Icons.logo className="w-8 h-8 " />
         </div>
@@ -116,6 +116,7 @@ const NavBar = () => {
           <span className="text-primary">.AI</span>
         </h1>
       </div>
+
       {currentUser ? <ProfileNav /> : <RegisterButton />}
     </div>
   );
@@ -123,7 +124,7 @@ const NavBar = () => {
 
 const RegisterButton = () => {
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-2 md:gap-4">
       <LinkButton href="/login" variant={"ghost"}>
         Login
       </LinkButton>
@@ -134,8 +135,8 @@ const RegisterButton = () => {
 
 const Footer = () => {
   return (
-    <div className="mt-10 w-screen h-fit py-4 gap-4 bg-background/30 blurBack border-t flex justify-between items-center px-20">
-      <div className="flex">
+    <div className="mt-10 w-screen h-fit py-4 md:gap-4 bg-background/30 blurBack border-t flex md:flex-row flex-col justify-between items-center md:px-20">
+      <div className="flex md:flex-row flex-col items-center">
         <Icons.logo className="w-6 h-6 text-primary" />
 
         <h1 className="text-primary poppins-bold text-xl"> Frizzle AI</h1>

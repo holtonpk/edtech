@@ -78,7 +78,7 @@ const ResizableHandle = forwardRef<
           ref={handleRef}
           className={`absolute ${getHandleClass(
             handleAxis
-          )} react-resizable-handle nodrag z-30 bg-background border border-foreground/30 shadow-lg rounded-full ${
+          )} react-resizable-handle nodrag nodrag2 z-30 bg-background border border-foreground/30 shadow-lg rounded-full ${
             activeHandle === handleAxis
               ? "bg-primary"
               : "hover:bg-primary bg-background"

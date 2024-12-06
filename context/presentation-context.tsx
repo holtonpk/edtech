@@ -624,7 +624,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
       const copiedTextBoxes = parsedData.textBoxes.map(
         (textBox: TextBoxType) => ({
           ...textBox,
-          textBoxId: Math.random().toString(),
+          textBoxId: Math.random().toString(36).substr(2, 9),
         })
       );
 
@@ -642,6 +642,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
 
       setSlideData({
         ...slideDataRef.current,
+
         slides: [
           ...slideDataRef.current.slides.slice(
             0,
@@ -670,7 +671,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
       const copiedData = {
         textBoxes: parsedData.textBoxes.map((textBox: TextBoxType) => ({
           ...textBox,
-          textBoxId: Math.random().toString(),
+          textBoxId: Math.random().toString(36).substr(2, 9),
           position: {
             x: textBox.position.x + 20,
             y: textBox.position.y + 20,
@@ -678,7 +679,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         })),
         images: parsedData.images.map((image: SlideImage) => ({
           ...image,
-          imageId: Math.random().toString(),
+          imageId: Math.random().toString(36).substr(2, 9),
           position: {
             x: image.position.x + 20,
             y: image.position.y + 20,
@@ -692,6 +693,11 @@ export const PresentationProvider = ({children, projectId}: Props) => {
           // Update the selected slide with the new text boxes and images
           return {
             ...slide,
+            layerMap: [
+              ...copiedData.textBoxes.map((tb: TextBoxType) => tb.textBoxId),
+              ...copiedData.images.map((img: SlideImage) => img.imageId),
+              ...(slide.layerMap || []),
+            ],
             textBoxes: [...slide.textBoxes, ...copiedData.textBoxes],
             images: [...slide.images, ...copiedData.images],
           };
@@ -712,7 +718,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     } else if (isTextBoxType(parsedData)) {
       const copiedData = {
         ...parsedData,
-        textBoxId: Math.random().toString(),
+        textBoxId: Math.random().toString(36).substr(2, 9),
         position: {
           x: parsedData.position.x + 20,
           y: parsedData.position.y + 20,
@@ -724,6 +730,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         if (slide.id === selectedSlideRef.current!.id) {
           return {
             ...slide,
+            layerMap: [copiedData.textBoxId, ...(slide.layerMap || [])],
             textBoxes: [...slide.textBoxes, copiedData],
           };
         }
@@ -750,6 +757,10 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         if (slide.id === selectedSlideRef.current!.id) {
           return {
             ...slide,
+            layerMap: [
+              ...copiedData.map((textBox: any) => textBox.textBoxId),
+              ...(slide.layerMap || []),
+            ],
             textBoxes: [...slide.textBoxes, ...copiedData],
           };
         }
@@ -775,6 +786,7 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         if (slide.id === selectedSlideRef.current!.id) {
           return {
             ...slide,
+            layerMap: [copiedData.imageId, ...(slide.layerMap || [])],
             images: [...slide.images, copiedData],
           };
         }
@@ -801,6 +813,10 @@ export const PresentationProvider = ({children, projectId}: Props) => {
         if (slide.id === selectedSlideRef.current!.id) {
           return {
             ...slide,
+            layerMap: [
+              ...copiedData.map((img: SlideImage) => img.imageId),
+              ...(slide.layerMap || []),
+            ],
             images: [...slide.images, ...copiedData],
           };
         }
@@ -955,6 +971,8 @@ export const PresentationProvider = ({children, projectId}: Props) => {
     const doc = parser.parseFromString(selectedTextBoxText, "text/html");
     const innerHtml = doc.body.childNodes[0] as HTMLElement;
     const fontTag = innerHtml.getElementsByTagName("font");
+    console.log("sstt", selectedTextBoxText);
+    console.log("fontTag", fontTag);
     var fontTagArr = Array.prototype.slice.call(fontTag);
     let activeColors: string[] = [];
     if (fontTagArr.length) {
@@ -1157,27 +1175,25 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   const bringToFront = (id: string) => {
     if (!slideDataRef.current || !selectedSlide) return;
 
-    const newSlideData = slideDataRef.current?.slides.map((slide) => {
-      if (slide.id === selectedSlide?.id) {
-        const layerMap = slide.layerMap;
-        if (!layerMap) return slide;
-
-        console.log("oldlayerMap", id, layerMap);
-        //  move the id in layermap to the last index
+    const newSlideData = slideDataRef.current.slides.map((slide) => {
+      if (slide.id === selectedSlide.id) {
+        const layerMap = slide.layerMap || []; // Ensure layerMap exists
         const index = layerMap.indexOf(id);
-        layerMap.splice(index, 1);
+
+        if (index !== -1) {
+          // If the id exists, move it to the last index
+          layerMap.splice(index, 1);
+        }
+        // Add id to the last index
         layerMap.push(id);
 
-        console.log("newLayerMap", layerMap);
         return {
           ...slide,
-          layerMap: layerMap,
+          layerMap,
         };
       }
       return slide;
     });
-
-    console.log("newSlideData", newSlideData);
 
     setSlideData({...slideDataRef.current, slides: newSlideData as Slide[]});
   };
@@ -1185,19 +1201,21 @@ export const PresentationProvider = ({children, projectId}: Props) => {
   const sendToBack = (id: string) => {
     if (!slideDataRef.current || !selectedSlide) return;
 
-    const newSlideData = slideDataRef.current?.slides.map((slide) => {
-      if (slide.id === selectedSlide?.id) {
-        const layerMap = slide.layerMap;
-        if (!layerMap) return slide;
-
-        //  move the id in layermap to the first index
+    const newSlideData = slideDataRef.current.slides.map((slide) => {
+      if (slide.id === selectedSlide.id) {
+        const layerMap = slide.layerMap || []; // Ensure layerMap exists
         const index = layerMap.indexOf(id);
-        layerMap.splice(index, 1);
+
+        if (index !== -1) {
+          // If the id exists, move it to the first index
+          layerMap.splice(index, 1);
+        }
+        // Add id to the first index
         layerMap.unshift(id);
 
         return {
           ...slide,
-          layerMap: layerMap,
+          layerMap,
         };
       }
       return slide;

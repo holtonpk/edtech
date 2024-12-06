@@ -224,9 +224,11 @@ const TextBox = () => {
   };
 
   const zIndex =
-    selectedSlide &&
-    selectedSlide.layerMap &&
-    selectedSlide.layerMap.indexOf(textBox.textBoxId);
+    (selectedSlide &&
+      selectedSlide.layerMap &&
+      selectedSlide.layerMap.includes(textBox.textBoxId) &&
+      selectedSlide.layerMap.indexOf(textBox.textBoxId)) ||
+    1;
 
   return (
     <>

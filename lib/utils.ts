@@ -46,9 +46,10 @@ export const applyCommand = (
 
 export const determineIfActive = (textBoxId: string, tag: string) => {
   const element = document.getElementById(`ui-focus-text-box-${textBoxId}`)
-    ?.childNodes[0].childNodes[0] as HTMLElement;
+    ?.childNodes[0] as HTMLElement;
+
   if (!element) return false;
-  const isActive = element.querySelector(tag) !== null;
+  const isActive = element?.querySelector(tag) !== null;
   return isActive;
 };
 

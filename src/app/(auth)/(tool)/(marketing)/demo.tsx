@@ -26,14 +26,14 @@ export const Demo = () => {
 
   return (
     <div className="h-fit w-screen relative z-40 justify-center flex flex-col container gap-10 mt-10 ">
-      <div className=" flex gap-2 flex-col text-center items-center  w-[650px] mx-auto">
+      <div className=" flex gap-2 flex-col text-center items-center max-w-full  w-[650px] mx-auto">
         <h1 className="text-3xl poppins-bold ">How To Use Frizzle AI</h1>
         <p className="poppins-regular ">
           A process so simple, anyone can do it. Just upload your content,
           describe what you want, and let Frizzle AI do the rest.
         </p>
       </div>
-      <div className="w-full flex flex-col gap-8 rounded-md  px-40">
+      <div className="w-full flex flex-col gap-8 rounded-md   md:px-40">
         <Card
           stepNumber={1}
           title="Import"
@@ -99,20 +99,20 @@ const Card = ({
   }, []);
 
   return (
-    <div id={`card-container-${stepNumber}`} className="w-fit h-[400px] ">
+    <div id={`card-container-${stepNumber}`} className="w-fit md:h-[400px]">
       <motion.div
         initial={{transform: "translateY(500px)"}}
         animate={isInView ? {transform: "translate(0)"} : {}}
-        className={`grid grid-cols-2 gap-20 items-center border p-8 rounded-md shadow-xl bg-background ${
+        className={`flex flex-col md:grid md:grid-cols-2 gap-20 items-center border p-8 rounded-md shadow-xl bg-background ${
           reverse ? "" : ""
         }`}
       >
         <div
-          className={`flex gap-2 flex-col text-left  h-[200px]
-          ${reverse ? "order-3" : "order-1"}
+          className={`flex gap-2 flex-col text-center md:text-left  h-[200px]
+          ${reverse ? "md:order-3" : "md:order-1"}
           `}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex md:flex-row flex-col items-center  gap-2">
             <div className="h-8 w-8 bg-primary/20 rounded-full text-primary flex items-center justify-center">
               {stepNumber}
             </div>
@@ -122,8 +122,8 @@ const Card = ({
           <p className="poppins-regular">{description}</p>
         </div>
         <div className="h-full w-full order-2 flex flex-col gap-4">
-          <div className="h-[300px]  aspect-square  bg-background shadow-lg rounded-md border overflow-hidden">
-            <img src={imgSrc} className="object-cover  w-full" />
+          <div className="h-full md:h-[300px]    bg-background shadow-lg rounded-md border overflow-hidden">
+            <img src={imgSrc} className="object-cover  " />
           </div>
         </div>
       </motion.div>

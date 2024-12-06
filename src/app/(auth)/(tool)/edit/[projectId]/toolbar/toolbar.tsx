@@ -13,6 +13,7 @@ import Present from "./present";
 import {Input} from "@/components/ui/input";
 import {usePresentation} from "@/context/presentation-context";
 import Share from "./share";
+import {LinkButton} from "@/components/ui/link";
 const ToolBar = () => {
   const {slideData, title, setTitle} = usePresentation()!;
 
@@ -32,24 +33,39 @@ const ToolBar = () => {
           <Undo />
           {/* <div className="h-[30px] w-[1px] bg-black/60"></div> */}
 
-          <TooltipProvider>
-            <Tooltip delayDuration={500}>
-              <TooltipTrigger className="disableTextboxListeners">
-                <Input
-                  placeholder="give your project a title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-96 overflow-hidden text-ellipsis disableSelector poppins-bold"
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Project title</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex w-fit items-center">
+            <LinkButton
+              href={"/dashboard"}
+              className="flex gap-1 items-center text-muted-foreground ml-4 hover:text-primary p-0 bg-transparent hover:bg-transparent"
+            >
+              {/* <Icons.dash className="w-4 h-4  " /> */}
+              <span className="poppins-regular text-base">Dashboard</span>
+            </LinkButton>
+            <Icons.chevronRight className="w-4 h-4 text-muted-foreground" />
+            <div className="w-fit relative   h-[24px]">
+              <TooltipProvider>
+                <Tooltip delayDuration={500}>
+                  <TooltipTrigger className="disableTextboxListeners">
+                    <div className="w-fit invisible pr-12 text-base rounded-[4px]">
+                      {title}
+                    </div>
+                    <input
+                      placeholder="give your presentation a title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full text-base  text-primary top-0 left-0 overflow-hidden text-ellipsis disableSelector poppins-bold h-fit p-0 absolute rounded-[4px] px-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Project title</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
 
           {/* <div className="h-[30px] w-[1px] bg-black/60"></div>s */}
-          <SaveStatus />
+          {/* <SaveStatus /> */}
         </div>
         <div className="flex items-center px-0 md:p-3 gap-4   ">
           <Share />

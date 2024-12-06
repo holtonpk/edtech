@@ -5,7 +5,7 @@ import {motion} from "framer-motion";
 
 export const Testimonials = () => {
   return (
-    <div className="h-fit w-screen z-30 relative mt-10 container">
+    <div className="h-fit w-screen z-30 relative mt-20 md:mt-10 container">
       <div className="flex flex-col items-center  text-center ">
         <div className="flex gap-1 flex-col">
           <h1 className="text-4xl poppins-bold">
@@ -15,7 +15,7 @@ export const Testimonials = () => {
             Over 10,000 teachers saving time with Frizzle AI.
           </p>
         </div>
-        <div className="grid grid-cols-3 py-10 w-full items-center gap-8">
+        <div className="grid md:grid-cols-3 py-10 w-full items-center gap-8">
           <div className="flex flex-col gap-1 w-full items-center bg-background p-4 rounded-md shadow-xl border">
             <div className="h-10 w-10 rounded-sm bg-primary/20 flex items-center justify-center">
               <Icons.clock className="w-6 h-6 text-primary" />

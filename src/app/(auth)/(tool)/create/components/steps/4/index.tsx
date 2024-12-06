@@ -58,6 +58,7 @@ export const Step4 = () => {
   };
 
   const formatSlides = (unformattedResponse: UnformattedResponse) => {
+    console.log("unformatted response", JSON.stringify(unformattedResponse));
     const formatSlideTitlePage = () => {
       const title = `<p><b>${unformattedResponse.titleSlide.title}</b></p>`;
       const titleSize = calculateSizeTitle(title);

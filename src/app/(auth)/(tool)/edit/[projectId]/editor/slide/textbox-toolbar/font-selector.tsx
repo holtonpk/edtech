@@ -105,13 +105,18 @@ export const FontSelector = () => {
         `ui-focus-text-box-${activeEdit}`
       );
       // get first font child of textBoxElement
-      const fontNode = textBoxElement?.childNodes[0]
-        .childNodes[0] as HTMLElement;
+      const fontNode = textBoxElement?.childNodes[0] as HTMLElement;
 
-      const nodeFont = fontNode?.getAttribute("face");
+      console.log("fontNode", fontNode);
 
-      setSelectedFont(nodeFont ? nodeFont : fonts[0]);
-      setOriginalFont(nodeFont ? nodeFont : fonts[0]);
+      try {
+        const nodeFont = fontNode?.getAttribute("face");
+
+        setSelectedFont(nodeFont ? nodeFont : fonts[0]);
+        setOriginalFont(nodeFont ? nodeFont : fonts[0]);
+      } catch (e) {
+        console.log("error", e);
+      }
     } else if (groupSelectedTextBoxes) {
       const selectedFonts = new Set<string>();
 

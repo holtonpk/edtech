@@ -20,7 +20,7 @@ const CreateSteps = () => {
     usePresentationCreate()!;
 
   return (
-    <div className="h-[calc(100vh-60px)] flex items-center justify-center gaps-10 z-40 relative  w-screen">
+    <div className="md:h-[calc(100vh-60px)] flex items-center justify-center gaps-10 z-40 relative  w-screen">
       <Start
         step={step}
         setStep={setStep}

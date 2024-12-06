@@ -79,6 +79,8 @@ export const ResizableBox = ({
 
     switch (handleAxis) {
       case "e":
+        console.log("deltaX", position.x);
+
         setSize({
           width: size.width + deltaX,
         });
@@ -171,7 +173,7 @@ export const ResizableBox = ({
     >
       <div
         ref={handleRef}
-        className=" origin-center  absolute z-10"
+        className=" origin-center  absolute z-[999] "
         style={{
           width: size.width,
           height: "fit-content",

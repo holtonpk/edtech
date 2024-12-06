@@ -1,10 +1,82 @@
 import {NextResponse} from "next/server";
 import OpenAI from "openai";
-import {Size} from "@/config/data";
+// import {Size} from "@/config/data";
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
 export const maxDuration = 300;
+
+const calculateSize = (text: string, index: number) => {
+  // Determine the font size based on the index
+  const fontSize = index === 0 ? 40 : 20;
+
+  // Set the maximum width
+  const maxWidth = 960;
+
+  // Adjust character width and line height based on whether the text is bold (index === 0)
+  const charWidthMultiplier = index === 0 ? 1.2 : 0.6; // Increased multiplier for bold text
+  const lineHeightMultiplier = index === 0 ? 1 : 1.4; // Increased line height for bold text
+
+  const charWidth = fontSize * charWidthMultiplier;
+
+  // Calculate the number of characters per line that can fit within the maxWidth
+  const charsPerLine = Math.floor(maxWidth / charWidth);
+
+  // Calculate the number of lines by dividing the total number of characters by charsPerLine
+  const numLines = Math.ceil(text.length / charsPerLine);
+
+  // Calculate the height based on the number of lines and the adjusted line height
+  const lineHeight = fontSize * lineHeightMultiplier;
+  const height = numLines * lineHeight;
+
+  return {width: 960, height};
+};
+
+type Size = {
+  width: number;
+  height: number;
+};
+
+const calculatePosition = (previousTextBoxSize?: Size) => {
+  // if its the first text box, position it at the top left
+  if (!previousTextBoxSize) {
+    return {x: 20, y: 20};
+  } else {
+    // if its not the first text box, position it below the previous text box calculate based on the previous text box size + 20px padding
+    return {x: 20, y: previousTextBoxSize.height + 10};
+  }
+};
+
+const formateText = (text: string, isTitle: boolean) => {
+  const format = isTitle
+    ? `<font style= "font-size:40px"><b>${text}</b></font>`
+    : `<font style= "font-size:20px">${text}</font>`;
+  return format;
+};
+
+const formatResponse = (unformattedData: UnformattedResponse) => {
+  const textBoxes = unformattedData.slides.map((slide) => {
+    let previousTextBoxSize: Size | undefined = undefined;
+    const textBoxes = slide.textBoxes.map((textObject, index) => {
+      const size = calculateSize(textObject.text, index);
+      const position = calculatePosition(previousTextBoxSize);
+      const textBoxId = Math.random().toString(36).substring(2, 9);
+      const text = formateText(textObject.text, index === 0);
+      previousTextBoxSize = size;
+      return {
+        text,
+        size,
+        position,
+        textBoxId,
+      };
+    });
+    return {
+      textBoxes,
+      id: slide.id,
+    };
+  });
+  return {slides: textBoxes};
+};
 
 export async function POST(req: Request) {
   const {uploadText, selectedFormat} = await req.json();
@@ -78,6 +150,19 @@ Focus on concise, impactful content that’s easy for a general audience to foll
   });
 }
 
+type UnformattedResponse = {
+  titleSlide: {
+    title: string;
+    description: string;
+  };
+  slides: {
+    textBoxes: {
+      text: string;
+    }[];
+    id: string;
+  }[];
+};
+
 const responseType = `type UnformattedResponse = {
 titleSlide:{
   title: string;
@@ -87,6 +172,7 @@ titleSlide:{
       textBoxes: {
         text: string;
       }[];
+      id: string;
     }[];
   };
 }`;

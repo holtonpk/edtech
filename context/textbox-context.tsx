@@ -163,6 +163,7 @@ export const TextBoxProvider = ({children, textBox}: Props) => {
       if (slide.id === selectedSlide.id) {
         return {
           ...slide,
+          layerMap: [newTextBoxId, ...(slide.layerMap || [])],
           textBoxes: [
             ...slide.textBoxes,
             {
@@ -178,6 +179,8 @@ export const TextBoxProvider = ({children, textBox}: Props) => {
       }
       return slide;
     });
+    // add to index map
+
     setSlideData({...slideData, slides: newSlideData});
     setHistory([{...slideData, slides: newSlideData}, ...history]);
 
